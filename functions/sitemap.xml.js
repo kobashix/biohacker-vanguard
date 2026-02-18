@@ -1,53 +1,36 @@
 export async function onRequest(context) {
-  const { DB } = context.env;
-  const baseUrl = "https://minmaxmuscle.com";
-
-  // 1. Static Pages
-  const staticPages = [
-    "",
-    "/training.html",
-    "/nutrition.html",
-    "/peptidesdb.html",
-    "/peptide-stacks.html",
-    "/coaching.html",
-    "/contact.html"
-  ];
+  const { env } = context;
+  const domain = "https://minmaxmuscle.com";
 
   try {
-    // 2. Fetch Dynamic Slugs from D1
-    const [peptides, stacks] = await Promise.all([
-      DB.prepare("SELECT slug FROM Peptides").all(),
-      DB.prepare("SELECT slug FROM Stacks").all()
-    ]);
+    // 1. Get all peptide slugs
+    const { results } = await env.DB.prepare("SELECT slug, 'As Of' as date FROM Peptides").all();
 
-    // 3. Construct XML
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+    // 2. Build XML
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url><loc>${domain}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+      <url><loc>${domain}/compounds</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+      <url><loc>${domain}/calculators</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`;
 
-    // Add Static
-    staticPages.forEach(path => {
-      xml += `<url><loc>${baseUrl}${path}</loc><changefreq>weekly</changefreq></url>`;
-    });
-
-    // Add Peptides
-    peptides.results.forEach(p => {
-      xml += `<url><loc>${baseUrl}/peptides/${p.slug}</loc><changefreq>monthly</changefreq></url>`;
-    });
-
-    // Add Stacks
-    stacks.results.forEach(s => {
-      xml += `<url><loc>${baseUrl}/stacks/${s.slug}</loc><changefreq>monthly</changefreq></url>`;
+    // 3. Inject Dynamic Peptide Rows
+    results.forEach(row => {
+      xml += `
+      <url>
+        <loc>${domain}/peptide/${row.slug}</loc>
+        <lastmod>${row.date || new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+      </url>`;
     });
 
     xml += `</urlset>`;
 
     return new Response(xml, {
-      headers: {
-        "Content-Type": "application/xml",
-        "Cache-Control": "public, max-age=86400" // Cache for 24 hours
-      }
+      headers: { "Content-Type": "application/xml" }
     });
-  } catch (e) {
-    return new Response(`Sitemap Error: ${e.message}`, { status: 500 });
+
+  } catch (err) {
+    return new Response(`<error>${err.message}</error>`, { status: 500 });
   }
 }

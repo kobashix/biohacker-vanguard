@@ -23,6 +23,8 @@
             backdrop-filter: blur(12px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
         }
         .bento-card:hover { 
             border-color: rgba(255, 255, 255, 0.2); 
@@ -84,9 +86,6 @@
                     <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tighter leading-[0.9]">
                         OPTIMIZE YOUR<br><span class="text-blue-500">HARDWARE</span>
                     </h1>
-                    <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                        The definitive database for peptides, biological stacks, and recovery protocols.
-                    </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <button onclick="navigate('/compounds')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
                             Browse Compounds
@@ -143,33 +142,72 @@
     </div>
 
     <script>
-        // --- ROUTER ---
+        // --- ROUTER (DEEP LINKING V2) ---
+        
         const ROUTES = {
             '/': { id: 'view-home', title: 'Home | MinMaxMuscle' },
             '/compounds': { id: 'view-compounds', title: 'Compounds | MinMaxMuscle' },
             '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle' }
         };
 
-        function navigate(path) {
+        function navigate(path, addToHistory = true) {
+            // Check for Peptide Deep Link (/peptide/slug)
+            if (path.startsWith('/peptide/')) {
+                const slug = path.split('/')[2];
+                // Ensure data is loaded first
+                if (GLOBAL_DATA.length === 0) {
+                    fetchData().then(() => openDeepLink(slug));
+                } else {
+                    openDeepLink(slug);
+                }
+                if (addToHistory) window.history.pushState({}, '', path);
+                return;
+            }
+
+            // Normal Routing
             if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
             if (!ROUTES[path]) path = '/';
+            
             const route = ROUTES[path];
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(route.id).classList.add('active');
-            window.history.pushState({}, '', path);
+            
+            // Close modal if open
+            closeModal(false);
+
+            document.title = route.title;
+            if (addToHistory) window.history.pushState({}, '', path);
             window.scrollTo(0,0);
         }
 
-        window.addEventListener('popstate', () => navigate(window.location.pathname));
+        // Handle Deep Linking
+        function openDeepLink(slug) {
+            // Ensure we are on compounds view
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-compounds').classList.add('active');
+            
+            const item = GLOBAL_DATA.find(p => p.slug === slug);
+            if (item) {
+                openModal(item, false); // Open modal without changing URL (URL already set)
+                document.title = `${item.name} | MinMaxMuscle`;
+            } else {
+                console.error("Peptide not found:", slug);
+                navigate('/compounds');
+            }
+        }
+
+        window.addEventListener('popstate', () => navigate(window.location.pathname, false));
         window.addEventListener('DOMContentLoaded', () => {
-            navigate(window.location.pathname);
-            fetchData(); 
+            fetchData().then(() => {
+                 navigate(window.location.pathname, false);
+            });
         });
 
         // --- DATA & RENDER ---
         let GLOBAL_DATA = [];
 
         async function fetchData() {
+            if (GLOBAL_DATA.length > 0) return; // Don't refetch
             try {
                 const response = await fetch('/api/peptides');
                 if (!response.ok) throw new Error('API Error');
@@ -177,11 +215,8 @@
                 renderCompounds(GLOBAL_DATA);
             } catch (error) {
                 console.error("DB Error:", error);
-                // Fallback Data
-                GLOBAL_DATA = [
-                    { id: 1, name: 'BPC-157', cat: 'Repair', focus: 'Systemic Healing', rank: 5, status: 'Research', summary: 'Gold standard for tendon repair.' },
-                    { id: 2, name: 'TB-500', cat: 'Repair', focus: 'Angiogenesis', rank: 5, status: 'Research', summary: 'Promotes blood flow.' }
-                ];
+                // Fallback
+                GLOBAL_DATA = [{name: "DB Connection Error", slug: "error"}];
                 renderCompounds(GLOBAL_DATA);
             }
         }
@@ -199,9 +234,16 @@
                 if(p.cat && p.cat.includes('Cosmetic')) imgUrl = 'https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1983';
                 if(p.cat && p.cat.includes('Muscle')) imgUrl = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070';
 
-                const card = document.createElement('div');
-                card.className = 'bento-card rounded-2xl p-1 overflow-hidden group cursor-pointer';
-                card.onclick = () => openModal(p); // CLICK HANDLER
+                // SEO FRIENDLY LINK
+                const card = document.createElement('a');
+                card.href = `/peptide/${p.slug}`;
+                card.className = 'bento-card rounded-2xl p-1 overflow-hidden group cursor-pointer block h-full';
+                
+                // Intercept Click for SPA feel
+                card.onclick = (e) => {
+                    e.preventDefault();
+                    navigate(`/peptide/${p.slug}`);
+                };
                 
                 card.innerHTML = `
                     <div class="relative bg-[#18181b] rounded-xl h-full flex flex-col overflow-hidden">
@@ -224,19 +266,17 @@
         }
 
         // --- MODAL LOGIC ---
-        function openModal(item) {
+        function openModal(item, updateHistory = true) {
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             
             // Generate content
             content.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
-                    <!-- Header Side -->
                     <div class="md:col-span-4 bg-[#020617] p-8 border-r border-white/5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
                         <h2 class="text-5xl font-bold text-white display-font mb-2">${item.name}</h2>
                         <span class="text-blue-400 text-sm font-bold uppercase tracking-widest block mb-8">${item.cat}</span>
-                        
                         <div class="space-y-6 text-sm">
                             <div class="bg-white/5 p-4 rounded border border-white/5">
                                 <span class="text-gray-500 uppercase text-[10px] font-bold block mb-1">Status</span>
@@ -248,21 +288,16 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Details Side -->
                     <div class="md:col-span-8 bg-[#09090b] p-8 relative">
-                        <button onclick="closeModal()" class="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full text-white transition"><i data-feather="x"></i></button>
-                        
+                        <button onclick="navigate('/compounds')" class="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full text-white transition"><i data-feather="x"></i></button>
                         <div class="mb-8">
                             <h3 class="text-xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">Mechanism of Action</h3>
                             <p class="text-gray-300 leading-relaxed text-lg">${item.summary || item.focus || 'No detailed summary available.'}</p>
                         </div>
-
                         <div class="mb-8">
                              <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Molecular Data</h4>
                              <p class="font-mono text-xs text-blue-400 bg-blue-900/10 p-3 rounded border border-blue-900/30">${item.molecular || 'Structure Data Pending'}</p>
                         </div>
-
                         ${item.sources ? `
                         <div class="mt-8 pt-8 border-t border-white/5">
                              <a href="${item.sources.split(',')[0]}" target="_blank" class="text-xs text-gray-500 hover:text-white transition flex items-center gap-2">
@@ -279,19 +314,21 @@
                 content.classList.add('opacity-100', 'scale-100');
             }, 10);
             feather.replace();
+            
+            if(updateHistory) window.history.pushState({}, '', `/peptide/${item.slug}`);
         }
 
-        function closeModal() {
+        function closeModal(updateHistory = true) {
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             content.classList.remove('opacity-100', 'scale-100');
             content.classList.add('opacity-0', 'scale-95');
             setTimeout(() => overlay.classList.add('hidden'), 300);
+            if(updateHistory) window.history.pushState({}, '', '/compounds');
         }
 
-        // Close on outside click
         document.getElementById('modal-overlay').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-overlay') closeModal();
+            if (e.target.id === 'modal-overlay') navigate('/compounds');
         });
 
         // Search Listener
@@ -301,7 +338,7 @@
             renderCompounds(filtered);
         });
 
-        // Calculator Logic
+        // Calculators
         const ids = ['calc-mg', 'calc-ml', 'calc-mcg'];
         ids.forEach(id => document.getElementById(id).addEventListener('input', calculateRecon));
         function calculateRecon() {
