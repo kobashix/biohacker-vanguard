@@ -1,209 +1,99 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINMAXMUSCLE | Peak Performance Architecture</title>
+    <title>MINMAXMUSCLE | Hardware Optimization</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&display=swap');
-        :root { --zinc-950: #09090b; --blue-500: #3b82f6; --blue-600: #2563eb; }
-        body { background: var(--zinc-950); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        h1, h2, h3, .brand { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
-        
-        /* Navigation Styles */
-        .nav-pill { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;600;800&display=swap');
+        :root { --bg: #050505; --accent: #3b82f6; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .brand { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; }
+        .nav-pill { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid #222; }
         .nav-link.active { background: rgba(255,255,255,0.1); color: #fff; }
-        
-        /* Cards */
-        .bento-card { background: #111; border: 1px solid #222; border-radius: 24px; transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
-        .bento-card:hover { border-color: var(--blue-500); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(59,130,246,0.3); }
-        
-        /* Layout Transitions */
-        .view-section { display: none; opacity: 0; transform: translateY(10px); }
-        .view-section.active { display: block; opacity: 1; transform: translateY(0); transition: all 0.4s ease; }
-        
-        /* Modal & UI */
-        #modal-overlay { background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); z-index: 100; }
-        .modal-content { background: #0a0a0a; border: 1px solid #222; max-width: 950px; width: 100%; border-radius: 32px; overflow: hidden; }
-        
-        .tab-btn.active { background: var(--blue-500); color: white; border-color: var(--blue-500); }
-        
-        .skeleton { animation: pulse 1.5s infinite; background: #18181b; border-radius: 24px; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .bento { background: #111; border: 1px solid #222; border-radius: 24px; transition: all 0.3s ease; cursor: pointer; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+        .bento:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(59,130,246,0.3); }
+        .view-section { display: none; opacity: 0; }
+        .view-section.active { display: block; opacity: 1; transition: opacity 0.4s ease; }
+        #modal-overlay { background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 100; }
+        .modal-content { background: #0a0a0a; border: 1px solid #222; max-width: 900px; width: 100%; border-radius: 32px; }
     </style>
 </head>
-<body class="selection:bg-blue-500 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Global Navigation -->
     <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
         <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-4xl shadow-2xl">
-            <button onclick="navigate('/')" class="flex items-center gap-2 group">
-                <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold transition group-hover:bg-blue-500 group-hover:text-white">M</div>
+            <button onclick="navigate('/')" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-black">M</div>
                 <span class="font-bold hidden sm:block italic tracking-tighter">MINMAXMUSCLE</span>
             </button>
-            <div class="flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
-                <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-peptides">Peptides</button>
-                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-stacks">Stacks</button>
-                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-calculators">Calculators</button>
+            <div class="flex gap-1 bg-black/40 rounded-full p-1 border border-white/5">
+                <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white" id="nav-peptides">Peptides</button>
+                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white" id="nav-stacks">Stacks</button>
+                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white" id="nav-calculators">Calculators</button>
             </div>
-            <button onclick="navigate('/peptides')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase italic transition hidden sm:block">Explore Data</button>
+            <button onclick="navigate('/peptides')" class="bg-blue-600 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase italic hidden sm:block">Database</button>
         </div>
     </nav>
 
     <main class="flex-grow pt-24 pb-20">
-
-        <!-- VIEW: HOME -->
+        <!-- HOME -->
         <section id="view-home" class="view-section active">
-            <div class="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-4">
-                <div class="absolute inset-0 z-0">
-                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 grayscale" alt="Gym">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent"></div>
-                </div>
-                <div class="relative z-10 text-center max-w-4xl">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-[10px] font-black uppercase mb-8">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                        V2.4 Intelligence Online
-                    </div>
-                    <h1 class="text-7xl md:text-9xl font-black mb-6 leading-[0.85] uppercase italic">Better<br><span class="text-blue-600">Hardware</span></h1>
-                    <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto font-medium">Engineered recovery protocols and biological data analysis. Peak human performance via technical mastery.</p>
+            <div class="relative min-h-[70vh] flex items-center justify-center text-center px-4">
+                <div class="max-w-4xl">
+                    <h1 class="text-7xl md:text-9xl font-black mb-6 leading-[0.85] uppercase italic">RECODE<br><span class="text-blue-600">THE MACHINE</span></h1>
+                    <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto font-medium">Biological data archives for hypertrophy and recovery. Engineered for elite hardware.</p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
                         <button onclick="navigate('/peptides')" class="px-10 py-4 bg-white text-black font-black rounded-xl uppercase italic text-sm hover:bg-blue-600 hover:text-white transition">Peptide Library</button>
-                        <button onclick="navigate('/calculators')" class="px-10 py-4 bg-white/5 border border-white/10 rounded-xl uppercase italic text-sm font-black hover:bg-white/10 transition backdrop-blur">Lab Tools</button>
+                        <button onclick="navigate('/calculators')" class="px-10 py-4 bg-white/5 border border-white/10 rounded-xl uppercase italic text-sm font-black">Lab Tools</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- VIEW: PEPTIDES -->
+        <!-- PEPTIDES -->
         <section id="view-peptides" class="view-section px-4 max-w-7xl mx-auto py-12">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                <div>
-                    <h2 class="text-6xl font-black italic uppercase mb-2">Peptide Archives</h2>
-                    <p class="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Clinical Research Dossiers</p>
-                </div>
-                <input type="text" id="pepSearch" class="bg-[#111] border border-white/5 p-4 rounded-xl w-full md:w-80 text-sm font-bold focus:border-blue-500 outline-none" placeholder="SEARCH DATABASE...">
-            </div>
-            <div id="pep-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Skeletons while loading -->
-                <div class="skeleton h-64"></div><div class="skeleton h-64"></div><div class="skeleton h-64"></div>
-            </div>
+            <h2 class="text-5xl font-black italic uppercase mb-12">Peptide Library</h2>
+            <div id="pep-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
 
-        <!-- VIEW: STACKS -->
+        <!-- STACKS -->
         <section id="view-stacks" class="view-section px-4 max-w-7xl mx-auto py-12">
-            <div class="mb-12">
-                <h2 class="text-6xl font-black italic uppercase mb-2">Protocol Stacks</h2>
-                <p class="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Multi-Compound Synergies</p>
-            </div>
-            <div id="stacks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="skeleton h-80"></div><div class="skeleton h-80"></div>
-            </div>
+            <h2 class="text-5xl font-black italic uppercase mb-12">Protocol Stacks</h2>
+            <div id="stacks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
         </section>
 
-        <!-- VIEW: CALCULATORS -->
-        <section id="view-calculators" class="view-section px-4 max-w-6xl mx-auto py-12">
-            <div class="text-center mb-16">
-                <h2 class="text-6xl font-black italic uppercase mb-4">Peptide Calculators</h2>
-                <p class="text-gray-500 font-bold uppercase text-[10px] tracking-widest italic">Precision Lab Measurements</p>
-            </div>
-
-            <!-- Calc Switcher -->
-            <div class="flex justify-center gap-2 mb-10 overflow-x-auto">
-                <button onclick="switchCalc('recon')" class="tab-btn active px-6 py-2 rounded-full border border-white/10 text-xs font-black uppercase italic tracking-widest transition">Reconstitution</button>
-                <button onclick="switchCalc('unit')" class="tab-btn px-6 py-2 rounded-full border border-white/10 text-xs font-black uppercase italic tracking-widest transition">IU Converter</button>
-                <button onclick="switchCalc('tdee')" class="tab-btn px-6 py-2 rounded-full border border-white/10 text-xs font-black uppercase italic tracking-widest transition">Hypertrophy Macros</button>
-            </div>
-
-            <div class="max-w-2xl mx-auto bento-card p-10 cursor-default hover:transform-none">
-                
-                <!-- Tool 1: Recon -->
-                <div id="calc-recon" class="calc-view space-y-6">
-                    <h3 class="text-2xl font-black uppercase italic border-b border-white/5 pb-4">Syringe Measurement</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="text-[9px] font-black text-gray-500 uppercase">Vial Size (mg)</label><input type="number" id="c-mg" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="5"></div>
-                        <div><label class="text-[9px] font-black text-gray-500 uppercase">Water (ml)</label><input type="number" id="c-ml" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="2"></div>
-                    </div>
-                    <div><label class="text-[9px] font-black text-gray-500 uppercase">Dose Target (mcg)</label><input type="number" id="c-mcg" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="250"></div>
-                    <div class="p-8 bg-blue-500/10 border-2 border-blue-500/20 rounded-3xl text-center">
-                        <span class="text-[10px] font-black text-blue-500 uppercase block mb-1 tracking-widest italic">Tick Mark Draw</span>
+        <!-- CALCULATORS -->
+        <section id="view-calculators" class="view-section px-4 max-w-2xl mx-auto py-12">
+            <h2 class="text-5xl font-black italic uppercase text-center mb-12">Peptide Calculator</h2>
+            <div class="bento p-10 cursor-default">
+                <div class="space-y-6">
+                    <div><label class="text-[9px] font-black text-gray-500 uppercase">Vial (mg)</label><input type="number" id="c-mg" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="5"></div>
+                    <div><label class="text-[9px] font-black text-gray-500 uppercase">Water (ml)</label><input type="number" id="c-ml" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="2"></div>
+                    <div><label class="text-[9px] font-black text-gray-500 uppercase">Dose (mcg)</label><input type="number" id="c-mcg" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" value="250"></div>
+                    <div class="p-8 bg-blue-600/10 border-2 border-blue-600/20 rounded-3xl text-center">
                         <span id="c-res" class="text-7xl font-black italic">10</span>
-                        <p class="text-[9px] text-gray-500 font-bold uppercase mt-2">Units on U-100 Syringe</p>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase mt-2">Units (U-100)</p>
                     </div>
                 </div>
-
-                <!-- Tool 2: IU Converter -->
-                <div id="calc-unit" class="calc-view hidden space-y-6">
-                    <h3 class="text-2xl font-black uppercase italic border-b border-white/5 pb-4">IU to Mcg Conversion</h3>
-                    <p class="text-xs text-gray-500">Essential for Somatropin and HCG research. Default is 1mg = 3 IU.</p>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div><label class="text-[9px] font-black text-gray-500 uppercase">Input Mcg</label><input type="number" id="u-mcg" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 font-mono" placeholder="1000"></div>
-                        <div class="p-8 bg-purple-500/10 border-2 border-purple-500/20 rounded-3xl text-center">
-                            <span class="text-[10px] font-black text-purple-400 uppercase block mb-1 italic tracking-widest">Intl Units Equivalent</span>
-                            <span id="u-res" class="text-6xl font-black italic">3.0</span>
-                            <p class="text-[9px] text-gray-500 font-bold uppercase mt-2">IUs (at 3:1 ratio)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tool 3: TDEE -->
-                <div id="calc-tdee" class="calc-view hidden space-y-6">
-                    <h3 class="text-2xl font-black uppercase italic border-b border-white/5 pb-4">Hypertrophy Macro Estimate</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="t-w" class="w-full bg-black border border-white/10 p-4 rounded-xl font-mono" placeholder="Weight (lbs)">
-                        <input type="number" id="t-h" class="w-full bg-black border border-white/10 p-4 rounded-xl font-mono" placeholder="Height (in)">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="t-a" class="w-full bg-black border border-white/10 p-4 rounded-xl font-mono" placeholder="Age">
-                        <select id="t-ac" class="bg-black border border-white/10 p-4 rounded-xl font-bold text-sm">
-                            <option value="1.2">Sedentary</option>
-                            <option value="1.55" selected>Active (3-5 days)</option>
-                            <option value="1.9">Pro Athlete</option>
-                        </select>
-                    </div>
-                    <button onclick="runTDEE()" class="w-full py-4 bg-blue-600 rounded-xl font-black italic uppercase text-sm">Calculate Baselines</button>
-                    <div id="t-res-box" class="hidden grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-white/5 rounded-2xl text-center"><span class="text-[8px] text-gray-500 uppercase block">Maint. kcal</span><span id="t-res-kcal" class="text-2xl font-black">--</span></div>
-                        <div class="p-4 bg-white/5 rounded-2xl text-center"><span class="text-[8px] text-gray-500 uppercase block">Growth Protein</span><span id="t-res-pro" class="text-2xl font-black">--</span></div>
-                    </div>
-                </div>
-
             </div>
         </section>
-
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/5 bg-[#020202] py-20 px-4">
+    <footer class="border-t border-white/5 bg-[#020202] py-20 px-4 mt-auto">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
-            <div>
-                <span class="brand text-2xl font-black italic">MINMAXMUSCLE</span>
-                <p class="text-gray-600 text-sm mt-4 max-w-xs">Biological architecture and hardware optimization. Engineered for the 0.1%.</p>
-            </div>
-            <div class="text-[10px] font-black uppercase tracking-widest text-gray-700 flex gap-20">
-                <div class="space-y-4">
-                    <p class="text-blue-600 tracking-[0.2em]">Matrix</p>
-                    <button onclick="navigate('/peptides')" class="block hover:text-white transition">Library</button>
-                    <button onclick="navigate('/stacks')" class="block hover:text-white transition">Stacks</button>
-                    <button onclick="navigate('/calculators')" class="block hover:text-white transition">Tools</button>
-                </div>
-                <div class="space-y-4">
-                    <p class="text-blue-600 tracking-[0.2em]">Legal</p>
-                    <a href="#" class="block">Disclaimer</a>
-                    <a href="#" class="block">Privacy</a>
-                </div>
+            <div><span class="brand text-2xl font-black italic">MINMAXMUSCLE</span><p class="text-gray-600 text-sm mt-4">Hardware optimization for the 0.1%.</p></div>
+            <div class="text-[10px] font-black uppercase text-gray-700 flex gap-12">
+                <div class="space-y-4"><p class="text-blue-600">Core</p><button onclick="navigate('/peptides')" class="block">Library</button><button onclick="navigate('/stacks')" class="block">Stacks</button></div>
+                <div class="space-y-4"><p class="text-blue-600">Legal</p><a href="#" class="block">Disclaimer</a><a href="#" class="block">Privacy</a></div>
             </div>
         </div>
-        <p class="max-w-7xl mx-auto text-[9px] text-gray-800 font-bold uppercase mt-20 border-t border-white/5 pt-10">FDA Disclaimer: Educational research only. Peptides are research chemicals and not intended for human consumption.</p>
+        <p class="max-w-7xl mx-auto text-[9px] text-gray-800 font-bold uppercase mt-20 pt-10 border-t border-white/5">Educational research only. Not for human consumption.</p>
     </footer>
 
-    <!-- MODAL OVERLAY -->
     <div id="modal-overlay" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div id="modal-content" class="modal-content opacity-0 scale-95 transition-all duration-300"></div>
     </div>
@@ -212,123 +102,95 @@
         const ROUTES = { '/': 'view-home', '/peptides': 'view-peptides', '/stacks': 'view-stacks', '/calculators': 'view-calculators' };
         let DB = { peptides: [], stacks: [] };
 
-        async function init() {
-            try {
-                const res = await fetch('/api/peptides');
-                DB = await res.json();
-                renderP(DB.peptides); renderS(DB.stacks); handleURL();
-            } catch(e) { console.error("Database connection failed", e); }
-        }
-
         function navigate(path, push = true) {
-            if (path.startsWith('/peptide/')) return openPepDossier(path.split('/')[2], push);
-            if (path.startsWith('/stack/')) return openStackDossier(path.split('/')[2], push);
-            
+            if (path.startsWith('/peptide/')) return openPep(path.split('/')[2], push);
+            if (path.startsWith('/stack/')) return openStack(path.split('/')[2], push);
             const route = ROUTES[path] || 'view-home';
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(route).classList.add('active');
-            
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             const lid = 'nav-' + path.replace('/', '');
             if(document.getElementById(lid)) document.getElementById(lid).classList.add('active');
-
             if (push) window.history.pushState({}, '', path);
             window.scrollTo(0,0); closeModal();
         }
 
+        async function init() {
+            const res = await fetch('/api/peptides');
+            DB = await res.json();
+            renderP(DB.peptides); renderS(DB.stacks); handleURL();
+        }
+
         function handleURL() {
             const p = window.location.pathname;
-            if(p.startsWith('/peptide/')) openPepDossier(p.split('/')[2], false);
-            else if(p.startsWith('/stack/')) openStackDossier(p.split('/')[2], false);
+            if(p.startsWith('/peptide/')) openPep(p.split('/')[2], false);
+            else if(p.startsWith('/stack/')) openStack(p.split('/')[2], false);
             else navigate(p, false);
         }
 
         function renderP(arr) {
-            const grid = document.getElementById('pep-grid');
-            grid.innerHTML = arr.map(p => `
-                <div class="bento-card p-8" onclick="openPepDossier('${p.slug}')">
-                    <div class="flex justify-between mb-6"><span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${p.Category || 'Core'}</span><span class="text-gray-800 font-mono text-[10px]">PX-0${p.id}</span></div>
-                    <h3 class="text-4xl font-black italic mb-2 uppercase leading-none">${p.peptide_name}</h3>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6">${p.nicknames?.split(',')[0] || 'Unclassified'}</p>
-                    <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed font-medium">${p.primary_focus || p.research_summary}</p>
+            document.getElementById('pep-grid').innerHTML = arr.map(p => `
+                <div class="bento p-8" onclick="openPep('${p.slug}')">
+                    <span class="text-[9px] font-black uppercase text-blue-500 mb-4 block">${p.Category}</span>
+                    <h3 class="text-3xl font-black italic mb-2 uppercase">${p.peptide_name}</h3>
+                    <p class="text-sm text-gray-400 line-clamp-3">${p.primary_focus || p.research_summary}</p>
                 </div>
             `).join('');
         }
 
         function renderS(arr) {
-            const grid = document.getElementById('stacks-grid');
-            grid.innerHTML = arr.map(s => `
-                <div class="bento-card min-h-[300px] relative overflow-hidden group justify-end" onclick="openStackDossier('${s.slug}')">
-                    <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=1000" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale transition group-hover:scale-105 duration-1000">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                    <div class="relative p-10 z-10">
-                        <h3 class="text-5xl font-black italic uppercase leading-none mb-4">${s.stack_name}</h3>
+            document.getElementById('stacks-grid').innerHTML = arr.map(s => `
+                <div class="bento min-h-[250px] p-10 relative overflow-hidden flex flex-col justify-end" onclick="openStack('${s.slug}')">
+                    <div class="relative z-10">
+                        <h3 class="text-5xl font-black italic uppercase leading-none mb-2">${s.stack_name}</h3>
                         <p class="text-gray-400 text-sm max-w-md line-clamp-2">${s.description}</p>
-                        <button class="mt-8 px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic">Analyze Stack</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function openPepDossier(slug, push = true) {
+        function openPep(slug, push = true) {
             const p = DB.peptides.find(x => x.slug === slug);
             if(!p) return navigate('/peptides');
+            const stacks = DB.stacks.filter(s => s.peptides_used?.toLowerCase().includes(p.peptide_name.toLowerCase()));
             
-            const relevantStacks = DB.stacks.filter(s => s.peptides_used?.toLowerCase().includes(p.peptide_name.toLowerCase()));
-            const q = p.faq_questions ? p.faq_questions.split('|||') : [];
-            const a = p.faq_answers ? p.faq_answers.split('|||') : [];
-            const src = p.Sources ? p.Sources.split(',') : [];
-
             document.getElementById('modal-content').innerHTML = `
-                <div class="grid md:grid-cols-12 min-h-[600px]">
-                    <div class="md:col-span-4 bg-[#050505] p-12 border-r border-white/5">
-                        <h2 class="text-6xl font-black italic uppercase leading-[0.85] mb-4">${p.peptide_name}</h2>
-                        <p class="text-blue-500 text-[10px] font-black uppercase italic tracking-widest">${p.Category}</p>
-                        <div class="mt-12 space-y-4">
-                            <div class="p-6 bg-white/5 rounded-3xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Status</p><p class="text-xs font-bold italic">${p.Status}</p></div>
-                            <div class="p-6 bg-white/5 rounded-3xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Potency</p><p class="text-xs font-bold italic text-blue-500">${p.rank}/10</p></div>
-                        </div>
+                <div class="grid md:grid-cols-12 min-h-[500px]">
+                    <div class="md:col-span-4 bg-[#050505] p-10 border-r border-white/5">
+                        <h2 class="text-5xl font-black italic uppercase leading-[0.85] mb-4">${p.peptide_name}</h2>
+                        <span class="text-blue-500 text-[10px] font-black uppercase">${p.Category}</span>
                     </div>
-                    <div class="md:col-span-8 p-12 relative">
-                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-600"><i data-feather="x"></i></button>
-                        <h3 class="text-2xl font-black italic uppercase mb-6 border-l-4 border-blue-600 pl-6">Research Summary</h3>
-                        <p class="text-gray-300 leading-relaxed font-medium mb-12 text-lg">${p.research_summary}</p>
-                        
-                        ${relevantStacks.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Utilized in Stacks</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">${relevantStacks.map(s => `<div onclick="openStackDossier('${s.slug}')" class="p-5 bg-blue-500/5 border border-blue-500/20 rounded-2xl cursor-pointer hover:border-blue-500/50"><p class="text-white font-black uppercase text-xs italic">${s.stack_name}</p></div>`).join('')}</div>` : ''}
-
-                        ${q.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Knowledge Base</h4><div class="space-y-2 mb-12">${q.map((qi, i) => `<details class="bg-white/5 rounded-2xl"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between uppercase italic">${qi}<i data-feather="plus" class="w-4 h-4 text-gray-600"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed">${a[i]}</p></details>`).join('')}</div>` : ''}
-
-                        ${src.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Clinical References</h4><div class="grid gap-2">${src.map((s, i) => `<a href="${s.trim()}" target="_blank" class="text-[10px] text-blue-500 hover:underline uppercase font-bold italic">Source Archive 0${i+1} <i data-feather="external-link" class="inline w-2 h-2 ml-1"></i></a>`).join('')}</div>` : ''}
+                    <div class="md:col-span-8 p-10 relative">
+                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-feather="x"></i></button>
+                        <h3 class="text-xl font-black italic uppercase mb-6 border-l-4 border-blue-600 pl-6">Research</h3>
+                        <p class="text-gray-400 leading-relaxed mb-10">${p.research_summary}</p>
+                        ${stacks.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Linked Stacks</h4><div class="grid gap-2 mb-10">${stacks.map(s => `<div onclick="openStack('${s.slug}')" class="p-4 bg-white/5 border border-white/5 rounded-xl cursor-pointer hover:border-blue-500/50"><p class="text-white font-black uppercase text-xs italic">${s.stack_name}</p></div>`).join('')}</div>` : ''}
                     </div>
                 </div>
             `;
             showM(); if(push) window.history.pushState({}, '', `/peptide/${slug}`);
         }
 
-        function openStackDossier(slug, push = true) {
+        function openStack(slug, push = true) {
             const s = DB.stacks.find(x => x.slug === slug);
             if(!s) return navigate('/stacks');
             const comps = s.peptides_used?.split(',').map(c => c.trim()) || [];
-            const q = s.faq_questions ? s.faq_questions.split('|||') : [];
-            const a = s.faq_answers ? s.faq_answers.split('|||') : [];
 
             document.getElementById('modal-content').innerHTML = `
                 <div class="grid md:grid-cols-12 min-h-[500px]">
-                    <div class="md:col-span-5 bg-[#050505] p-12 border-r border-white/5 flex flex-col justify-center">
-                        <span class="text-blue-500 font-black uppercase text-[10px] tracking-widest mb-4 italic">Protocol Configuration</span>
-                        <h2 class="text-7xl font-black italic leading-[0.8] uppercase mb-6">${s.stack_name}</h2>
-                        <p class="text-gray-400 font-medium leading-relaxed">${s.description}</p>
+                    <div class="md:col-span-5 bg-[#050505] p-12 border-r border-white/5">
+                        <h2 class="text-7xl font-black italic leading-[0.8] uppercase mb-4">${s.stack_name}</h2>
+                        <p class="text-gray-500">${s.description}</p>
                     </div>
                     <div class="md:col-span-7 p-12 relative">
-                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-600 hover:text-white"><i data-feather="x"></i></button>
-                        <h4 class="text-[10px] font-black text-gray-600 uppercase mb-8 italic tracking-widest">Component Matrix</h4>
-                        <div class="grid gap-4 mb-12">${comps.map(c => {
+                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-feather="x"></i></button>
+                        <h4 class="text-[10px] font-black text-gray-600 uppercase mb-8 italic tracking-widest">Components Matrix</h4>
+                        <div class="grid gap-4">${comps.map(c => {
                             const found = DB.peptides.find(p => p.peptide_name.toLowerCase() === c.toLowerCase());
-                            return `<div ${found ? `onclick="openPepDossier('${found.slug}')"` : ''} class="p-6 bg-white/5 border border-white/10 rounded-3xl flex justify-between items-center ${found ? 'cursor-pointer hover:border-blue-500/30' : 'opacity-40'}">
+                            return `<div ${found ? `onclick="openPep('${found.slug}')"` : ''} class="p-6 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center ${found ? 'cursor-pointer hover:border-blue-500/30' : 'opacity-40'}">
                                 <span class="font-black uppercase italic">${c}</span>${found ? '<i data-feather="database" class="w-4 h-4 text-blue-600"></i>' : ''}
                             </div>`;
                         }).join('')}</div>
-                        ${q.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Stack Logic</h4><div class="space-y-2">${q.map((qi, i) => `<details class="bg-white/5 rounded-2xl"><summary class="p-4 cursor-pointer font-bold text-sm flex justify-between italic uppercase">${qi}<i data-feather="plus" class="w-4 h-4 text-gray-600"></i></summary><p class="p-4 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed">${a[i]}</p></details>`).join('')}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -346,45 +208,19 @@
             const content = document.getElementById('modal-content');
             content.classList.remove('opacity-100', 'scale-100'); content.classList.add('opacity-0', 'scale-95');
             setTimeout(() => overlay.classList.add('hidden'), 500);
-            if(window.location.pathname.includes('/peptide/')) window.history.pushState({}, '', '/peptides');
-            if(window.location.pathname.includes('/stack/')) window.history.pushState({}, '', '/stacks');
-        }
-
-        function switchCalc(id) {
-            document.querySelectorAll('.calc-view').forEach(v => v.classList.add('hidden'));
-            document.getElementById('calc-'+id).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        function runTDEE() {
-            const w = document.getElementById('t-w').value, h = document.getElementById('t-h').value, a = document.getElementById('t-a').value, ac = document.getElementById('t-ac').value;
-            if(!w||!h||!a) return;
-            const bmr = (10 * (w*0.453)) + (6.25 * (h*2.54)) - (5*a) + 5;
-            const tdee = Math.round(bmr * ac);
-            document.getElementById('t-res-kcal').innerText = tdee;
-            document.getElementById('t-res-pro').innerText = Math.round(w*1.2) + "g";
-            document.getElementById('t-res-box').classList.remove('hidden');
+            if(!window.location.pathname.includes('/peptide/') && !window.location.pathname.includes('/stack/')) return;
+            const fallback = window.location.pathname.includes('/peptide/') ? '/peptides' : '/stacks';
+            window.history.pushState({}, '', fallback);
         }
 
         window.addEventListener('popstate', handleURL);
         window.addEventListener('DOMContentLoaded', init);
         document.getElementById('modal-overlay').addEventListener('click', (e) => { if(e.target.id==='modal-overlay') closeModal(); });
         
-        document.getElementById('pepSearch').addEventListener('input', (e) => {
-            const t = e.target.value.toLowerCase();
-            renderP(DB.peptides.filter(p => p.peptide_name.toLowerCase().includes(t) || p.primary_focus.toLowerCase().includes(t)));
-        });
-
         ['mg','ml','mcg'].forEach(i => document.getElementById('c-'+i).addEventListener('input', () => {
             const mg = document.getElementById('c-mg').value, ml = document.getElementById('c-ml').value, mcg = document.getElementById('c-mcg').value;
             if(mg&&ml&&mcg) document.getElementById('c-res').innerText = (mcg / ((mg*1000)/(ml*100))).toFixed(1);
         }));
-
-        document.getElementById('u-mcg').addEventListener('input', (e) => {
-            const val = e.target.value;
-            document.getElementById('u-res').innerText = val ? (val / 333.33).toFixed(1) : '0.0';
-        });
     </script>
 </body>
 </html>
