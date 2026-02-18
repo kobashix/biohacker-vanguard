@@ -59,10 +59,10 @@
                 <span class="font-bold tracking-tight hidden sm:block group-hover:text-white transition text-gray-200">MINMAX</span>
             </button>
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
-                <button onclick="navigate('/compounds')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-compounds">Compounds</button>
+                <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-peptides">Peptides</button>
                 <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-calculators">Tools</button>
             </div>
-            <button onclick="navigate('/compounds')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
+            <button onclick="navigate('/peptides')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
                 Database
             </button>
         </div>
@@ -87,23 +87,23 @@
                         OPTIMIZE YOUR<br><span class="text-blue-500">HARDWARE</span>
                     </h1>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button onclick="navigate('/compounds')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
-                            Browse Compounds
+                        <button onclick="navigate('/peptides')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
+                            Browse Peptides
                         </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- COMPOUNDS GRID -->
-        <section id="view-compounds" class="view-section px-4 max-w-7xl mx-auto">
+        <!-- PEPTIDES GRID -->
+        <section id="view-peptides" class="view-section px-4 max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 mt-10">
                 <div>
-                    <h2 class="text-4xl font-bold text-white mb-2">Active Compounds</h2>
+                    <h2 class="text-4xl font-bold text-white mb-2">Active Peptides</h2>
                     <p class="text-gray-400">Select a card to view dosing & research.</p>
                 </div>
                 <div class="relative w-full md:w-96">
-                    <input type="text" id="compoundSearch" class="w-full bg-[#18181b] border border-white/10 text-white px-4 py-3 rounded-lg focus:border-blue-500 outline-none" placeholder="Search Database...">
+                    <input type="text" id="peptideSearch" class="w-full bg-[#18181b] border border-white/10 text-white px-4 py-3 rounded-lg focus:border-blue-500 outline-none" placeholder="Search Database...">
                 </div>
             </div>
             
@@ -142,11 +142,10 @@
     </div>
 
     <script>
-        // --- ROUTER (DEEP LINKING V2) ---
-        
+        // --- ROUTER ---
         const ROUTES = {
             '/': { id: 'view-home', title: 'Home | MinMaxMuscle' },
-            '/compounds': { id: 'view-compounds', title: 'Compounds | MinMaxMuscle' },
+            '/peptides': { id: 'view-peptides', title: 'Peptides | MinMaxMuscle' },
             '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle' }
         };
 
@@ -154,7 +153,6 @@
             // Check for Peptide Deep Link (/peptide/slug)
             if (path.startsWith('/peptide/')) {
                 const slug = path.split('/')[2];
-                // Ensure data is loaded first
                 if (GLOBAL_DATA.length === 0) {
                     fetchData().then(() => openDeepLink(slug));
                 } else {
@@ -172,7 +170,6 @@
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(route.id).classList.add('active');
             
-            // Close modal if open
             closeModal(false);
 
             document.title = route.title;
@@ -182,17 +179,15 @@
 
         // Handle Deep Linking
         function openDeepLink(slug) {
-            // Ensure we are on compounds view
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-compounds').classList.add('active');
+            document.getElementById('view-peptides').classList.add('active');
             
             const item = GLOBAL_DATA.find(p => p.slug === slug);
             if (item) {
-                openModal(item, false); // Open modal without changing URL (URL already set)
+                openModal(item, false); 
                 document.title = `${item.name} | MinMaxMuscle`;
             } else {
-                console.error("Peptide not found:", slug);
-                navigate('/compounds');
+                navigate('/peptides');
             }
         }
 
@@ -207,21 +202,20 @@
         let GLOBAL_DATA = [];
 
         async function fetchData() {
-            if (GLOBAL_DATA.length > 0) return; // Don't refetch
+            if (GLOBAL_DATA.length > 0) return;
             try {
                 const response = await fetch('/api/peptides');
                 if (!response.ok) throw new Error('API Error');
                 GLOBAL_DATA = await response.json();
-                renderCompounds(GLOBAL_DATA);
+                renderPeptides(GLOBAL_DATA);
             } catch (error) {
                 console.error("DB Error:", error);
-                // Fallback
                 GLOBAL_DATA = [{name: "DB Connection Error", slug: "error"}];
-                renderCompounds(GLOBAL_DATA);
+                renderPeptides(GLOBAL_DATA);
             }
         }
 
-        function renderCompounds(data) {
+        function renderPeptides(data) {
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
             
@@ -234,12 +228,10 @@
                 if(p.cat && p.cat.includes('Cosmetic')) imgUrl = 'https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1983';
                 if(p.cat && p.cat.includes('Muscle')) imgUrl = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070';
 
-                // SEO FRIENDLY LINK
                 const card = document.createElement('a');
                 card.href = `/peptide/${p.slug}`;
                 card.className = 'bento-card rounded-2xl p-1 overflow-hidden group cursor-pointer block h-full';
                 
-                // Intercept Click for SPA feel
                 card.onclick = (e) => {
                     e.preventDefault();
                     navigate(`/peptide/${p.slug}`);
@@ -270,7 +262,6 @@
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             
-            // Generate content
             content.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
                     <div class="md:col-span-4 bg-[#020617] p-8 border-r border-white/5 relative overflow-hidden">
@@ -289,7 +280,7 @@
                         </div>
                     </div>
                     <div class="md:col-span-8 bg-[#09090b] p-8 relative">
-                        <button onclick="navigate('/compounds')" class="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full text-white transition"><i data-feather="x"></i></button>
+                        <button onclick="navigate('/peptides')" class="absolute top-6 right-6 p-2 bg-white/5 hover:bg-white/10 rounded-full text-white transition"><i data-feather="x"></i></button>
                         <div class="mb-8">
                             <h3 class="text-xl font-bold text-white mb-4 border-l-4 border-blue-500 pl-4">Mechanism of Action</h3>
                             <p class="text-gray-300 leading-relaxed text-lg">${item.summary || item.focus || 'No detailed summary available.'}</p>
@@ -324,21 +315,19 @@
             content.classList.remove('opacity-100', 'scale-100');
             content.classList.add('opacity-0', 'scale-95');
             setTimeout(() => overlay.classList.add('hidden'), 300);
-            if(updateHistory) window.history.pushState({}, '', '/compounds');
+            if(updateHistory) window.history.pushState({}, '', '/peptides');
         }
 
         document.getElementById('modal-overlay').addEventListener('click', (e) => {
-            if (e.target.id === 'modal-overlay') navigate('/compounds');
+            if (e.target.id === 'modal-overlay') navigate('/peptides');
         });
 
-        // Search Listener
-        document.getElementById('compoundSearch').addEventListener('input', (e) => {
+        document.getElementById('peptideSearch').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = GLOBAL_DATA.filter(p => p.name.toLowerCase().includes(term) || (p.focus && p.focus.toLowerCase().includes(term)));
-            renderCompounds(filtered);
+            renderPeptides(filtered);
         });
 
-        // Calculators
         const ids = ['calc-mg', 'calc-ml', 'calc-mcg'];
         ids.forEach(id => document.getElementById(id).addEventListener('input', calculateRecon));
         function calculateRecon() {
