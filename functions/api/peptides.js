@@ -2,20 +2,12 @@ export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // 1. Fetch Peptides with Deep Data
+    // 1. Fetch Peptides (unchanged)
     const peptideQuery = `
       SELECT 
-        p.id, 
-        p.peptide_name as name, 
-        p.slug, 
-        p.Category as cat, 
-        p.primary_focus as focus, 
-        p.rank, 
-        p.Status as status,
-        p.molecular_data as molecular,
-        p.research_summary as summary,
-        p.nicknames,
-        p.Sources as sources,
+        p.id, p.peptide_name as name, p.slug, p.Category as cat, p.primary_focus as focus, 
+        p.rank, p.Status as status, p.molecular_data as molecular, p.research_summary as summary,
+        p.nicknames, p.Sources as sources,
         GROUP_CONCAT(f.question, '|||') as faq_questions,
         GROUP_CONCAT(f.answer, '|||') as faq_answers
       FROM Peptides p
@@ -25,15 +17,21 @@ export async function onRequest(context) {
       ORDER BY p.rank DESC
     `;
     
-    // 2. Fetch Stacks (So we can link them in the modal)
-    // Assuming a 'Stacks' table exists based on your backup. 
-    // If not, this part returns empty array to prevent crash.
+    // 2. Fetch Stacks (Standardized columns)
     let stacks = [];
     try {
-      const stackRes = await env.DB.prepare("SELECT * FROM Stacks").all();
+      // Maps your DB columns to standard frontend names
+      const stackRes = await env.DB.prepare(`
+        SELECT 
+          id, 
+          stack_name as name, 
+          description as desc, 
+          peptides_used as components 
+        FROM Stacks
+      `).all();
       stacks = stackRes.results;
     } catch (e) {
-      console.log("No Stacks table found yet, sending empty list.");
+      console.log("Stack query error or table missing", e);
     }
 
     const peptides = await env.DB.prepare(peptideQuery).all();
@@ -42,10 +40,7 @@ export async function onRequest(context) {
       peptides: peptides.results,
       stacks: stacks
     }), {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=3600"
-      }
+      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" }
     });
 
   } catch (err) {
