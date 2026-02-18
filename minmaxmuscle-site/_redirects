@@ -1,11 +1,14 @@
---- SEO 301 Redirects ---
+--- Core Redirects ---
 
 /calculators.html  /calculators  301
-/peptides.html     /compounds    301
-/library           /compounds    301
-/stacks.html       /stacks       301
-/science.html      /science      301
+/peptides.html     /database     301
+/peptides          /database     301
+/library           /database     301
+/compounds         /database     301
+/stacks.html       /database     301
+/stacks            /database     301
 
---- SPA Fallback ---
+--- Dynamic Routing ---
 
-/* /index.html  200
+/peptide/* /index.html 200
+/* /index.html 200
