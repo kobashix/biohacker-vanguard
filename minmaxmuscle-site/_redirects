@@ -1,0 +1,10 @@
+--- SEO 301 Redirects (The Bridge) ---
+
+/calculators.html  /calculators  301
+/peptides.html     /library      301
+/stacks.html       /stacks       301
+/science.html      /science      301
+
+--- SPA Fallback (The Engine) ---
+
+/* /index.html  200
