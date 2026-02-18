@@ -1,10 +1,10 @@
-SEO 301 Redirects for old pages
+--- SEO 301 Redirects ---
 
 /calculators.html  /calculators  301
 /peptides.html     /peptides     301
 /stacks.html       /stacks       301
 
-Dynamic App Routing
+--- Dynamic Deep Linking ---
 
 /peptide/* /index.html   200
 /stack/* /index.html   200
@@ -12,6 +12,6 @@ Dynamic App Routing
 /stacks            /index.html   200
 /calculators       /index.html   200
 
-SPA Fallback
+--- SPA Fallback ---
 
 /* /index.html   200
