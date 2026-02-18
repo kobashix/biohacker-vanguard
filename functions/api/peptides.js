@@ -2,9 +2,8 @@ export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // UPDATED: Now performs a LEFT JOIN on the FAQ tables
-    // Uses '|||' as a separator to bundle multiple questions into one string
-    const query = `
+    // 1. Fetch Peptides with Deep Data
+    const peptideQuery = `
       SELECT 
         p.id, 
         p.peptide_name as name, 
@@ -25,10 +24,24 @@ export async function onRequest(context) {
       GROUP BY p.id
       ORDER BY p.rank DESC
     `;
+    
+    // 2. Fetch Stacks (So we can link them in the modal)
+    // Assuming a 'Stacks' table exists based on your backup. 
+    // If not, this part returns empty array to prevent crash.
+    let stacks = [];
+    try {
+      const stackRes = await env.DB.prepare("SELECT * FROM Stacks").all();
+      stacks = stackRes.results;
+    } catch (e) {
+      console.log("No Stacks table found yet, sending empty list.");
+    }
 
-    const results = await env.DB.prepare(query).all();
+    const peptides = await env.DB.prepare(peptideQuery).all();
 
-    return new Response(JSON.stringify(results.results), {
+    return new Response(JSON.stringify({
+      peptides: peptides.results,
+      stacks: stacks
+    }), {
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "public, max-age=3600"

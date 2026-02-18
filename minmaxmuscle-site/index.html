@@ -49,7 +49,7 @@
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: sweep .5s ease-in-out; }
-        @keyframes sweep { 0%    {opacity: 0; transform: translateY(-10px)} 100%  {opacity: 1; transform: translateY(0)} }
+        @keyframes sweep { 0% {opacity: 0; transform: translateY(-10px)} 100% {opacity: 1; transform: translateY(0)} }
         
         .skeleton { animation: pulse-bg 1.5s infinite; background: rgba(255,255,255,0.05); }
         @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
@@ -66,6 +66,7 @@
             </button>
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
                 <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-peptides">Peptides</button>
+                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-stacks">Stacks</button>
                 <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-calculators">Tools</button>
             </div>
             <button onclick="navigate('/peptides')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
@@ -112,12 +113,24 @@
                     <input type="text" id="peptideSearch" class="w-full bg-[#18181b] border border-white/10 text-white px-4 py-3 rounded-lg focus:border-blue-500 outline-none" placeholder="Search Database...">
                 </div>
             </div>
-            
             <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Loading State -->
                 <div class="bento-card h-64 rounded-xl skeleton"></div>
                 <div class="bento-card h-64 rounded-xl skeleton"></div>
                 <div class="bento-card h-64 rounded-xl skeleton"></div>
+            </div>
+        </section>
+        
+        <!-- STACKS GRID (Placeholder for dedicated stacks page) -->
+        <section id="view-stacks" class="view-section px-4 max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 mt-10">
+                <div>
+                    <h2 class="text-4xl font-bold text-white mb-2">Synergistic Stacks</h2>
+                    <p class="text-gray-400">Combined protocols for maximum effect.</p>
+                </div>
+            </div>
+            <div id="stacks-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Stacks injected here -->
             </div>
         </section>
 
@@ -142,7 +155,7 @@
 
     <!-- MODAL OVERLAY -->
     <div id="modal-overlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-        <div id="modal-content" class="modal-content w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl opacity-0 transform scale-95 transition-all duration-300">
+        <div id="modal-content" class="modal-content w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl opacity-0 transform scale-95 transition-all duration-300">
             <!-- Content Injected via JS -->
         </div>
     </div>
@@ -152,13 +165,14 @@
         const ROUTES = {
             '/': { id: 'view-home', title: 'Home | MinMaxMuscle' },
             '/peptides': { id: 'view-peptides', title: 'Peptides | MinMaxMuscle' },
+            '/stacks': { id: 'view-stacks', title: 'Stacks | MinMaxMuscle' },
             '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle' }
         };
 
         function navigate(path, addToHistory = true) {
             if (path.startsWith('/peptide/')) {
                 const slug = path.split('/')[2];
-                if (GLOBAL_DATA.length === 0) {
+                if (GLOBAL_DATA.peptides.length === 0) {
                     fetchData().then(() => openDeepLink(slug));
                 } else {
                     openDeepLink(slug);
@@ -185,7 +199,7 @@
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('view-peptides').classList.add('active');
             
-            const item = GLOBAL_DATA.find(p => p.slug === slug);
+            const item = GLOBAL_DATA.peptides.find(p => p.slug === slug);
             if (item) {
                 openModal(item, false); 
                 document.title = `${item.name} | MinMaxMuscle`;
@@ -202,19 +216,21 @@
         });
 
         // --- DATA & RENDER ---
-        let GLOBAL_DATA = [];
+        let GLOBAL_DATA = { peptides: [], stacks: [] };
 
         async function fetchData() {
-            if (GLOBAL_DATA.length > 0) return;
+            if (GLOBAL_DATA.peptides.length > 0) return;
             try {
                 const response = await fetch('/api/peptides');
                 if (!response.ok) throw new Error('API Error');
                 GLOBAL_DATA = await response.json();
-                renderPeptides(GLOBAL_DATA);
+                renderPeptides(GLOBAL_DATA.peptides);
+                renderStacks(GLOBAL_DATA.stacks);
             } catch (error) {
                 console.error("DB Error:", error);
-                GLOBAL_DATA = [{name: "DB Connection Error", slug: "error"}];
-                renderPeptides(GLOBAL_DATA);
+                // Fallback
+                GLOBAL_DATA.peptides = [{name: "DB Connection Error", slug: "error"}];
+                renderPeptides(GLOBAL_DATA.peptides);
             }
         }
 
@@ -234,11 +250,7 @@
                 const card = document.createElement('a');
                 card.href = `/peptide/${p.slug}`;
                 card.className = 'bento-card rounded-2xl p-1 overflow-hidden group cursor-pointer block h-full';
-                
-                card.onclick = (e) => {
-                    e.preventDefault();
-                    navigate(`/peptide/${p.slug}`);
-                };
+                card.onclick = (e) => { e.preventDefault(); navigate(`/peptide/${p.slug}`); };
                 
                 card.innerHTML = `
                     <div class="relative bg-[#18181b] rounded-xl h-full flex flex-col overflow-hidden">
@@ -260,22 +272,42 @@
             feather.replace();
         }
 
-        // --- MODAL LOGIC (With FAQs) ---
+        function renderStacks(stacks) {
+             const container = document.getElementById('stacks-container');
+             container.innerHTML = '';
+             
+             if(stacks.length === 0) {
+                 container.innerHTML = '<p class="text-gray-500 col-span-2 text-center">No stacks found in database.</p>';
+                 return;
+             }
+             
+             stacks.forEach(s => {
+                 const card = document.createElement('div');
+                 card.className = 'bento-card rounded-xl p-6';
+                 card.innerHTML = `
+                    <h3 class="text-xl font-bold text-white mb-2">${s.stack_name || 'Unnamed Stack'}</h3>
+                    <p class="text-gray-400 text-sm mb-4">${s.description || 'No description.'}</p>
+                    <button class="text-xs font-bold bg-blue-900/30 text-blue-400 px-3 py-1 rounded border border-blue-500/30">View Protocol</button>
+                 `;
+                 container.appendChild(card);
+             });
+        }
+
+
+        // --- MODAL LOGIC (With Research & Stacks) ---
         function openModal(item, updateHistory = true) {
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             
-            // Generate FAQs
+            // 1. FAQs
             let faqHTML = '';
             if (item.faq_questions && item.faq_answers) {
                 const qs = item.faq_questions.split('|||');
                 const as = item.faq_answers.split('|||');
-                
                 if (qs.length > 0) {
                     faqHTML += `<div class="mt-8 pt-8 border-t border-white/5">
                         <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Common Questions</h4>
                         <div class="space-y-2">`;
-                    
                     qs.forEach((q, i) => {
                         const a = as[i] || "Information pending.";
                         if(q) {
@@ -285,13 +317,57 @@
                                     ${q}
                                     <i data-feather="chevron-down" class="text-gray-500 w-4 h-4 transition group-open:rotate-180"></i>
                                 </summary>
-                                <div class="px-4 pb-4 text-sm text-gray-300 leading-relaxed border-t border-white/5 pt-2">
-                                    ${a}
-                                </div>
+                                <div class="px-4 pb-4 text-sm text-gray-300 leading-relaxed border-t border-white/5 pt-2">${a}</div>
                             </details>`;
                         }
                     });
                     faqHTML += `</div></div>`;
+                }
+            }
+
+            // 2. Research Sources (Fixed)
+            let sourcesHTML = '';
+            if (item.sources) {
+                const urls = item.sources.split(',');
+                sourcesHTML = `<div class="mt-8 pt-8 border-t border-white/5">
+                    <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Related Research</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+                urls.forEach((url, index) => {
+                    const cleanUrl = url.trim();
+                    if(cleanUrl.length > 5) {
+                        sourcesHTML += `
+                        <a href="${cleanUrl}" target="_blank" class="flex items-center gap-2 p-3 rounded bg-white/5 hover:bg-white/10 transition text-xs text-blue-400 border border-white/5">
+                            <i data-feather="external-link" class="w-3 h-3"></i>
+                            <span class="truncate">Clinical Source ${index + 1}</span>
+                        </a>`;
+                    }
+                });
+                sourcesHTML += `</div></div>`;
+            }
+
+            // 3. Related Stacks (Dynamic Filter)
+            let relatedStacksHTML = '';
+            if (GLOBAL_DATA.stacks && GLOBAL_DATA.stacks.length > 0) {
+                // Filter stacks that might contain this peptide (Basic string match for now)
+                const relevantStacks = GLOBAL_DATA.stacks.filter(s => 
+                    s.description && s.description.toLowerCase().includes(item.name.toLowerCase()) || 
+                    (s.stack_name && s.stack_name.toLowerCase().includes(item.name.toLowerCase()))
+                );
+
+                if (relevantStacks.length > 0) {
+                    relatedStacksHTML = `<div class="mt-8 pt-8 border-t border-white/5">
+                        <h4 class="text-sm font-bold text-gray-500 uppercase mb-4">Featured In Stacks</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+                    
+                    relevantStacks.forEach(stack => {
+                         relatedStacksHTML += `
+                            <div onclick="navigate('/stacks')" class="p-4 rounded-xl bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 cursor-pointer hover:border-blue-500/50 transition">
+                                <h5 class="font-bold text-white mb-1">${stack.stack_name}</h5>
+                                <p class="text-xs text-gray-400 line-clamp-2">${stack.description}</p>
+                            </div>
+                         `;
+                    });
+                    relatedStacksHTML += `</div></div>`;
                 }
             }
 
@@ -322,13 +398,8 @@
                         </div>
 
                         ${faqHTML}
-
-                        ${item.sources ? `
-                        <div class="mt-8 pt-8 border-t border-white/5">
-                             <a href="${item.sources.split(',')[0]}" target="_blank" class="text-xs text-gray-500 hover:text-white transition flex items-center gap-2">
-                                <i data-feather="external-link" class="w-3 h-3"></i> View Clinical Source
-                             </a>
-                        </div>` : ''}
+                        ${relatedStacksHTML}
+                        ${sourcesHTML}
                     </div>
                 </div>
             `;
@@ -358,7 +429,7 @@
 
         document.getElementById('peptideSearch').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
-            const filtered = GLOBAL_DATA.filter(p => p.name.toLowerCase().includes(term) || (p.focus && p.focus.toLowerCase().includes(term)));
+            const filtered = GLOBAL_DATA.peptides.filter(p => p.name.toLowerCase().includes(term) || (p.focus && p.focus.toLowerCase().includes(term)));
             renderPeptides(filtered);
         });
 
