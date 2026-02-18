@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Dynamic Meta Tags (Will be updated by JS) -->
     <title>MINMAXMUSCLE | Optimize Hardware</title>
     <meta name="description" content="The definitive database for peptides, biological stacks, and recovery protocols.">
     
@@ -91,14 +90,14 @@
             </button>
             
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
-                <button onclick="navigate('/library')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-library">Library</button>
+                <button onclick="navigate('/compounds')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-compounds">Compounds</button>
                 <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-stacks">Stacks</button>
                 <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-calculators">Calculators</button>
-                <button onclick="navigate('/science')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-science">Science</button>
+                <button onclick="navigate('/science')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-science">Research</button>
             </div>
 
-            <button onclick="navigate('/library')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
-                Launch App
+            <button onclick="navigate('/compounds')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
+                Database
             </button>
         </div>
     </nav>
@@ -119,7 +118,7 @@
                 <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300 text-xs mb-8">
                         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        System Online
+                        Database v2.4 Live
                     </div>
                     <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tighter leading-[0.9]">
                         OPTIMIZE YOUR<br><span class="text-blue-500">HARDWARE</span>
@@ -128,29 +127,29 @@
                         The definitive database for peptides, biological stacks, and recovery protocols.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button onclick="navigate('/library')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
-                            Browse Database
+                        <button onclick="navigate('/compounds')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
+                            Access Compounds
                         </button>
                         <button onclick="navigate('/calculators')" class="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition display-font backdrop-blur-md">
-                            Open Tools
+                            Lab Tools
                         </button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- LIBRARY -->
-        <section id="view-library" class="view-section px-4 max-w-7xl mx-auto">
+        <!-- COMPOUNDS (Formerly Library) -->
+        <section id="view-compounds" class="view-section px-4 max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 mt-10">
                 <div>
-                    <h2 class="text-4xl font-bold text-white mb-2">Compound Library</h2>
-                    <p class="text-gray-400">Search verified peptide profiles.</p>
+                    <h2 class="text-4xl font-bold text-white mb-2">Active Compounds</h2>
+                    <p class="text-gray-400">Verified profiles and dosing protocols.</p>
                 </div>
                 <div class="relative w-full md:w-96 group">
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg opacity-30 group-hover:opacity-100 transition duration-500 blur"></div>
                     <div class="relative bg-[#18181b] rounded-lg flex items-center p-1">
                         <i data-feather="search" class="ml-3 text-gray-500 w-4 h-4"></i>
-                        <input type="text" id="librarySearch" class="w-full bg-transparent border-none text-white px-3 py-2 focus:ring-0 placeholder-gray-600 text-sm font-medium outline-none" placeholder="Search (e.g. BPC-157)">
+                        <input type="text" id="compoundSearch" class="w-full bg-transparent border-none text-white px-3 py-2 focus:ring-0 placeholder-gray-600 text-sm font-medium outline-none" placeholder="Search (e.g. BPC-157)">
                     </div>
                 </div>
             </div>
@@ -250,7 +249,7 @@
         
         const ROUTES = {
             '/': { id: 'view-home', title: 'Home | MinMaxMuscle', desc: 'Optimize your hardware with data-driven protocols.' },
-            '/library': { id: 'view-library', title: 'Peptide Library | MinMaxMuscle', desc: 'Search our database of biological compounds.' },
+            '/compounds': { id: 'view-compounds', title: 'Compounds | MinMaxMuscle', desc: 'Search our database of biological compounds.' },
             '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle', desc: 'Peptide reconstitution and dosage tools.' },
             '/stacks': { id: 'view-stacks', title: 'Stacks | MinMaxMuscle', desc: 'Synergistic supplement and peptide stacks.' },
             '/science': { id: 'view-science', title: 'Research | MinMaxMuscle', desc: 'Latest analysis and breakdown of clinical studies.' }
@@ -293,7 +292,7 @@
         // Initial Load
         window.addEventListener('DOMContentLoaded', () => {
             navigate(window.location.pathname, false);
-            renderLibrary(); // Load Data
+            renderCompounds(); // Load Data
         });
 
 
@@ -306,7 +305,7 @@
              { name: 'CJC-1295', cat: 'Muscle', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070', desc: 'Growth Hormone Releasing Hormone analogue.' }
         ];
 
-        function renderLibrary() {
+        function renderCompounds() {
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
             DB.forEach(p => {
