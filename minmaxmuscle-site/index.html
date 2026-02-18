@@ -3,139 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINMAXMUSCLE | Intelligence Matrix</title>
-    <meta name="description" content="Peptide database and synergistic protocol stacks.">
-    
+    <title>MINMAXMUSCLE | Database Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
-        :root { --bg-body: #09090b; --accent: #3b82f6; }
-        body { background-color: var(--bg-body); color: #f4f4f5; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        h1, h2, h3, .display-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
-
-        .bento-card {
-            background: linear-gradient(180deg, rgba(24, 24, 27, 0.6) 0%, rgba(24, 24, 27, 0.95) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-        .bento-card:hover { border-color: rgba(59, 130, 246, 0.5); transform: translateY(-4px); }
-
-        .nav-pill { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); }
-        .view-section { display: none; opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
-        .view-section.active { display: block; opacity: 1; transform: translateY(0); }
-        .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
-        
-        #modal-overlay { background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); }
-        .modal-content { background: #09090b; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
-
-        .tag-blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .tag-purple { background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
-        
-        .skeleton { animation: pulse-bg 1.5s infinite; background: rgba(255,255,255,0.05); }
-        @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;600;900&display=swap');
+        :root { --bg: #050505; --card: #111111; --accent: #3b82f6; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: -0.02em; }
+        .bento { background: var(--card); border: 1px solid #222; border-radius: 24px; transition: all 0.3s ease; cursor: pointer; }
+        .bento:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(59,130,246,0.4); }
+        .nav-pill { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid #222; }
+        .active-tab { background: var(--accent); color: #fff; }
+        #modal-overlay { background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 100; }
+        .modal-content { background: #0a0a0a; border: 1px solid #222; max-width: 900px; width: 100%; border-radius: 32px; overflow: hidden; }
+        .view-section { display: none; } .view-section.active { display: block; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
-<body class="selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
+<body class="selection:bg-blue-500 min-h-screen flex flex-col">
 
-    <!-- Navigation -->
+    <!-- Navbar -->
     <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-        <div class="nav-pill rounded-full px-2 py-2 flex items-center justify-between gap-4 w-full max-w-4xl shadow-2xl">
-            <button onclick="navigate('/')" class="flex items-center gap-3 pl-4 pr-2 group">
-                <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold display-font group-hover:bg-blue-500 group-hover:text-white transition">M</div>
-                <span class="font-bold tracking-tight hidden sm:block group-hover:text-white transition text-gray-200">MINMAX</span>
+        <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-8 w-full max-w-4xl">
+            <button onclick="navigate('/')" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-black">M</div>
+                <span class="font-bold hidden sm:block italic tracking-tighter">MINMAXMUSCLE</span>
             </button>
-            <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
-                <button onclick="navigate('/database')" class="nav-link px-6 py-1.5 rounded-full text-sm font-bold text-gray-400 hover:text-white transition" id="nav-database">Database</button>
-                <button onclick="navigate('/calculators')" class="nav-link px-6 py-1.5 rounded-full text-sm font-bold text-gray-400 hover:text-white transition" id="nav-calculators">Calculators</button>
+            <div class="flex gap-2">
+                <button onclick="navigate('/database')" class="nav-link px-5 py-1.5 rounded-full text-xs font-black uppercase text-gray-500 hover:text-white transition" id="nav-database">Database</button>
+                <button onclick="navigate('/calculators')" class="nav-link px-5 py-1.5 rounded-full text-xs font-black uppercase text-gray-500 hover:text-white transition" id="nav-calculators">Calculators</button>
             </div>
-            <button onclick="navigate('/database')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-black px-6 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] uppercase italic">
-                Get Protocol
-            </button>
+            <button onclick="navigate('/database')" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black px-6 py-2 rounded-full uppercase italic transition">D1 Archive</button>
         </div>
     </nav>
 
     <main class="flex-grow pt-32 pb-20">
-
+        
         <!-- HOME -->
-        <section id="view-home" class="view-section active">
-            <div class="relative min-h-[70vh] flex items-center justify-center text-center px-4 max-w-5xl mx-auto">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-8">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        MinMax Intelligence v2.8
-                    </div>
-                    <h1 class="text-7xl md:text-9xl font-bold mb-6 tracking-tighter leading-[0.85]">
-                        BETTER <span class="text-blue-500">FLESH</span><br>THROUGH DATA
-                    </h1>
-                    <p class="text-lg text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
-                        The complete biological protocol repository. Integrated research dossiers and synergistic stack engineering.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onclick="navigate('/database')" class="px-10 py-5 bg-white text-black font-black rounded-2xl hover:bg-blue-500 hover:text-white transition uppercase text-sm tracking-widest italic">Open Database</button>
-                        <button onclick="navigate('/calculators')" class="px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-2xl hover:bg-white/10 transition uppercase text-sm tracking-widest italic backdrop-blur">Lab Tools</button>
-                    </div>
+        <section id="view-home" class="view-section active text-center px-4">
+            <div class="max-w-4xl mx-auto py-20">
+                <h1 class="text-7xl md:text-9xl font-black mb-8 leading-[0.85]">SYSTEM<br><span class="text-blue-600">OVERRIDE</span></h1>
+                <p class="text-gray-500 text-lg mb-10 max-w-xl mx-auto font-medium">Hyper-engineered recovery protocols and biological data archives. Built for the modern athlete.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="navigate('/database')" class="px-12 py-5 bg-white text-black font-black rounded-2xl uppercase italic text-sm hover:bg-blue-600 hover:text-white transition">Enter Matrix</button>
+                    <button onclick="navigate('/calculators')" class="px-12 py-5 bg-white/5 border border-white/10 rounded-2xl uppercase italic text-sm font-black hover:bg-white/10 transition">Lab Tools</button>
                 </div>
             </div>
         </section>
 
-        <!-- UNIFIED DATABASE (Peptides + Stacks) -->
+        <!-- DATABASE -->
         <section id="view-database" class="view-section px-4 max-w-7xl mx-auto">
-            
-            <!-- PEPTIDES SECTION -->
-            <div class="mb-20">
-                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                    <div>
-                        <h2 class="text-5xl font-bold text-white mb-2 italic uppercase">The Library</h2>
-                        <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">Peptide Research Dossiers</p>
-                    </div>
-                    <div class="relative w-full md:w-96 group">
-                        <div class="absolute -inset-0.5 bg-blue-500 rounded-xl opacity-20 group-hover:opacity-40 blur transition"></div>
-                        <input type="text" id="dbSearch" class="relative w-full bg-[#18181b] border border-white/10 text-white px-5 py-4 rounded-xl focus:border-blue-500 outline-none font-bold" placeholder="SEARCH MATRIX...">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+                <div>
+                    <h2 class="text-6xl font-black italic uppercase leading-none mb-2">Central Intel</h2>
+                    <div class="flex gap-4">
+                        <button onclick="toggleDB('peptides')" id="tab-peptides" class="text-[10px] font-black uppercase tracking-widest text-blue-500">Peptides</button>
+                        <button onclick="toggleDB('stacks')" id="tab-stacks" class="text-[10px] font-black uppercase tracking-widest text-gray-600">Stacks</button>
                     </div>
                 </div>
-                <div id="peptides-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bento-card h-64 rounded-2xl skeleton"></div>
-                    <div class="bento-card h-64 rounded-2xl skeleton"></div>
-                    <div class="bento-card h-64 rounded-2xl skeleton"></div>
-                </div>
+                <input type="text" id="dbSearch" class="bg-[#111] border border-white/5 p-4 rounded-xl w-full md:w-80 text-sm font-bold focus:border-blue-500 outline-none" placeholder="FILTER DATA...">
             </div>
 
-            <!-- STACKS SECTION -->
-            <div class="mb-20 pt-20 border-t border-white/5">
-                <div class="mb-12">
-                    <h2 class="text-5xl font-bold text-white mb-2 italic uppercase">Protocol Stacks</h2>
-                    <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">Multi-Compound Synergy</p>
-                </div>
-                <div id="stacks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Stacks injected here -->
-                </div>
-            </div>
+            <!-- Peptides Hub -->
+            <div id="peptides-hub" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
+            <!-- Stacks Hub -->
+            <div id="stacks-hub" class="hidden grid grid-cols-1 md:grid-cols-2 gap-8"></div>
         </section>
 
         <!-- CALCULATORS -->
-        <section id="view-calculators" class="view-section px-4 max-w-3xl mx-auto">
-             <div class="text-center mb-12">
-                <h2 class="text-5xl font-bold text-white mb-2 italic uppercase">Lab Tools</h2>
-                <p class="text-gray-400 uppercase font-bold text-xs tracking-widest">Precision Measurement</p>
-            </div>
-            <div class="bento-card p-10 rounded-[2rem] relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-10"><i data-feather="thermometer" class="w-20 h-20 text-blue-500"></i></div>
-                <h3 class="text-3xl font-bold text-white mb-8 italic uppercase">Reconstitution Tool</h3>
+        <section id="view-calculators" class="view-section px-4 max-w-2xl mx-auto">
+            <h2 class="text-5xl font-black italic uppercase text-center mb-12">Peptide Calculator</h2>
+            <div class="bento p-10">
                 <div class="space-y-6">
-                    <div><label class="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Vial Size (mg)</label><input type="number" id="recon-mg" class="w-full bg-black/40 border border-white/10 text-white p-5 rounded-2xl mt-2 font-mono text-xl" value="5"></div>
-                    <div><label class="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Bacteriostatic Water (ml)</label><input type="number" id="recon-ml" class="w-full bg-black/40 border border-white/10 text-white p-5 rounded-2xl mt-2 font-mono text-xl" value="2"></div>
-                    <div><label class="text-[10px] text-gray-500 uppercase font-black tracking-widest ml-1">Desired Dose (mcg)</label><input type="number" id="recon-mcg" class="w-full bg-black/40 border border-white/10 text-white p-5 rounded-2xl mt-2 font-mono text-xl" value="250"></div>
-                    <div class="p-8 bg-blue-600/10 border-2 border-blue-500/20 rounded-[2rem] mt-6 text-center">
-                        <span class="text-[10px] text-blue-400 uppercase font-black tracking-[0.3em] block mb-2">Draw Distance</span>
-                        <span class="text-6xl font-bold text-white display-font" id="recon-result">10</span>
-                        <span class="text-xs text-gray-500 block mt-2 uppercase font-bold tracking-widest italic">Units on U-100 Syringe</span>
+                    <div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Vial Size (mg)</label><input type="number" id="mg" class="w-full bg-black border border-white/10 p-5 rounded-2xl mt-2 text-xl font-mono" value="5"></div>
+                    <div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Water (ml)</label><input type="number" id="ml" class="w-full bg-black border border-white/10 p-5 rounded-2xl mt-2 text-xl font-mono" value="2"></div>
+                    <div><label class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Dose (mcg)</label><input type="number" id="mcg" class="w-full bg-black border border-white/10 p-5 rounded-2xl mt-2 text-xl font-mono" value="250"></div>
+                    <div class="p-8 bg-blue-600/10 border-2 border-blue-600/20 rounded-3xl text-center">
+                        <span class="text-[10px] font-black text-blue-500 uppercase block mb-1">Units to Draw</span>
+                        <span id="calc-res" class="text-7xl font-black italic">10</span>
                     </div>
                 </div>
             </div>
@@ -143,265 +91,187 @@
 
     </main>
 
-    <footer class="border-t border-white/5 bg-[#020617] pt-20 pb-10">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
-                <div class="max-w-md">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold">M</div>
-                        <span class="font-bold text-2xl italic tracking-tighter">MINMAXMUSCLE</span>
-                    </div>
-                    <p class="text-gray-500 text-sm leading-relaxed font-medium">
-                        Bodybuilding optimization through biological data analysis. Engineered for high-performance recovery and hypertrophy.
-                    </p>
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-[#020202] py-20 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
+            <div>
+                <span class="brand text-2xl font-black italic">MINMAXMUSCLE</span>
+                <p class="text-gray-600 text-sm mt-4 max-w-xs">Engineered hardware optimization. Data over dogma. Peak performance protocols.</p>
+            </div>
+            <div class="text-[10px] font-black uppercase tracking-widest text-gray-700 flex gap-10">
+                <div class="space-y-4">
+                    <p class="text-blue-600">Core</p>
+                    <button onclick="navigate('/database')" class="block">Library</button>
+                    <button onclick="navigate('/calculators')" class="block">Tools</button>
                 </div>
-                <div class="grid grid-cols-2 gap-20 uppercase font-black text-[10px] tracking-widest">
-                    <div class="space-y-4">
-                        <p class="text-blue-500">Navigation</p>
-                        <button onclick="navigate('/database')" class="block text-gray-400 hover:text-white">Peptides</button>
-                        <button onclick="navigate('/database')" class="block text-gray-400 hover:text-white">Stacks</button>
-                        <button onclick="navigate('/calculators')" class="block text-gray-400 hover:text-white">Tools</button>
-                    </div>
-                    <div class="space-y-4">
-                        <p class="text-blue-500">Governance</p>
-                        <a href="#" class="block text-gray-400 hover:text-white">Disclaimer</a>
-                        <a href="#" class="block text-gray-400 hover:text-white">Privacy</a>
-                    </div>
+                <div class="space-y-4">
+                    <p class="text-blue-600">Legal</p>
+                    <a href="#">Research Only</a>
+                    <a href="#">Disclaimer</a>
                 </div>
             </div>
-            <p class="text-[9px] text-gray-700 leading-relaxed font-bold border-t border-white/5 pt-10 uppercase tracking-wider">
-                FDA DISCLAIMER: Information provided on MinMaxMuscle is for academic research and educational purposes only. Products listed are NOT approved for human consumption. Always consult with a licensed healthcare provider before attempting any protocol.
-            </p>
         </div>
+        <p class="max-w-7xl mx-auto text-[9px] text-gray-800 font-bold uppercase mt-20 tracking-tighter">Information provided for educational use only. Peptides are research chemicals and not for human consumption.</p>
     </footer>
 
     <!-- MODAL -->
-    <div id="modal-overlay" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-        <div id="modal-content" class="modal-content w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] opacity-0 transform scale-95 transition-all duration-500">
-            <!-- Injected -->
-        </div>
+    <div id="modal-overlay" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div id="modal-content" class="modal-content opacity-0 scale-95 transition-all duration-500"></div>
     </div>
 
     <script>
-        // --- ROUTER ---
-        const ROUTES = {
-            '/': { id: 'view-home', title: 'Home | MinMaxMuscle' },
-            '/database': { id: 'view-database', title: 'Database | MinMaxMuscle' },
-            '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle' }
-        };
+        const ROUTES = { '/': 'view-home', '/database': 'view-database', '/calculators': 'view-calculators' };
+        let DATA = { peptides: [], stacks: [] };
 
         function navigate(path, addToHistory = true) {
-            if (path.startsWith('/peptide/')) {
-                const slug = path.split('/')[2];
-                if (GLOBAL_DATA.peptides.length === 0) { fetchData().then(() => openDeepLink(slug)); } 
-                else { openDeepLink(slug); }
-                if (addToHistory) window.history.pushState({}, '', path);
-                return;
-            }
-            if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+            if (path.startsWith('/peptide/')) return openDeepLink(path.split('/')[2]);
             if (!ROUTES[path]) path = '/';
-            
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(ROUTES[path].id).classList.add('active');
-            
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            const navId = 'nav-' + path.replace('/', '');
-            if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
-
-            document.title = ROUTES[path].title;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(ROUTES[path]).classList.add('active');
             if (addToHistory) window.history.pushState({}, '', path);
-            window.scrollTo(0,0);
-            closeModal(false);
+            window.scrollTo(0,0); closeModal();
         }
 
-        function openDeepLink(slug) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-database').classList.add('active');
-            const item = GLOBAL_DATA.peptides.find(p => p.slug === slug);
-            if (item) { openModal(item, false); document.title = `${item.name} Dossier`; }
-            else { navigate('/database'); }
+        async function init() {
+            const res = await fetch('/api/peptides');
+            DATA = await res.json();
+            renderPeptides(DATA.peptides);
+            renderStacks(DATA.stacks);
+            if (window.location.pathname.startsWith('/peptide/')) openDeepLink(window.location.pathname.split('/')[2]);
         }
 
-        window.addEventListener('popstate', () => navigate(window.location.pathname, false));
-        window.addEventListener('DOMContentLoaded', () => fetchData().then(() => navigate(window.location.pathname, false)));
-
-        // --- DATA & RENDER ---
-        let GLOBAL_DATA = { peptides: [], stacks: [] };
-
-        async function fetchData() {
-            try {
-                const res = await fetch('/api/peptides');
-                GLOBAL_DATA = await res.json();
-                renderPeptides(GLOBAL_DATA.peptides);
-                renderStacks(GLOBAL_DATA.stacks);
-            } catch (e) {
-                console.error("DB Error", e);
-                GLOBAL_DATA.peptides = [{name: "Offline Mode", slug: "error", summary: "D1 Connection Failure."}];
-                renderPeptides(GLOBAL_DATA.peptides);
-            }
+        function renderPeptides(arr) {
+            const container = document.getElementById('peptides-hub');
+            container.innerHTML = arr.map(p => `
+                <div class="bento p-8 flex flex-col h-full" onclick="openPeptideModal(${p.id})">
+                    <div class="flex justify-between mb-4"><span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full">${p.Category || 'Core'}</span><span class="text-gray-800 font-mono text-xs">#${p.id}</span></div>
+                    <h3 class="text-3xl font-black italic mb-2">${p.peptide_name}</h3>
+                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-6">${p.nicknames?.split(',')[0] || 'Protocol'}</p>
+                    <p class="text-sm text-gray-400 line-clamp-3 font-medium">${p.primary_focus || p.research_summary}</p>
+                </div>
+            `).join('');
         }
 
-        function renderPeptides(data) {
-            const grid = document.getElementById('peptides-grid');
-            grid.innerHTML = '';
-            data.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'bento-card rounded-3xl p-6 relative overflow-hidden group';
-                card.onclick = () => openModal(p);
-                
-                let accentClass = p.cat && p.cat.includes('Repair') ? 'tag-blue' : 'tag-purple';
-                
-                card.innerHTML = `
-                    <div class="mb-4 flex justify-between items-start">
-                        <span class="text-[9px] font-black uppercase px-3 py-1 rounded-full ${accentClass} tracking-widest">${p.cat || 'Core'}</span>
-                        <span class="text-gray-700 font-mono text-[10px]">#00${p.id}</span>
-                    </div>
-                    <h3 class="text-3xl font-bold text-white mb-2 italic uppercase leading-none group-hover:text-blue-500 transition">${p.name}</h3>
-                    <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">${p.nicknames?.split(',')[0] || 'Protocol'}</p>
-                    <p class="text-sm text-gray-400 leading-relaxed line-clamp-3 mb-6">${p.focus || p.summary}</p>
-                    <div class="mt-auto pt-6 border-t border-white/5 flex justify-between items-center">
-                        <span class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Rank: ${p.rank || 'N/A'}/10</span>
-                        <i data-feather="arrow-right" class="w-4 h-4 text-gray-700 group-hover:text-blue-500 group-hover:translate-x-1 transition"></i>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-            feather.replace();
-        }
-
-        function renderStacks(data) {
-            const grid = document.getElementById('stacks-grid');
-            grid.innerHTML = '';
-            data.forEach(s => {
-                const card = document.createElement('div');
-                card.className = 'bento-card rounded-[2rem] p-10 min-h-[300px] flex flex-col justify-end relative overflow-hidden group';
-                
-                const images = [
-                    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000',
-                    'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1000'
-                ];
-                const img = images[s.id % 2];
-
-                card.innerHTML = `
-                    <img src="${img}" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale group-hover:scale-110 group-hover:grayscale-0 transition duration-1000">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                    <div class="relative z-10">
-                        <h3 class="text-5xl font-bold text-white mb-4 italic uppercase leading-[0.85]">${s.name}</h3>
-                        <p class="text-gray-400 text-sm max-w-md mb-8 font-medium">${s.desc}</p>
-                        <button class="px-8 py-3 bg-blue-600 text-white font-black text-xs uppercase tracking-widest italic rounded-full group-hover:bg-white group-hover:text-black transition">Analyze Protocol</button>
-                    </div>
-                `;
-                card.onclick = () => openStackModal(s);
-                grid.appendChild(card);
-            });
-        }
-
-        // --- MODAL ENGINE ---
-        function openStackModal(stack) {
-            const overlay = document.getElementById('modal-overlay');
-            const content = document.getElementById('modal-content');
-            
-            // Logic to find peptides in this stack for linking
-            let peptidesHTML = '';
-            const comps = stack.components ? stack.components.split(',') : [];
-            comps.forEach(c => {
-                const found = GLOBAL_DATA.peptides.find(p => p.name.toLowerCase().trim() === c.toLowerCase().trim());
-                if (found) {
-                    peptidesHTML += `<div onclick="openModal(GLOBAL_DATA.peptides.find(p=>p.id===${found.id}))" class="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500/40 cursor-pointer flex justify-between items-center">
-                        <div><p class="text-white font-black uppercase text-sm">${found.name}</p><p class="text-[10px] text-gray-500 font-bold uppercase">${found.cat}</p></div>
-                        <i data-feather="database" class="w-4 h-4 text-gray-700"></i>
-                    </div>`;
-                } else {
-                    peptidesHTML += `<div class="p-5 rounded-2xl bg-white/5 border border-white/5 opacity-50"><p class="text-gray-500 font-black uppercase text-sm">${c.trim()}</p></div>`;
-                }
-            });
-
-            content.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
-                    <div class="md:col-span-5 bg-[#020617] p-12 flex flex-col justify-center border-r border-white/5">
-                        <span class="text-blue-500 font-black uppercase text-[10px] tracking-widest mb-4">Tactical Configuration</span>
-                        <h2 class="text-6xl font-bold text-white italic uppercase leading-[0.85] mb-6">${stack.name}</h2>
-                        <p class="text-gray-500 font-medium leading-relaxed">${stack.desc}</p>
-                    </div>
-                    <div class="md:col-span-7 bg-[#09090b] p-12 relative">
-                        <button onclick="closeModal(false)" class="absolute top-8 right-8 p-3 bg-white/5 rounded-full text-white"><i data-feather="x"></i></button>
-                        <h4 class="text-[10px] text-gray-500 uppercase font-black tracking-[0.2em] mb-6">Component Breakdown</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${peptidesHTML}</div>
+        function renderStacks(arr) {
+            const container = document.getElementById('stacks-hub');
+            container.innerHTML = arr.map(s => `
+                <div class="bento p-10 relative overflow-hidden group min-h-[300px] flex flex-col justify-end" onclick="openStackModal(${s.id})">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                    <div class="relative z-20">
+                        <h3 class="text-4xl font-black italic mb-4">${s.stack_name}</h3>
+                        <p class="text-gray-400 text-sm max-w-md line-clamp-2">${s.description}</p>
+                        <button class="mt-6 px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic group-hover:bg-white group-hover:text-black transition">View Configuration</button>
                     </div>
                 </div>
-            `;
-            showModal(overlay, content);
+            `).join('');
         }
 
-        function openModal(item, updateHistory = true) {
+        function toggleDB(type) {
+            ['peptides', 'stacks'].forEach(t => {
+                document.getElementById(`${t}-hub`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('text-blue-500');
+                document.getElementById(`tab-${t}`).classList.add('text-gray-600');
+            });
+            document.getElementById(`${type}-hub`).classList.remove('hidden');
+            document.getElementById(`tab-${type}`).classList.add('text-blue-500');
+        }
+
+        function openPeptideModal(id) {
+            const p = DATA.peptides.find(x => x.id === id);
+            const stacks = DATA.stacks.filter(s => s.peptides_used?.toLowerCase().includes(p.peptide_name.toLowerCase()));
+            
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             
-            let faqHTML = '';
-            if(item.faq_questions) {
-                const qs = item.faq_questions.split('|||');
-                const as = item.faq_answers ? item.faq_answers.split('|||') : [];
-                faqHTML = `<div class="mt-12 pt-12 border-t border-white/5"><h4 class="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-6">Common Intel</h4><div class="space-y-2">`;
-                qs.forEach((q, i) => { if(q) faqHTML += `<details class="bg-white/5 rounded-2xl transition group"><summary class="p-5 cursor-pointer font-bold text-white text-sm flex justify-between items-center select-none">${q}<i data-feather="plus" class="w-4 h-4 text-gray-600 group-open:rotate-45 transition"></i></summary><div class="px-5 pb-5 text-sm text-gray-400 leading-relaxed border-t border-white/5 pt-4">${as[i]}</div></details>`; });
-                faqHTML += `</div></div>`;
-            }
-
             content.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-12 min-h-[600px]">
-                    <div class="md:col-span-4 bg-[#020617] p-12 border-r border-white/5">
-                        <h2 class="text-6xl font-bold text-white italic uppercase leading-[0.85] mb-2">${item.name}</h2>
-                        <p class="text-blue-400 font-black uppercase text-[10px] tracking-widest mb-10">${item.cat}</p>
-                        <div class="space-y-4">
-                            <div class="p-5 rounded-2xl bg-white/5 border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Status</p><p class="text-sm font-bold text-white uppercase italic">${item.status || 'Verified'}</p></div>
-                            <div class="p-5 rounded-2xl bg-white/5 border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">D1 Archive ID</p><p class="text-sm font-mono text-white">PX-00${item.id}</p></div>
+                <div class="grid md:grid-cols-12 min-h-[500px]">
+                    <div class="md:col-span-4 bg-[#050505] p-10 border-r border-white/5">
+                        <h2 class="text-5xl font-black italic uppercase leading-none mb-4">${p.peptide_name}</h2>
+                        <span class="text-blue-500 text-[10px] font-black uppercase tracking-widest">${p.Category}</span>
+                        <div class="mt-12 space-y-4">
+                            <div class="p-5 bg-white/5 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Status</p><p class="text-xs font-bold italic">${p.Status}</p></div>
+                            <div class="p-5 bg-white/5 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Potency Rank</p><p class="text-xs font-bold italic text-blue-500">${p.rank}/10</p></div>
                         </div>
                     </div>
-                    <div class="md:col-span-8 bg-[#09090b] p-12 relative">
-                        <button onclick="closeModal()" class="absolute top-10 right-10 p-3 bg-white/5 rounded-full text-white"><i data-feather="x"></i></button>
-                        <h3 class="text-3xl font-bold text-white italic uppercase mb-6 border-l-4 border-blue-500 pl-6">Research Summary</h3>
-                        <p class="text-gray-400 leading-relaxed text-lg mb-10 font-medium">${item.summary}</p>
-                        <h4 class="text-[10px] text-gray-600 uppercase font-black tracking-widest mb-4">Molecular Blueprint</h4>
-                        <div class="p-6 bg-black/40 border border-white/10 rounded-2xl font-mono text-blue-300 text-xs">${item.molecular || 'Structure Classified'}</div>
-                        ${faqHTML}
+                    <div class="md:col-span-8 p-10 relative">
+                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-feather="x"></i></button>
+                        <h3 class="text-2xl font-black italic uppercase mb-6 border-l-4 border-blue-600 pl-6">Research Summary</h3>
+                        <p class="text-gray-400 leading-relaxed font-medium mb-10">${p.research_summary}</p>
+                        
+                        ${stacks.length ? `<h4 class="text-[10px] font-black uppercase text-gray-600 mb-4">Utilized in Stacks</h4><div class="grid grid-cols-2 gap-4 mb-10">${stacks.map(s => `<div onclick="openStackModal(${s.id})" class="p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl cursor-pointer hover:border-blue-500/50"><p class="text-white font-black uppercase text-xs italic">${s.stack_name}</p></div>`).join('')}</div>` : ''}
+
+                        <h4 class="text-[10px] font-black uppercase text-gray-600 mb-4 tracking-widest">Molecular Data</h4>
+                        <div class="p-6 bg-black border border-white/5 rounded-2xl font-mono text-[10px] text-blue-400">${p.molecular_data || 'Classified'}</div>
                     </div>
                 </div>
             `;
-            showModal(overlay, content);
-            if(updateHistory) window.history.pushState({}, '', `/peptide/${item.slug}`);
+            overlay.classList.remove('hidden');
+            setTimeout(() => { content.classList.remove('opacity-0', 'scale-95'); content.classList.add('opacity-100', 'scale-100'); }, 10);
+            feather.replace(); window.history.pushState({}, '', `/peptide/${p.slug}`);
         }
 
-        function showModal(overlay, content) {
+        function openStackModal(id) {
+            const s = DATA.stacks.find(x => x.id === id);
+            const comps = s.peptides_used?.split(',').map(c => c.trim()) || [];
+            
+            const overlay = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="grid md:grid-cols-12 min-h-[500px]">
+                    <div class="md:col-span-5 bg-[#050505] p-12 border-r border-white/5 flex flex-col justify-center">
+                        <h2 class="text-6xl font-black italic leading-[0.85] uppercase mb-4">${s.stack_name}</h2>
+                        <p class="text-gray-500 font-medium">${s.description}</p>
+                    </div>
+                    <div class="md:col-span-7 p-12 relative">
+                        <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-feather="x"></i></button>
+                        <h4 class="text-[10px] font-black text-gray-600 uppercase mb-8 tracking-widest italic">Components Matrix</h4>
+                        <div class="grid gap-4">${comps.map(c => {
+                            const found = DATA.peptides.find(p => p.peptide_name.toLowerCase() === c.toLowerCase());
+                            return `<div ${found ? `onclick="openPeptideModal(${found.id})"` : ''} class="p-6 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center ${found ? 'cursor-pointer hover:border-blue-500/30' : 'opacity-40'}">
+                                <span class="font-black uppercase italic">${c}</span>
+                                ${found ? '<i data-feather="database" class="w-4 h-4 text-blue-600"></i>' : ''}
+                            </div>`;
+                        }).join('')}</div>
+                    </div>
+                </div>
+            `;
             overlay.classList.remove('hidden');
             setTimeout(() => { content.classList.remove('opacity-0', 'scale-95'); content.classList.add('opacity-100', 'scale-100'); }, 10);
             feather.replace();
         }
 
-        function closeModal(updateHistory = true) {
+        function closeModal() {
             const overlay = document.getElementById('modal-overlay');
             const content = document.getElementById('modal-content');
             content.classList.remove('opacity-100', 'scale-100'); content.classList.add('opacity-0', 'scale-95');
             setTimeout(() => overlay.classList.add('hidden'), 500);
-            if(updateHistory) window.history.pushState({}, '', '/database');
+            if(window.location.pathname.startsWith('/peptide/')) window.history.pushState({}, '', '/database');
         }
 
-        document.getElementById('modal-overlay').addEventListener('click', (e) => { if(e.target.id==='modal-overlay') navigate('/database'); });
+        function openDeepLink(slug) {
+            fetchData().then(() => {
+                const p = DATA.peptides.find(x => x.slug === slug);
+                if (p) openPeptideModal(p.id);
+                else navigate('/database');
+            });
+        }
+
+        async function fetchData() { if(DATA.peptides.length > 0) return; await init(); }
+        window.addEventListener('popstate', () => navigate(window.location.pathname, false));
+        window.addEventListener('DOMContentLoaded', () => init().then(() => navigate(window.location.pathname, false)));
 
         // Search
         document.getElementById('dbSearch').addEventListener('input', (e) => {
             const t = e.target.value.toLowerCase();
-            const filtered = GLOBAL_DATA.peptides.filter(p => p.name.toLowerCase().includes(t) || p.summary.toLowerCase().includes(t));
-            renderPeptides(filtered);
+            renderPeptides(DATA.peptides.filter(p => p.peptide_name.toLowerCase().includes(t) || p.research_summary.toLowerCase().includes(t)));
+            renderStacks(DATA.stacks.filter(s => s.stack_name.toLowerCase().includes(t)));
         });
 
-        // Recon Calc
-        ['recon-mg', 'recon-ml', 'recon-mcg'].forEach(id => document.getElementById(id).addEventListener('input', () => {
-            const mg = parseFloat(document.getElementById('recon-mg').value) || 0;
-            const ml = parseFloat(document.getElementById('recon-ml').value) || 0;
-            const dose = parseFloat(document.getElementById('recon-mcg').value) || 0;
-            if (mg > 0 && ml > 0 && dose > 0) {
-                const res = dose / ((mg * 1000) / (ml * 100)); 
-                document.getElementById('recon-result').innerText = res.toFixed(1);
-            }
+        // Calc
+        ['mg','ml','mcg'].forEach(i => document.getElementById(i).addEventListener('input', () => {
+            const mg = document.getElementById('mg').value, ml = document.getElementById('ml').value, mcg = document.getElementById('mcg').value;
+            if(mg&&ml&&mcg) document.getElementById('calc-res').innerText = (mcg / ((mg*1000)/(ml*100))).toFixed(1);
         }));
     </script>
 </body>

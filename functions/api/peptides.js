@@ -2,12 +2,12 @@ export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // 1. Fetch Peptides + FAQs
+    // 1. Fetch Peptides with joined FAQs
     const peptideQuery = `
       SELECT 
-        p.id, p.peptide_name as name, p.slug, p.Category as cat, p.primary_focus as focus, 
-        p.rank, p.Status as status, p.molecular_data as molecular, p.research_summary as summary,
-        p.nicknames, p.Sources as sources,
+        p.id, p.peptide_name, p.slug, p.Category, p.primary_focus, 
+        p.rank, p.Status, p.molecular_data, p.research_summary,
+        p.nicknames, p.Sources,
         GROUP_CONCAT(f.question, '|||') as faq_questions,
         GROUP_CONCAT(f.answer, '|||') as faq_answers
       FROM Peptides p
@@ -17,29 +17,29 @@ export async function onRequest(context) {
       ORDER BY p.rank DESC
     `;
     
-    // 2. Fetch Stacks + Stack FAQs
+    // 2. Fetch Stacks with joined FAQs
     const stackQuery = `
-        SELECT 
-          s.id, s.stack_name as name, s.description as desc, s.peptides_used as components,
-          GROUP_CONCAT(f.question, '|||') as faq_questions,
-          GROUP_CONCAT(f.answer, '|||') as faq_answers
-        FROM Stacks s
-        LEFT JOIN Stack_FAQs sf ON s.id = sf.stack_id
-        LEFT JOIN FAQs f ON sf.faq_id = f.id
-        GROUP BY s.id
+      SELECT 
+        s.id, s.stack_name, s.slug, s.description, s.peptides_used, s.Category,
+        GROUP_CONCAT(f.question, '|||') as faq_questions,
+        GROUP_CONCAT(f.answer, '|||') as faq_answers
+      FROM Stacks s
+      LEFT JOIN Stack_FAQs sf ON s.id = sf.stack_id
+      LEFT JOIN FAQs f ON sf.faq_id = f.id
+      GROUP BY s.id
+      ORDER BY s.rank DESC
     `;
 
-    const peptides = await env.DB.prepare(peptideQuery).all();
-    const stacks = await env.DB.prepare(stackQuery).all();
+    const [peptides, stacks] = await Promise.all([
+      env.DB.prepare(peptideQuery).all(),
+      env.DB.prepare(stackQuery).all()
+    ]);
 
     return new Response(JSON.stringify({
       peptides: peptides.results,
       stacks: stacks.results
     }), {
-      headers: { 
-        "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=3600" 
-      }
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" }
     });
 
   } catch (err) {
