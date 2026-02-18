@@ -2,7 +2,7 @@ export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // 1. Fetch Peptides (unchanged)
+    // 1. Fetch Peptides + FAQs
     const peptideQuery = `
       SELECT 
         p.id, p.peptide_name as name, p.slug, p.Category as cat, p.primary_focus as focus, 
@@ -17,30 +17,29 @@ export async function onRequest(context) {
       ORDER BY p.rank DESC
     `;
     
-    // 2. Fetch Stacks (Standardized columns)
-    let stacks = [];
-    try {
-      // Maps your DB columns to standard frontend names
-      const stackRes = await env.DB.prepare(`
+    // 2. Fetch Stacks + Stack FAQs
+    const stackQuery = `
         SELECT 
-          id, 
-          stack_name as name, 
-          description as desc, 
-          peptides_used as components 
-        FROM Stacks
-      `).all();
-      stacks = stackRes.results;
-    } catch (e) {
-      console.log("Stack query error or table missing", e);
-    }
+          s.id, s.stack_name as name, s.description as desc, s.peptides_used as components,
+          GROUP_CONCAT(f.question, '|||') as faq_questions,
+          GROUP_CONCAT(f.answer, '|||') as faq_answers
+        FROM Stacks s
+        LEFT JOIN Stack_FAQs sf ON s.id = sf.stack_id
+        LEFT JOIN FAQs f ON sf.faq_id = f.id
+        GROUP BY s.id
+    `;
 
     const peptides = await env.DB.prepare(peptideQuery).all();
+    const stacks = await env.DB.prepare(stackQuery).all();
 
     return new Response(JSON.stringify({
       peptides: peptides.results,
-      stacks: stacks
+      stacks: stacks.results
     }), {
-      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" }
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600" 
+      }
     });
 
   } catch (err) {
