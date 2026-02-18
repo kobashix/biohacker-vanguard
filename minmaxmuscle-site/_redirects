@@ -1,14 +1,17 @@
---- Core Redirects ---
+SEO 301 Redirects for old pages
 
 /calculators.html  /calculators  301
-/peptides.html     /database     301
-/peptides          /database     301
-/library           /database     301
-/compounds         /database     301
-/stacks.html       /database     301
-/stacks            /database     301
+/peptides.html     /peptides     301
+/stacks.html       /stacks       301
 
---- Dynamic Routing ---
+Dynamic App Routing
 
-/peptide/* /index.html 200
-/* /index.html 200
+/peptide/* /index.html   200
+/stack/* /index.html   200
+/peptides          /index.html   200
+/stacks            /index.html   200
+/calculators       /index.html   200
+
+SPA Fallback
+
+/* /index.html   200
