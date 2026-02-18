@@ -2,7 +2,7 @@ export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // UPDATED: Selects ALL data columns needed for the detailed view
+    // UPDATED: Fetching deep data for the dossier view
     const results = await env.DB.prepare(
       `SELECT 
         id, 
