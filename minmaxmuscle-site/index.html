@@ -14,18 +14,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
-        :root {
-            --bg-body: #09090b;
-            --accent: #3b82f6;
-        }
-
-        body {
-            background-color: var(--bg-body);
-            color: #f4f4f5;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
+        :root { --bg-body: #09090b; --accent: #3b82f6; }
+        body { background-color: var(--bg-body); color: #f4f4f5; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         h1, h2, h3, .display-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; }
 
         .bento-card {
@@ -34,49 +24,19 @@
             backdrop-filter: blur(12px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .bento-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3);
-        }
+        .bento-card:hover { border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3); }
 
-        .nav-pill {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-        }
+        .nav-pill { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); }
+        .tech-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; transition: all 0.2s; }
+        .tech-input:focus { border-color: var(--accent); outline: none; }
 
-        .tech-input {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            transition: all 0.2s;
-        }
-        .tech-input:focus {
-            border-color: var(--accent);
-            outline: none;
-        }
-
-        .view-section {
-            display: none;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-        .view-section.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Active Nav State */
-        .nav-link.active {
-            color: white;
-            background: rgba(255,255,255,0.1);
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        .view-section { display: none; opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        .view-section.active { display: block; opacity: 1; transform: translateY(0); }
+        .nav-link.active { color: white; background: rgba(255,255,255,0.1); }
+        
+        /* Loading Skeleton */
+        .skeleton { animation: pulse-bg 1.5s infinite; background: rgba(255,255,255,0.05); }
+        @keyframes pulse-bg { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body class="selection:bg-blue-500 selection:text-white min-h-screen flex flex-col">
@@ -88,15 +48,16 @@
                 <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold display-font group-hover:bg-blue-500 group-hover:text-white transition">M</div>
                 <span class="font-bold tracking-tight hidden sm:block group-hover:text-white transition text-gray-200">MINMAX</span>
             </button>
-            
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
                 <button onclick="navigate('/compounds')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-compounds">Compounds</button>
-                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-stacks">Stacks</button>
-                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-calculators">Calculators</button>
+                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-calculators">Tools</button>
                 <button onclick="navigate('/science')" class="nav-link px-4 py-1.5 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition" id="nav-science">Research</button>
             </div>
-
-            <button onclick="navigate('/compounds')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
+            <div class="md:hidden flex items-center pr-2">
+                <!-- Mobile Menu Placeholder -->
+                <button onclick="navigate('/compounds')" class="text-gray-300"><i data-feather="grid"></i></button>
+            </div>
+            <button onclick="navigate('/compounds')" class="hidden md:block bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-full transition shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]">
                 Database
             </button>
         </div>
@@ -109,16 +70,14 @@
         <section id="view-home" class="view-section active">
             <div class="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
                 <div class="absolute inset-0 z-0">
-                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop" 
-                         class="w-full h-full object-cover opacity-50" alt="Gym">
+                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover opacity-50" alt="Gym">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/60 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-r from-[#09090b] via-transparent to-[#09090b]"></div>
                 </div>
-
                 <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300 text-xs mb-8">
-                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                        Database v2.4 Live
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span id="system-status">Connecting to D1 Database...</span>
                     </div>
                     <h1 class="text-6xl md:text-8xl font-bold mb-6 tracking-tighter leading-[0.9]">
                         OPTIMIZE YOUR<br><span class="text-blue-500">HARDWARE</span>
@@ -128,7 +87,7 @@
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <button onclick="navigate('/compounds')" class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition display-font">
-                            Access Compounds
+                            Browse Compounds
                         </button>
                         <button onclick="navigate('/calculators')" class="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition display-font backdrop-blur-md">
                             Lab Tools
@@ -138,22 +97,29 @@
             </div>
         </section>
 
-        <!-- COMPOUNDS (Formerly Library) -->
+        <!-- COMPOUNDS -->
         <section id="view-compounds" class="view-section px-4 max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 mt-10">
                 <div>
                     <h2 class="text-4xl font-bold text-white mb-2">Active Compounds</h2>
-                    <p class="text-gray-400">Verified profiles and dosing protocols.</p>
+                    <p class="text-gray-400">Live data from MinMax D1.</p>
                 </div>
                 <div class="relative w-full md:w-96 group">
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg opacity-30 group-hover:opacity-100 transition duration-500 blur"></div>
                     <div class="relative bg-[#18181b] rounded-lg flex items-center p-1">
                         <i data-feather="search" class="ml-3 text-gray-500 w-4 h-4"></i>
-                        <input type="text" id="compoundSearch" class="w-full bg-transparent border-none text-white px-3 py-2 focus:ring-0 placeholder-gray-600 text-sm font-medium outline-none" placeholder="Search (e.g. BPC-157)">
+                        <input type="text" id="compoundSearch" class="w-full bg-transparent border-none text-white px-3 py-2 focus:ring-0 placeholder-gray-600 text-sm font-medium outline-none" placeholder="Search Database...">
                     </div>
                 </div>
             </div>
-            <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            
+            <!-- Dynamic Grid -->
+            <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Skeletons show while loading -->
+                <div class="bento-card h-64 rounded-xl skeleton"></div>
+                <div class="bento-card h-64 rounded-xl skeleton"></div>
+                <div class="bento-card h-64 rounded-xl skeleton"></div>
+            </div>
         </section>
 
         <!-- CALCULATORS -->
@@ -192,47 +158,23 @@
             </div>
         </section>
 
-        <!-- STACKS -->
-        <section id="view-stacks" class="view-section px-4 max-w-7xl mx-auto mt-10">
-            <h2 class="text-4xl font-bold text-white mb-8 text-center">Synergistic Protocols</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                 <div class="bento-card h-96 relative rounded-3xl overflow-hidden group cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=1974&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-700">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-                    <div class="absolute bottom-0 p-8">
-                        <h3 class="text-3xl font-bold text-white mb-2">The Wolverine</h3>
-                        <p class="text-gray-300 mb-4">BPC-157 + TB-500.</p>
-                        <button class="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg">View Details</button>
-                    </div>
-                 </div>
-                 <div class="bento-card h-96 relative rounded-3xl overflow-hidden group cursor-pointer">
-                    <img src="https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1983&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-700">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-                    <div class="absolute bottom-0 p-8">
-                        <h3 class="text-3xl font-bold text-white mb-2">Glow Protocol</h3>
-                        <p class="text-gray-300 mb-4">GHK-Cu + Collagen.</p>
-                        <button class="px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg">View Details</button>
-                    </div>
-                 </div>
-            </div>
-        </section>
-
-        <!-- SCIENCE -->
+        <!-- RESEARCH -->
         <section id="view-science" class="view-section px-4 max-w-4xl mx-auto mt-10">
              <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-white mb-2">Research Log</h2>
                 <p class="text-gray-400">Analysis from the lab.</p>
             </div>
             <div class="space-y-6">
+                <!-- Static Placeholder for Blog - Needs WP API integration later -->
                 <div class="bento-card p-6 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
                     <div class="w-full sm:w-48 h-32 bg-gray-800 rounded-xl overflow-hidden flex-shrink-0">
-                        <img src="https://images.unsplash.com/photo-1579126038374-6064e9370f0f?auto=format&fit=crop&q=80" class="w-full h-full object-cover">
+                         <img src="https://images.unsplash.com/photo-1579126038374-6064e9370f0f?auto=format&fit=crop&q=80" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <span class="text-blue-400 text-xs font-bold uppercase tracking-wider mb-2 block">Analysis</span>
-                        <h3 class="text-xl font-bold text-white mb-2 hover:text-blue-400 cursor-pointer transition">BPC-157: Oral vs Injectable</h3>
-                        <p class="text-sm text-gray-400 mb-4">Bioavailability comparison study.</p>
-                        <span class="text-xs text-gray-600">Feb 14, 2026</span>
+                        <h3 class="text-xl font-bold text-white mb-2">System Live</h3>
+                        <p class="text-sm text-gray-400 mb-4">Blog functionality requires WordPress Headless API connection. Currently running in Static Mode.</p>
+                        <span class="text-xs text-gray-600">Admin Notification</span>
                     </div>
                 </div>
             </div>
@@ -245,94 +187,114 @@
     </footer>
 
     <script>
-        // --- ROUTER & SEO LOGIC ---
-        
+        // --- ROUTER ---
         const ROUTES = {
-            '/': { id: 'view-home', title: 'Home | MinMaxMuscle', desc: 'Optimize your hardware with data-driven protocols.' },
-            '/compounds': { id: 'view-compounds', title: 'Compounds | MinMaxMuscle', desc: 'Search our database of biological compounds.' },
-            '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle', desc: 'Peptide reconstitution and dosage tools.' },
-            '/stacks': { id: 'view-stacks', title: 'Stacks | MinMaxMuscle', desc: 'Synergistic supplement and peptide stacks.' },
-            '/science': { id: 'view-science', title: 'Research | MinMaxMuscle', desc: 'Latest analysis and breakdown of clinical studies.' }
+            '/': { id: 'view-home', title: 'Home | MinMaxMuscle' },
+            '/compounds': { id: 'view-compounds', title: 'Compounds | MinMaxMuscle' },
+            '/calculators': { id: 'view-calculators', title: 'Calculators | MinMaxMuscle' },
+            '/science': { id: 'view-science', title: 'Research | MinMaxMuscle' }
         };
 
         function navigate(path, addToHistory = true) {
-            // Normalize path
             if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
-            if (!ROUTES[path]) path = '/'; // Fallback to home
+            if (!ROUTES[path]) path = '/';
 
             const route = ROUTES[path];
-
-            // 1. Update UI
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(route.id).classList.add('active');
             
-            // 2. Update Nav State
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             const navId = 'nav-' + path.replace('/', '');
             if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
 
-            // 3. Update SEO Meta
             document.title = route.title;
-            document.querySelector('meta[name="description"]').setAttribute("content", route.desc);
-
-            // 4. Update URL Bar
-            if (addToHistory) {
-                window.history.pushState({}, '', path);
-            }
-            
-            // 5. Scroll to top
+            if (addToHistory) window.history.pushState({}, '', path);
             window.scrollTo(0,0);
         }
 
-        // Handle Browser Back Button
-        window.addEventListener('popstate', () => {
-            navigate(window.location.pathname, false);
-        });
-
-        // Initial Load
+        window.addEventListener('popstate', () => navigate(window.location.pathname, false));
         window.addEventListener('DOMContentLoaded', () => {
             navigate(window.location.pathname, false);
-            renderCompounds(); // Load Data
+            fetchData(); 
         });
 
+        // --- LIVE DATA ENGINE ---
+        let GLOBAL_DATA = [];
 
-        // --- DATA & CALCULATOR LOGIC ---
+        async function fetchData() {
+            try {
+                // FETCH FROM YOUR NEW BACKEND FILE
+                const response = await fetch('/api/peptides');
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                GLOBAL_DATA = await response.json();
+                
+                document.getElementById('system-status').innerText = "System Online";
+                document.getElementById('system-status').previousElementSibling.classList.replace('bg-green-500', 'bg-blue-500'); // Stable blue
+                
+                renderCompounds(GLOBAL_DATA);
 
-        const DB = [
-             { name: 'BPC-157', cat: 'Repair', img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2030', desc: 'Systemic healing peptide derived from gastric juice.' },
-             { name: 'TB-500', cat: 'Repair', img: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2080', desc: 'Promotes angiogenesis and cell migration.' },
-             { name: 'GHK-Cu', cat: 'Cosmetic', img: 'https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1983', desc: 'Skin remodeling and collagen synthesis.' },
-             { name: 'CJC-1295', cat: 'Muscle', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070', desc: 'Growth Hormone Releasing Hormone analogue.' }
-        ];
+            } catch (error) {
+                console.error("DB Error:", error);
+                document.getElementById('system-status').innerText = "Offline Mode (Using Cached Data)";
+                document.getElementById('system-status').classList.add('text-red-400');
+                
+                // Fallback Mock Data so site doesn't break if API fails
+                GLOBAL_DATA = [
+                    { name: 'BPC-157', cat: 'Repair', desc: 'Systemic healing peptide. (Offline Mode)', rank: 5 },
+                    { name: 'TB-500', cat: 'Repair', desc: 'Angiogenesis agent. (Offline Mode)', rank: 5 }
+                ];
+                renderCompounds(GLOBAL_DATA);
+            }
+        }
 
-        function renderCompounds() {
+        function renderCompounds(data) {
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
-            DB.forEach(p => {
+            
+            data.forEach(p => {
                 let color = 'text-gray-400';
-                if(p.cat === 'Repair') color = 'text-blue-400';
-                if(p.cat === 'Muscle') color = 'text-red-400';
+                if(p.cat && p.cat.includes('Repair')) color = 'text-blue-400';
+                if(p.cat && p.cat.includes('Cosmetic')) color = 'text-purple-400';
                 
+                // Assign random image based on category if no image in DB
+                let imgUrl = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=2030'; // Default Vial
+                if(p.cat && p.cat.includes('Cosmetic')) imgUrl = 'https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1983';
+
                 const card = document.createElement('div');
                 card.className = 'bento-card rounded-2xl p-1 overflow-hidden group cursor-pointer';
                 card.innerHTML = `
                     <div class="relative bg-[#18181b] rounded-xl h-full flex flex-col overflow-hidden">
                         <div class="h-40 relative overflow-hidden">
-                            <img src="${p.img}" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition duration-700">
+                            <img src="${imgUrl}" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition duration-700">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#18181b] to-transparent"></div>
-                            <div class="absolute top-3 right-3"><span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-black/50 backdrop-blur border border-white/10 ${color}">${p.cat}</span></div>
+                            <div class="absolute top-3 right-3"><span class="text-[10px] font-bold uppercase px-2 py-1 rounded bg-black/50 backdrop-blur border border-white/10 ${color}">${p.cat || 'Unknown'}</span></div>
                         </div>
                         <div class="p-6">
-                            <h3 class="text-2xl font-bold text-white display-font group-hover:text-blue-400 transition mb-2">${p.name}</h3>
-                            <p class="text-sm text-gray-400 leading-relaxed">${p.desc}</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-2xl font-bold text-white display-font group-hover:text-blue-400 transition">${p.name}</h3>
+                                <span class="text-xs font-mono text-gray-500">Rank: ${p.rank || 'N/A'}</span>
+                            </div>
+                            <p class="text-sm text-gray-400 leading-relaxed line-clamp-3">${p.desc || 'No description available.'}</p>
                         </div>
                     </div>`;
                 grid.appendChild(card);
             });
             feather.replace();
         }
+        
+        // Search Logic
+        document.getElementById('compoundSearch').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = GLOBAL_DATA.filter(p => 
+                (p.name && p.name.toLowerCase().includes(term)) || 
+                (p.desc && p.desc.toLowerCase().includes(term))
+            );
+            renderCompounds(filtered);
+        });
 
-        // Recon Calculator
+        // Calculators
         const ids = ['calc-mg', 'calc-ml', 'calc-mcg'];
         ids.forEach(id => document.getElementById(id).addEventListener('input', calculateRecon));
 
@@ -340,9 +302,8 @@
             const mg = parseFloat(document.getElementById('calc-mg').value) || 0;
             const ml = parseFloat(document.getElementById('calc-ml').value) || 0;
             const dose = parseFloat(document.getElementById('calc-mcg').value) || 0;
-
             if (mg > 0 && ml > 0 && dose > 0) {
-                const concentration = (mg * 1000) / (ml * 100); // mcg per unit (assuming U100)
+                const concentration = (mg * 1000) / (ml * 100); 
                 const units = dose / concentration; 
                 document.getElementById('calc-result').innerText = units.toFixed(1) + " Units";
             }

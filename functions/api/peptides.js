@@ -1,29 +1,31 @@
 export async function onRequest(context) {
-  const { DB } = context.env;
-
-  // Check if DB is actually bound
-  if (!DB) {
-    return new Response(JSON.stringify({ 
-      error: "D1 Binding Missing", 
-      detail: "Please check your Cloudflare dashboard settings." 
-    }), { 
-      status: 500, 
-      headers: { "Content-Type": "application/json" } 
-    });
-  }
+  const { env } = context;
 
   try {
-    const { results } = await DB.prepare(
-      "SELECT peptide_name, research_summary, category, slug FROM Peptides ORDER BY rank ASC"
+    // 1. Query your D1 Database (using the schema from your backup)
+    // We map 'peptide_name' to 'name' to match the frontend
+    const results = await env.DB.prepare(
+      `SELECT 
+        id, 
+        peptide_name as name, 
+        slug, 
+        Category as cat, 
+        primary_focus as desc, 
+        rank, 
+        Status as status 
+       FROM Peptides 
+       ORDER BY rank DESC`
     ).all();
 
-    return new Response(JSON.stringify({ data: results || [] }), {
-      headers: { "Content-Type": "application/json; charset=utf-8" },
+    // 2. Return JSON to the frontend
+    return new Response(JSON.stringify(results.results), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=3600" // Cache for speed (1hr)
+      }
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Query Failed", detail: error.message }), { 
-      status: 500,
-      headers: { "Content-Type": "application/json" } 
-    });
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
