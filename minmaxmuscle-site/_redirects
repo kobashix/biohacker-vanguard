@@ -4,14 +4,14 @@
 /peptides.html     /peptides     301
 /stacks.html       /stacks       301
 
---- Dynamic Deep Linking ---
+--- Dynamic Routes ---
 
-/peptide/* /index.html   200
-/stack/* /index.html   200
-/peptides          /index.html   200
-/stacks            /index.html   200
-/calculators       /index.html   200
+/peptide/* /index.html 200
+/stack/* /index.html 200
+/peptides /index.html 200
+/stacks /index.html 200
+/calculators /index.html 200
 
---- SPA Fallback ---
+--- Fallback ---
 
-/* /index.html   200
+/* /index.html 200
