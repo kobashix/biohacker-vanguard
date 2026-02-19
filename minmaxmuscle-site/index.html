@@ -202,28 +202,29 @@
             <div class="bg-[#111] border border-white/10 rounded-3xl p-8 md:p-12">
                 <h3 class="text-3xl font-black italic uppercase mb-2">Apply for Coaching</h3>
                 <p class="text-gray-400 text-sm mb-8">Submit your details. We will contact you within 24 hours.</p>
-                <form class="space-y-6" onsubmit="event.preventDefault(); alert('Application submitted.');">
+                <!-- Formspree Integration -->
+                <form action="https://formspree.io/f/xkovzdqq" method="POST" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="text-[9px] font-black text-gray-500 uppercase">Full Name</label>
-                            <input type="text" required class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
+                            <input type="text" name="name" required class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
                         </div>
                         <div>
                             <label class="text-[9px] font-black text-gray-500 uppercase">Email</label>
-                            <input type="email" required class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
+                            <input type="email" name="email" required class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
                         </div>
                     </div>
                     <div>
                         <label class="text-[9px] font-black text-gray-500 uppercase">Primary Goal</label>
-                        <select class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
-                            <option>Hypertrophy (Mass Gain)</option>
-                            <option>Fat Loss & Recomp</option>
-                            <option>Injury Recovery</option>
+                        <select name="goal" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white">
+                            <option value="Hypertrophy">Hypertrophy (Mass Gain)</option>
+                            <option value="Fat Loss">Fat Loss & Recomp</option>
+                            <option value="Injury Recovery">Injury Recovery</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-[9px] font-black text-gray-500 uppercase">Current Limitations / Notes</label>
-                        <textarea rows="3" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white"></textarea>
+                        <textarea name="notes" rows="3" class="w-full bg-black border border-white/10 p-4 rounded-xl mt-2 text-sm text-white"></textarea>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black italic uppercase tracking-widest py-4 rounded-xl transition">Submit Application</button>
                 </form>
