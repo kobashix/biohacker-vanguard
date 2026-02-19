@@ -12,7 +12,7 @@ export async function onRequest(context) {
       LEFT JOIN Peptide_FAQs pf ON p.id = pf.peptide_id
       LEFT JOIN FAQs f ON pf.faq_id = f.id
       GROUP BY p.id
-      ORDER BY p.rank DESC
+      ORDER BY p.rank ASC
     `).all();
 
     const sReq = env.DB.prepare(`
