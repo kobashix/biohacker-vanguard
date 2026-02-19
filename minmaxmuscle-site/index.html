@@ -16,25 +16,16 @@
         .nav-pill { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .nav-link.active { background: rgba(255,255,255,0.1); color: #fff; }
         
-        /* Fixed Bento Card - No Overlap */
         .bento-card { 
-            background: #111; 
-            border: 1px solid #222; 
-            border-radius: 24px; 
-            transition: all 0.3s ease; 
-            cursor: pointer; 
-            height: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; /* Pushes footer to bottom */
-            overflow: hidden;
+            background: #111; border: 1px solid #222; border-radius: 24px; transition: all 0.3s ease; 
+            cursor: pointer; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; 
         }
         .bento-card:hover { border-color: var(--blue-500); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(59,130,246,0.3); }
         
         .view-section { display: none; opacity: 0; transform: translateY(10px); }
         .view-section.active { display: block; opacity: 1; transform: translateY(0); transition: all 0.4s ease; }
         
-        #modal-overlay { background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); z-index: 100; }
+        #modal-overlay { background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); z-index: 100; }
         .modal-content { background: #0a0a0a; border: 1px solid #222; max-width: 950px; width: 100%; border-radius: 32px; overflow: hidden; }
         
         .tab-btn.active { background: var(--blue-500); color: white; border-color: var(--blue-500); }
@@ -43,21 +34,31 @@
 
         details > summary { list-style: none; outline: none; }
         details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
+        @keyframes sweep { 0% {opacity: 0; transform: translateY(-5px)} 100% {opacity: 1; transform: translateY(0)} }
     </style>
 </head>
 <body class="selection:bg-blue-500 min-h-screen flex flex-col">
 
+    <!-- Navbar (Expanded) -->
     <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-        <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-4xl shadow-2xl">
+        <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-6xl shadow-2xl">
             <button onclick="navigate('/')" class="flex items-center gap-2 group">
                 <div class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold transition group-hover:bg-blue-500 group-hover:text-white">M</div>
-                <span class="font-bold hidden sm:block italic tracking-tighter">MINMAXMUSCLE</span>
+                <span class="font-bold hidden md:block italic tracking-tighter">MINMAXMUSCLE</span>
             </button>
-            <div class="flex gap-1 bg-black/20 rounded-full p-1 border border-white/5">
-                <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-peptides">Peptides</button>
-                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-stacks">Stacks</button>
-                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition" id="nav-calculators">Calculators</button>
+            
+            <div class="flex gap-1 bg-black/20 rounded-full p-1 border border-white/5 overflow-x-auto">
+                <button onclick="navigate('/peptides')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap" id="nav-peptides">Peptides</button>
+                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap" id="nav-stacks">Stacks</button>
+                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap" id="nav-calculators">Calculators</button>
+                <!-- New Links -->
+                <a href="/training" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Training</a>
+                <a href="/nutrition" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Nutrition</a>
+                <a href="/blog" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Blog</a>
+                <a href="/forums" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Forums</a>
             </div>
+            
             <button onclick="navigate('/peptides')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase italic transition hidden sm:block">Archive</button>
         </div>
     </nav>
@@ -73,12 +74,12 @@
                 <div class="relative z-10 text-center max-w-4xl">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-[10px] font-black uppercase mb-8">
                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                        System Online
+                        V2.5 Systems Online
                     </div>
                     <h1 class="text-7xl md:text-9xl font-black mb-6 leading-[0.85] uppercase italic">Better<br><span class="text-blue-600">Hardware</span></h1>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onclick="navigate('/peptides')" class="px-10 py-4 bg-white text-black font-black rounded-xl uppercase italic text-sm hover:bg-blue-600 hover:text-white transition">Peptide Library</button>
-                        <button onclick="navigate('/calculators')" class="px-10 py-4 bg-white/5 border border-white/10 rounded-xl uppercase italic text-sm font-black hover:bg-white/10 transition backdrop-blur">Lab Tools</button>
+                        <button onclick="navigate('/peptides')" class="px-10 py-4 bg-white text-black font-black rounded-xl uppercase italic text-sm hover:bg-blue-600 hover:text-white transition shadow-lg">Peptide Library</button>
+                        <button onclick="navigate('/calculators')" class="px-10 py-4 bg-white/5 border border-white/10 rounded-xl uppercase italic text-sm font-black hover:bg-white/10 transition backdrop-blur">Peptide Calculators</button>
                     </div>
                 </div>
             </div>
@@ -108,7 +109,7 @@
 
         <!-- CALCULATORS -->
         <section id="view-calculators" class="view-section px-4 max-w-2xl mx-auto py-12">
-            <h2 class="text-6xl font-black italic uppercase text-center mb-12">Dosing Tools</h2>
+            <h2 class="text-6xl font-black italic uppercase text-center mb-12">Peptide Calculators</h2>
             <div class="flex justify-center gap-2 mb-10">
                 <button onclick="switchCalc('recon')" class="tab-btn active px-6 py-2 rounded-full border border-white/10 text-xs font-black uppercase italic tracking-widest transition">Reconstitution</button>
                 <button onclick="switchCalc('unit')" class="tab-btn px-6 py-2 rounded-full border border-white/10 text-xs font-black uppercase italic tracking-widest transition">IU Converter</button>
@@ -138,15 +139,42 @@
         </section>
     </main>
 
+    <!-- Fat Footer -->
     <footer class="border-t border-white/5 bg-[#020202] py-20 px-4 mt-auto">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
-            <div><span class="brand text-2xl font-black italic">MINMAXMUSCLE</span><p class="text-gray-600 text-sm mt-4">Hardware optimization through clinical data analysis.</p></div>
-            <div class="text-[10px] font-black uppercase text-gray-700 flex gap-12">
-                <div class="space-y-4"><p class="text-blue-600 tracking-widest">Archive</p><button onclick="navigate('/peptides')" class="block hover:text-white transition">Library</button><button onclick="navigate('/stacks')" class="block hover:text-white transition">Stacks</button></div>
-                <div class="space-y-4"><p class="text-blue-600 tracking-widest">Legal</p><a href="#" class="block hover:text-white transition">Disclaimer</a><a href="#" class="block hover:text-white transition">Privacy</a></div>
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <span class="brand text-2xl font-black italic">MINMAXMUSCLE</span>
+                <p class="text-gray-600 text-sm mt-4 max-w-sm">Hardware optimization through clinical data analysis. Engineered for hypertrophy and recovery.</p>
+                <div class="flex gap-4 mt-6">
+                    <a href="#" class="text-gray-500 hover:text-white"><i data-feather="instagram" class="w-5 h-5"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-white"><i data-feather="twitter" class="w-5 h-5"></i></a>
+                    <a href="#" class="text-gray-500 hover:text-white"><i data-feather="youtube" class="w-5 h-5"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Archive</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><button onclick="navigate('/peptides')" class="hover:text-white transition">Peptide Library</button></li>
+                    <li><button onclick="navigate('/stacks')" class="hover:text-white transition">Protocol Stacks</button></li>
+                    <li><button onclick="navigate('/calculators')" class="hover:text-white transition">Calculators</button></li>
+                    <li><a href="/training" class="hover:text-white transition">Training</a></li>
+                    <li><a href="/nutrition" class="hover:text-white transition">Nutrition</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Company</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><a href="/about" class="hover:text-white transition">About</a></li>
+                    <li><a href="/contact" class="hover:text-white transition">Contact</a></li>
+                    <li><a href="/privacy" class="hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="/terms" class="hover:text-white transition">Terms of Service</a></li>
+                </ul>
             </div>
         </div>
-        <p class="max-w-7xl mx-auto text-[9px] text-gray-800 font-bold uppercase mt-20 pt-10 border-t border-white/5">FDA Disclaimer: Educational research only. Not for human consumption.</p>
+        <div class="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 text-[9px] text-gray-800 font-bold uppercase flex flex-col md:flex-row justify-between gap-4">
+            <p>FDA Disclaimer: Educational research only. Peptides are research chemicals and not intended for human consumption.</p>
+            <p>&copy; 2026 MinMaxMuscle. All rights reserved.</p>
+        </div>
     </footer>
 
     <div id="modal-overlay" class="fixed inset-0 hidden flex items-center justify-center p-4 overflow-y-auto">
@@ -160,17 +188,17 @@
         function navigate(path, push = true) {
             if (path.startsWith('/peptide/')) return openPepDossier(path.split('/')[2], push);
             if (path.startsWith('/stack/')) return openStackDossier(path.split('/')[2], push);
-            
             const route = ROUTES[path] || 'view-home';
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(route).classList.add('active');
-            
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             const lid = 'nav-' + path.replace('/', '');
             if(document.getElementById(lid)) document.getElementById(lid).classList.add('active');
-            
             if (push) window.history.pushState({}, '', path);
             window.scrollTo(0,0); closeModal();
+            
+            // Set Page Title for SEO
+            document.title = "MINMAXMUSCLE | Hardware Optimization";
         }
 
         async function init() {
@@ -201,9 +229,9 @@
                             <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${p.Category || 'Core'}</span>
                             <span class="text-gray-800 text-[10px] font-mono">PX-0${p.id}</span>
                         </div>
-                        <h3 class="text-3xl font-black italic mb-2 uppercase leading-none break-words">${p.peptide_name}</h3>
+                        <h3 class="text-2xl font-black italic mb-2 uppercase leading-none break-words">${p.peptide_name}</h3>
                         <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">${p.nicknames?.split(',')[0] || 'Protocol'}</p>
-                        <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed font-medium mb-6">${p.primary_focus || p.research_summary}</p>
+                        <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed font-medium">${p.primary_focus || p.research_summary}</p>
                     </div>
                     <div class="mt-auto pt-6 border-t border-white/5 flex justify-between items-center text-[9px] font-black uppercase text-gray-600">
                         <span>Potency: ${p.rank || 5}/10</span>
@@ -236,27 +264,38 @@
             const stacks = DB.stacks.filter(s => s.component_list?.map(c=>c.toLowerCase()).includes(p.peptide_name.toLowerCase()));
             const q = p.faq_questions ? p.faq_questions.split('|||') : [];
             const a = p.faq_answers ? p.faq_answers.split('|||') : [];
-            
+            const src = p.Sources ? p.Sources.split(',') : [];
+
             document.getElementById('modal-content').innerHTML = `
                 <div class="grid md:grid-cols-12 min-h-[600px]">
                     <div class="md:col-span-4 bg-[#050505] p-12 border-r border-white/5">
                         <h2 class="text-5xl font-black italic uppercase leading-[0.85] mb-4 break-words">${p.peptide_name}</h2>
                         <span class="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em] italic">${p.Category}</span>
                         <div class="mt-12 space-y-4">
+                            <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Common Designations</p><p class="text-xs font-bold italic text-white">${p.nicknames || 'None'}</p></div>
                             <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Status</p><p class="text-xs font-bold italic">${p.Status}</p></div>
-                            <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Potency</p><p class="text-xs font-bold italic text-blue-500">${p.rank}/10</p></div>
+                            <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Search Rank</p><p class="text-xs font-bold italic text-blue-500">${p.rank}/10</p></div>
                         </div>
                     </div>
                     <div class="md:col-span-8 p-12 relative">
                         <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-600 hover:text-white transition p-2 bg-white/5 rounded-full"><i data-feather="x" class="w-4 h-4"></i></button>
                         <h3 class="text-2xl font-black italic uppercase mb-6 border-l-4 border-blue-600 pl-6">Research Summary</h3>
                         <p class="text-gray-300 leading-relaxed font-medium mb-12 text-lg">${p.research_summary || 'Analysis pending.'}</p>
+                        
+                        <h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Molecular Structure</h4>
+                        <div class="p-6 bg-black border border-white/5 rounded-2xl font-mono text-[10px] text-blue-400 mb-10 overflow-x-auto">${p.molecular_data || 'Data Classified'}</div>
+
                         ${stacks.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Utilized in Stacks</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">${stacks.map(s => `<div onclick="openStackDossier('${s.slug}')" class="p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl cursor-pointer hover:border-blue-500/40 transition flex justify-between items-center"><span class="text-white font-black uppercase text-xs italic">${s.stack_name}</span><i data-feather="plus" class="w-3 h-3 text-blue-600"></i></div>`).join('')}</div>` : ''}
+                        
                         ${q.length ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest italic">Common Inquiries</h4><div class="space-y-2 mb-10">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between items-center italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i] || 'Details pending.'}</p></details>` : '').join('')}</div>` : ''}
+
+                        ${src.length && src[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest italic">Related Research</h4><div class="flex flex-wrap gap-4">${src.map((s, i) => `<a href="${s.trim()}" target="_blank" class="text-[10px] text-blue-500 hover:text-white transition font-black uppercase italic border-b border-blue-500/20 pb-1">Source ${i+1} <i data-feather="external-link" class="inline w-2 h-2 ml-1"></i></a>`).join('')}</div>` : ''}
                     </div>
                 </div>
             `;
-            showM(); if(push) window.history.pushState({}, '', `/peptide/${slug}`);
+            showM(); 
+            if(push) window.history.pushState({}, '', `/peptide/${slug}`);
+            document.title = `${p.peptide_name}, ${p.nicknames ? p.nicknames.split(',')[0] : 'Research'} | MinMaxMuscle Peptides`;
         }
 
         function openStackDossier(slug, push = true) {
@@ -285,14 +324,16 @@
                                     <span class="font-black uppercase italic text-sm group-hover:text-blue-500 transition">${c}</span>
                                     ${found ? '<i data-feather="arrow-right" class="w-4 h-4 text-blue-600"></i>' : ''}
                                 </div>`;
-                            }).join('') : '<p class="text-gray-500 text-xs italic">No specific components listed.</p>'}
+                            }).join('') : '<p class="text-gray-500 text-xs italic">No specific components listed in database.</p>'}
                         </div>
 
                         ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i]}</p></details>` : '').join('')}</div>` : ''}
                     </div>
                 </div>
             `;
-            showM(); if(push) window.history.pushState({}, '', `/stack/${slug}`);
+            showM(); 
+            if(push) window.history.pushState({}, '', `/stack/${slug}`);
+            document.title = `${s.stack_name} | MinMaxMuscle Stacks`;
         }
 
         function showM() {
@@ -311,6 +352,7 @@
                 const fallback = curr.includes('/peptide/') ? '/peptides' : '/stacks';
                 window.history.pushState({}, '', fallback);
             }
+            document.title = "MINMAXMUSCLE | Hardware Optimization";
         }
 
         document.getElementById('pepSearch')?.addEventListener('input', (e) => {
