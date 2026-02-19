@@ -55,11 +55,11 @@
                 <!-- New Links -->
                 <a href="/training" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Training</a>
                 <a href="/nutrition" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Nutrition</a>
-                <a href="/blog" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Blog</a>
-                <a href="/forums" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Forums</a>
+                <a href="https://blog.minmaxmuscle.com" target="_blank" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Blog</a>
+                <a href="https://blog.minmaxmuscle.com/forum/" target="_blank" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-500 hover:text-white transition whitespace-nowrap hidden lg:block">Forums</a>
             </div>
             
-            <button onclick="navigate('/peptides')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase italic transition hidden sm:block">Archive</button>
+            <button onclick="navigate('/coaching')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black px-5 py-2 rounded-full uppercase italic transition hidden sm:block">Coaching</button>
         </div>
     </nav>
 
@@ -137,6 +137,23 @@
                 </div>
             </div>
         </section>
+
+        <!-- COACHING / ARCHIVE -->
+        <section id="view-coaching" class="view-section px-4 max-w-4xl mx-auto py-12 text-center">
+            <h2 class="text-6xl font-black italic uppercase mb-12">Performance Coaching</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bento-card p-10">
+                    <h3 class="text-3xl font-black italic uppercase mb-4">Training</h3>
+                    <p class="text-gray-400 mb-8">Hypertrophy-focused programming.</p>
+                    <button class="px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic">View Programs</button>
+                </div>
+                <div class="bento-card p-10">
+                    <h3 class="text-3xl font-black italic uppercase mb-4">Nutrition</h3>
+                    <p class="text-gray-400 mb-8">Macro-optimized meal planning.</p>
+                    <button class="px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic">View Plans</button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Fat Footer -->
@@ -156,7 +173,7 @@
                 <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
                     <li><button onclick="navigate('/peptides')" class="hover:text-white transition">Peptide Library</button></li>
                     <li><button onclick="navigate('/stacks')" class="hover:text-white transition">Protocol Stacks</button></li>
-                    <li><button onclick="navigate('/calculators')" class="hover:text-white transition">Calculators</button></li>
+                    <li><button onclick="navigate('/calculators')" class="hover:text-white transition">Peptide Calculators</button></li>
                     <li><a href="/training" class="hover:text-white transition">Training</a></li>
                     <li><a href="/nutrition" class="hover:text-white transition">Nutrition</a></li>
                 </ul>
@@ -182,7 +199,7 @@
     </div>
 
     <script>
-        const ROUTES = { '/': 'view-home', '/peptides': 'view-peptides', '/stacks': 'view-stacks', '/calculators': 'view-calculators' };
+        const ROUTES = { '/': 'view-home', '/peptides': 'view-peptides', '/stacks': 'view-stacks', '/calculators': 'view-calculators', '/coaching': 'view-coaching' };
         let DB = { peptides: [], stacks: [] };
 
         function navigate(path, push = true) {
@@ -197,7 +214,7 @@
             if (push) window.history.pushState({}, '', path);
             window.scrollTo(0,0); closeModal();
             
-            // Set Page Title for SEO
+            // Default Title
             document.title = "MINMAXMUSCLE | Hardware Optimization";
         }
 
