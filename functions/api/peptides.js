@@ -1,9 +1,8 @@
-// [ITEM #6] Backend API to fetch Peptides and Stacks with robust linking
 export async function onRequest(context) {
   const { env } = context;
 
   try {
-    // [ITEM #3] Sorting by Rank DESC
+    // [ISSUE 3] Changed to ORDER BY rank ASC
     const pReq = env.DB.prepare(`
       SELECT p.*, 
         GROUP_CONCAT(f.question, '|||') as faq_questions,
@@ -15,6 +14,7 @@ export async function onRequest(context) {
       ORDER BY p.rank ASC
     `).all();
 
+    // [ISSUE 3] Changed to ORDER BY rank ASC
     const sReq = env.DB.prepare(`
       SELECT s.*, 
         GROUP_CONCAT(f.question, '|||') as faq_questions,
@@ -23,35 +23,41 @@ export async function onRequest(context) {
       LEFT JOIN Stack_FAQs sf ON s.id = sf.stack_id
       LEFT JOIN FAQs f ON sf.faq_id = f.id
       GROUP BY s.id
-      ORDER BY s.rank DESC
+      ORDER BY s.rank ASC
     `).all();
 
-    // [ITEM #6] Attempt to fetch View_Stack_Details
+    // [ISSUE 6] Fetch View_Stack_Details to get dosage instructions
     let mapping = { results: [] };
     try {
       mapping = await env.DB.prepare(`SELECT * FROM View_Stack_Details`).all();
     } catch (e) {
-      console.log("[ITEM #6] View_Stack_Details missing, using fallback.");
+      console.log("View_Stack_Details missing or misspelled.", e);
     }
 
     const [peptides, stacks] = await Promise.all([pReq, sReq]);
 
-    // [ITEM #6] Logic to manually link stacks to peptides
     const pList = peptides.results;
     const sList = stacks.results;
     const links = mapping.results || [];
 
     sList.forEach(stack => {
-        const matches = links.filter(l => l.stack_id === stack.id);
-        let componentNames = matches.map(m => {
-            const p = pList.find(x => x.id === m.peptide_id);
-            return p ? p.peptide_name : null;
-        }).filter(n => n);
-
-        if (componentNames.length === 0 && stack.peptides_used) {
-            componentNames = stack.peptides_used.split(',').map(s => s.trim());
+        // [ISSUE 6] Match on stack_slug instead of ID, based on your screenshot
+        const matches = links.filter(l => l.stack_slug === stack.slug);
+        
+        if (matches.length > 0) {
+            stack.component_list = matches.map(m => ({
+                name: m.peptide_name,
+                slug: m.peptide_slug,
+                dosage: m.dosage_instruction
+            }));
+        } else if (stack.peptides_used) {
+            // Fallback
+            stack.component_list = stack.peptides_used.split(',').map(s => ({
+                name: s.trim(), slug: s.trim().toLowerCase().replace(' ', '-'), dosage: 'Review full protocol'
+            }));
+        } else {
+            stack.component_list = [];
         }
-        stack.component_list = componentNames;
     });
 
     return new Response(JSON.stringify({
