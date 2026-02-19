@@ -1,7 +1,9 @@
+// [ITEM #6] Backend API to fetch Peptides and Stacks with robust linking
 export async function onRequest(context) {
   const { env } = context;
 
   try {
+    // [ITEM #3] Sorting by Rank DESC
     const pReq = env.DB.prepare(`
       SELECT p.*, 
         GROUP_CONCAT(f.question, '|||') as faq_questions,
@@ -24,15 +26,17 @@ export async function onRequest(context) {
       ORDER BY s.rank DESC
     `).all();
 
+    // [ITEM #6] Attempt to fetch View_Stack_Details
     let mapping = { results: [] };
     try {
       mapping = await env.DB.prepare(`SELECT * FROM View_Stack_Details`).all();
     } catch (e) {
-      console.log("View_Stack_Details missing, using fallback.");
+      console.log("[ITEM #6] View_Stack_Details missing, using fallback.");
     }
 
     const [peptides, stacks] = await Promise.all([pReq, sReq]);
 
+    // [ITEM #6] Logic to manually link stacks to peptides
     const pList = peptides.results;
     const sList = stacks.results;
     const links = mapping.results || [];

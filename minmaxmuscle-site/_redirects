@@ -1,6 +1,10 @@
+SEO 301 Redirects
+
 /calculators.html  /calculators  301
 /peptides.html     /peptides     301
 /stacks.html       /stacks       301
+
+Dynamic Routing
 
 /peptide/* /index.html 200
 /stack/* /index.html 200
@@ -16,5 +20,7 @@
 /contact /index.html 200
 /privacy /index.html 200
 /terms /index.html 200
+
+Fallback
 
 /* /index.html 200
