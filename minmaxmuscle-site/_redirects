@@ -1,9 +1,4 @@
-Fixed Redirects
-
 /calculators.html  /calculators  301
 /peptides.html     /peptides     301
 /stacks.html       /stacks       301
-
-SPA Rule (Must be last line)
-
 /* /index.html 200
