@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peptide Index | MINMAXMUSCLE</title>
+    <meta name="description" content="The comprehensive research database for peptides, secretagogues, and performance compounds. Clinical data, molecular dossiers, and established research protocols.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="selection:bg-blue-500 min-h-screen flex flex-col bg-[#09090b] text-white">
+
+    <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+        <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-5xl shadow-2xl">
+            <a href="/" class="flex items-center gap-3 group">
+                <img src="https://minmaxmuscle.com/assets/img/logo.png" alt="MinMaxMuscle" class="w-8 h-8 rounded-full bg-white/5 object-contain">
+                <span class="font-bold hidden md:block italic tracking-tighter">MINMAXMUSCLE</span>
+            </a>
+            
+            <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5 overflow-x-auto">
+                <a href="/peptidesdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-white bg-blue-600 transition whitespace-nowrap">PEPTIDES</a>
+                <a href="/#stacks" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">STACKS</a>
+                <a href="/#calculators" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">CALCULATORS</a>
+                <a href="https://blog.minmaxmuscle.com/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">BLOG</a>
+                <a href="https://blog.minmaxmuscle.com/forum/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">FORUMS</a>
+                <a href="/#coaching" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">COACHING</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div>
+                    <h1 class="text-6xl font-black italic uppercase mb-2">Peptide Index</h1>
+                    <p class="text-gray-500 font-bold uppercase text-[10px] tracking-widest">Active Research Dossiers</p>
+                </div>
+                <input type="text" id="pepSearch" class="bg-[#111] border border-white/5 p-4 rounded-xl w-full md:w-80 text-sm font-bold focus:border-blue-500 outline-none" placeholder="SEARCH DATABASE...">
+            </div>
+
+            <!-- Database Introduction for AdSense Compliance -->
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 mb-12">
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-black italic uppercase text-white mb-6">Utilizing the Research Index</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">The MinMaxMuscle Peptide Index is designed as a high-density clinical archive for researchers, biohackers, and medical professionals. Our goal is to consolidate disparate data points—ranging from molecular structure and half-life to phase III clinical trial outcomes—into a single, searchable interface. Each entry in this database represents an active "Research Dossier" that is continuously updated as new literature is published.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">To use this database effectively, utilize the search function to filter by compound name or primary research focus (e.g., "hypertrophy," "neural repair," or "lipolysis"). Each compound is assigned a research rank based on the volume of available clinical data and its prevalence in established athletic protocols. Clicking on a compound will reveal its full dossier, including molecular data, common research dosages, and synergistic stack pairings.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-black italic uppercase text-white mb-6">Selection & Research Criteria</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">Compounds listed in this index must meet rigorous criteria to be included. We prioritize peptides that have either undergone human clinical trials or have extensive longitudinal data in animal models. Our editorial team cross-references every data point against primary sources such as PubMed, ScienceDirect, and the World Anti-Doping Agency (WADA) guidelines to ensure that our dossiers reflect the most accurate and current scientific understanding.</p>
+                        <div class="bg-blue-600/10 border-l-4 border-blue-600 p-6 rounded-r-xl">
+                            <p class="text-[10px] text-blue-400 font-black uppercase tracking-widest mb-2">Protocol Integrity</p>
+                            <p class="text-xs text-gray-300 italic">"The utility of a research chemical is defined by its purity and the precision of its administration. We provide the data; the researcher provides the discipline."</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10 pt-10 border-t border-white/5">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase leading-relaxed text-center max-w-3xl mx-auto">Mandatory Disclaimer: All compounds listed are strictly for laboratory research and development purposes. They are not intended for human or veterinary use. The information provided is theoretical and based on available scientific literature. MinMaxMuscle does not endorse the unauthorized use of research chemicals.</p>
+                </div>
+            </div>
+
+            <div id="pep-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+                <!-- Data will be loaded via script.js -->
+                <div class="skeleton h-64 w-full"></div><div class="skeleton h-64 w-full"></div><div class="skeleton h-64 w-full"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-white/5 bg-[#020202] py-20 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <span class="brand text-2xl font-black italic">MINMAXMUSCLE</span>
+                <p class="text-gray-600 text-sm mt-4 max-w-sm">Peak human performance through clinical data analysis. Engineered for hypertrophy and recovery.</p>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Matrix</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><a href="/peptidesdb.html" class="hover:text-white transition">Peptide Library</a></li>
+                    <li><a href="/#stacks" class="hover:text-white transition">Protocol Stacks</a></li>
+                    <li><a href="/#calculators" class="hover:text-white transition">Peptide Calculators</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Company & Legal</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><a href="/about.html" class="hover:text-white transition">About Us</a></li>
+                    <li><a href="/contact.html" class="hover:text-white transition">Contact</a></li>
+                    <li><a href="/privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="/terms.html" class="hover:text-white transition">Terms of Service</a></li>
+                    <li><a href="/disclaimer.html" class="hover:text-white transition text-red-900/50 hover:text-red-500">Medical Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 text-[9px] text-gray-800 font-bold uppercase flex flex-col md:flex-row justify-between gap-4">
+            <p>FDA Disclaimer: Educational research only. Peptides are research chemicals and not intended for human consumption.</p>
+            <p>&copy; 2026 MinMaxMuscle. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/assets/js/script.js"></script>
+    <script>
+        // Trigger initialization for this page if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            // init() is called in script.js, but we might need to handle grid rendering here
+        });
+    </script>
+</body>
+</html>

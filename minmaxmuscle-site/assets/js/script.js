@@ -80,7 +80,7 @@ function renderP(arr) {
     if (!grid) return;
     
     grid.innerHTML = arr.map(p => `
-        <div class="bento-card p-8" onclick="openPepDossier('${p.slug}')">
+        <a href="/peptide/${p.slug}" onclick="event.preventDefault(); openPepDossier('${p.slug}')" class="bento-card p-8 group block">
             <div class="flex-grow">
                 <div class="flex justify-between mb-4">
                     <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${p.Category || 'Core'}</span>
@@ -94,7 +94,7 @@ function renderP(arr) {
                 <span>Rank: ${p.rank}</span>
                 <i data-feather="arrow-right" class="w-3 h-3 group-hover:text-blue-500 group-hover:translate-x-1 transition"></i>
             </div>
-        </div>
+        </a>
     `).join('');
     feather.replace();
 }
@@ -107,16 +107,16 @@ function renderS(arr) {
     if (!grid) return;
 
     grid.innerHTML = arr.map(s => `
-        <div class="bento-card min-h-[300px] relative overflow-hidden group flex flex-col justify-end p-10" onclick="openStackDossier('${s.slug}')">
+        <a href="/stack/${s.slug}" onclick="event.preventDefault(); openStackDossier('${s.slug}')" class="bento-card min-h-[300px] relative overflow-hidden group flex flex-col justify-end p-10 block">
             <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=1000" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale group-hover:scale-105 transition duration-1000">
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
             <div class="relative z-10">
                 <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 mb-3 inline-block">Rank: ${s.rank}</span>
                 <h3 class="text-5xl font-black italic uppercase leading-none mb-4 group-hover:text-blue-500 transition">${s.stack_name}</h3>
                 <p class="text-gray-400 text-sm max-w-md line-clamp-2">${s.description}</p>
-                <button class="mt-8 px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic hover:bg-white hover:text-black transition">Analyze Protocol</button>
+                <div class="mt-8 px-8 py-3 bg-blue-600 rounded-full font-black text-[10px] uppercase italic hover:bg-white hover:text-black transition inline-block">Analyze Protocol</div>
             </div>
-        </div>
+        </a>
     `).join('');
     feather.replace();
 }

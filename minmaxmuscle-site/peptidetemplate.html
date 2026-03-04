@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{peptide_name}} Research Dossier | MINMAXMUSCLE</title>
+    <meta name="description" content="Comprehensive molecular data, research summary, and clinical protocols for {{peptide_name}}. Part of the MinMaxMuscle Peptide Index.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="selection:bg-blue-500 min-h-screen flex flex-col bg-[#050505] text-white">
+
+    <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+        <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-5xl shadow-2xl">
+            <a href="/" class="flex items-center gap-3 group">
+                <img src="https://minmaxmuscle.com/assets/img/logo.png" alt="MinMaxMuscle" class="w-8 h-8 rounded-full bg-white/5 object-contain">
+                <span class="font-bold hidden md:block italic tracking-tighter">MINMAXMUSCLE</span>
+            </a>
+            
+            <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5 overflow-x-auto">
+                <a href="/peptidesdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">PEPTIDES</a>
+                <a href="/#stacks" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">STACKS</a>
+                <a href="/#calculators" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">CALCULATORS</a>
+                <a href="https://blog.minmaxmuscle.com/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">BLOG</a>
+                <a href="https://blog.minmaxmuscle.com/forum/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">FORUMS</a>
+                <a href="/#coaching" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">COACHING</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-32 pb-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-12 gap-8 bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                <!-- Sidebar Info -->
+                <div class="md:col-span-4 bg-[#050505] p-12 border-r border-white/5">
+                    <h1 class="text-6xl font-black italic uppercase leading-[0.85] mb-4 break-words text-white">{{peptide_name}}</h1>
+                    <span class="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em] italic">{{Category}}</span>
+                    
+                    <div class="mt-12 space-y-4">
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Common Designations</p>
+                            <p class="text-xs font-bold italic text-white">{{nicknames}}</p>
+                        </div>
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Research Status</p>
+                            <p class="text-xs font-bold italic text-blue-400">{{Status}}</p>
+                        </div>
+                        <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-[8px] text-gray-500 font-black uppercase mb-1">Database Rank</p>
+                            <p class="text-xs font-bold italic text-white">PX-{{rank}}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 pt-12 border-t border-white/5">
+                        <h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest italic">Clinical Resources</h4>
+                        <div class="flex flex-col gap-3">
+                            {{Sources}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="md:col-span-8 p-12">
+                    <div class="mb-12">
+                        <h2 class="text-2xl font-black italic uppercase mb-6 border-l-4 border-blue-600 pl-6 text-white">Research Summary & Biological Action</h2>
+                        <p class="text-gray-300 leading-relaxed font-medium text-lg">{{research_summary}}</p>
+                    </div>
+                    
+                    <div class="mb-12">
+                        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 tracking-widest">Molecular Structure & Identification</h3>
+                        <div class="p-8 bg-black border border-white/5 rounded-2xl font-mono text-[11px] text-blue-400 overflow-x-auto">
+                            {{molecular_data}}
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-6 tracking-widest italic text-white">Compound Intelligence (FAQ)</h3>
+                        <div class="space-y-4">
+                            {{FAQs}}
+                        </div>
+                    </div>
+
+                    <div class="p-8 bg-blue-600/5 border border-blue-600/20 rounded-3xl">
+                        <h4 class="text-white font-black uppercase text-sm mb-4 italic">Researcher Note</h4>
+                        <p class="text-gray-400 text-xs leading-relaxed italic">This dossier is part of the MinMaxMuscle programmatic archive. Data is aggregated from peer-reviewed clinical literature and established research protocols. For laboratory research use only.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-white/5 bg-[#020202] py-20 px-4 mt-auto">
+        <!-- Footer Content -->
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div class="col-span-1 md:col-span-2">
+                <span class="brand text-2xl font-black italic">MINMAXMUSCLE</span>
+                <p class="text-gray-600 text-sm mt-4 max-w-sm">Peak human performance through clinical data analysis. Engineered for hypertrophy and recovery.</p>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Matrix</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><a href="/peptidesdb.html" class="hover:text-white transition">Peptide Library</a></li>
+                    <li><a href="/#stacks" class="hover:text-white transition">Protocol Stacks</a></li>
+                    <li><a href="/#calculators" class="hover:text-white transition">Peptide Calculators</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-blue-600 font-black uppercase text-[10px] tracking-widest mb-6">Company & Legal</h4>
+                <ul class="space-y-3 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                    <li><a href="/about.html" class="hover:text-white transition">About Us</a></li>
+                    <li><a href="/contact.html" class="hover:text-white transition">Contact</a></li>
+                    <li><a href="/privacy.html" class="hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="/terms.html" class="hover:text-white transition">Terms of Service</a></li>
+                    <li><a href="/disclaimer.html" class="hover:text-white transition text-red-900/50 hover:text-red-500">Medical Disclaimer</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
