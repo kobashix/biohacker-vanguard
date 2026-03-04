@@ -24,11 +24,24 @@ function navigate(path, push = true) {
     if (path.startsWith('/peptide/')) return openPepDossier(path.split('/')[2], push);
     if (path.startsWith('/stack/')) return openStackDossier(path.split('/')[2], push);
     
+    // Redirect /peptides to the standalone DB page if not on index.html
+    if (path === '/peptides' && !document.getElementById('view-peptides')) {
+        window.location.href = '/peptidesdb.html';
+        return;
+    }
+
     const routeData = ROUTES[path] || ROUTES['/'];
     const viewId = routeData.id;
+    const targetView = document.getElementById(viewId);
     
+    // If target view doesn't exist on this page, perform hard navigation to index
+    if (!targetView && path !== '/') {
+        window.location.href = '/#' + path.replace('/', '');
+        return;
+    }
+
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-    if(document.getElementById(viewId)) document.getElementById(viewId).classList.add('active');
+    if(targetView) targetView.classList.add('active');
     
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     const lid = 'nav-' + path.replace('/', '');
@@ -67,8 +80,11 @@ async function init() {
  */
 function handleURL() {
     const p = window.location.pathname;
+    const h = window.location.hash;
+    
     if(p.startsWith('/peptide/')) openPepDossier(p.split('/')[2], false);
     else if(p.startsWith('/stack/')) openStackDossier(p.split('/')[2], false);
+    else if(h) navigate('/' + h.replace('#', ''), false);
     else navigate(p, false);
 }
 
