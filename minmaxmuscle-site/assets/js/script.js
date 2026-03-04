@@ -30,27 +30,38 @@ function navigate(path, push = true) {
     if (path.startsWith('/peptide/')) return openPepDossier(path.split('/')[2], push);
     if (path.startsWith('/stack/')) return openStackDossier(path.split('/')[2], push);
     
-    // Normalize path
-    const cleanPath = path === '/' ? '/' : path.replace('.html', '').replace('#', '');
-    const isIndex = location.pathname === '/' || location.pathname === '/index.html';
+    // Normalize path: remove .html, hashes, and trailing slashes for comparison
+    const normPath = (p) => p.replace('.html', '').replace('#', '').replace(/\/$/, '') || '/';
+    const cleanPath = normPath(path);
+    const currPath = normPath(location.pathname);
+    const isIndex = currPath === '/' || currPath === '/index';
 
     // Global navigation behavior for Peptides/Stacks
-    if (cleanPath === '/peptides' || cleanPath === 'peptides') {
-        if (!isIndex) { window.location.href = '/peptides'; return; }
+    if (cleanPath === '/peptides') {
+        if (!isIndex && currPath !== '/peptides' && currPath !== '/peptidesdb') { 
+            window.location.href = '/peptides'; 
+            return; 
+        }
     }
-    if (cleanPath === '/stacks' || cleanPath === 'stacks') {
-        if (!isIndex) { window.location.href = '/stacks'; return; }
+    if (cleanPath === '/stacks') {
+        if (!isIndex && currPath !== '/stacks' && currPath !== '/stacksdb') { 
+            window.location.href = '/stacks'; 
+            return; 
+        }
     }
 
-    const routeData = ROUTES[path] || ROUTES[cleanPath] || ROUTES['/'];
+    const routeData = ROUTES[path] || ROUTES[path + '.html'] || ROUTES['/' + cleanPath] || ROUTES['/'];
     if (!routeData) return;
 
     const viewId = routeData.id;
     const targetView = document.getElementById(viewId);
     
-    // If target view doesn't exist on this page, perform clean navigation
+    // If target view doesn't exist on this page, perform clean navigation ONLY if different
     if (!targetView) {
-        window.location.href = cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath;
+        const targetUrl = cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath;
+        if (currPath !== normPath(targetUrl)) {
+            window.location.href = targetUrl;
+        }
         return;
     }
 
@@ -62,7 +73,10 @@ function navigate(path, push = true) {
     const navEl = document.getElementById(lid);
     if(navEl) navEl.classList.add('active');
     
-    if (push) window.history.pushState({}, '', cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath);
+    if (push) {
+        const pushUrl = cleanPath.startsWith('/') ? cleanPath : '/' + cleanPath;
+        window.history.pushState({}, '', pushUrl);
+    }
     window.scrollTo(0, 0);
     closeModal();
     
