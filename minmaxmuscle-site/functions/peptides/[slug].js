@@ -1,11 +1,8 @@
 /**
- * MinMaxMuscle - Peptide Detail Resolver (D1 Authoritative)
+ * MinMaxMuscle - Peptide Detail Resolver (Cloudflare Pages Authoritative)
  * This function queries the Cloudflare D1 database directly to serve
  * high-value, SEO-friendly peptide dossiers.
  */
-
-const fs = require('fs');
-const path = require('path');
 
 export async function onRequest(context) {
     const { request, env } = context;
@@ -20,7 +17,7 @@ export async function onRequest(context) {
     }
 
     if (!d1) {
-        return new Response("D1 Database binding not found. Please check Cloudflare dashboard settings.", { status: 500 });
+        return new Response("D1 Database binding not found. Please bind your D1 database to 'DB' in Cloudflare dashboard.", { status: 500 });
     }
 
     try {
@@ -31,10 +28,12 @@ export async function onRequest(context) {
             return new Response("Peptide dossier not found in archive.", { status: 404 });
         }
 
-        // 3. Load Template
-        // Note: In Cloudflare Pages Functions, we can use standard fetch to get the local template or assume it's in the assets
+        // 3. Load Template from assets
         const templateUrl = new URL('/peptidetemplate.html', request.url);
         const templateRes = await fetch(templateUrl);
+        if (!templateRes.ok) {
+            return new Response("Template load error.", { status: 500 });
+        }
         let template = await templateRes.text();
 
         // 4. Resolve unique content
@@ -66,9 +65,9 @@ export async function onRequest(context) {
 function renderFAQs(p) {
     const q = p.faq_questions ? p.faq_questions.split('|||') : [];
     const a = p.faq_answers ? p.faq_answers.split('|||') : [];
-    if (!q.length) return '<p class="text-gray-500 italic text-xs">No specific inquiries recorded for this compound.</p>';
+    if (!q.length || !q[0]) return '<p class="text-gray-500 italic text-xs">No specific inquiries recorded for this compound.</p>';
     
-    return q.map((qi, i) => `
+    return q.map((qi, i) => qi ? `
         <details class="bg-white/5 rounded-2xl group border border-white/5 mb-2">
             <summary class="p-6 cursor-pointer font-bold text-sm flex justify-between items-center italic uppercase text-white leading-none">
                 ${qi}
@@ -78,12 +77,12 @@ function renderFAQs(p) {
                 ${a[i] || 'Details pending additional clinical review.'}
             </p>
         </details>
-    `).join('');
+    ` : '').join('');
 }
 
 function renderSources(p) {
     const src = p.Sources ? p.Sources.split(',') : [];
-    if (!src.length) return '<p class="text-gray-500 italic text-[10px]">Primary sources pending archival.</p>';
+    if (!src.length || !src[0]) return '<p class="text-gray-500 italic text-[10px]">Primary sources pending archival.</p>';
     
     return src.map((s, i) => `
         <a href="${s.trim()}" target="_blank" class="p-4 bg-white/5 rounded-xl border border-white/10 text-[10px] text-blue-400 hover:bg-blue-600 hover:text-white transition flex justify-between items-center group mb-2">
