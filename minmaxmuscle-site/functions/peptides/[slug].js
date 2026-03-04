@@ -37,7 +37,7 @@ export async function onRequest(context) {
         let template = await templateRes.text();
 
         // 4. Resolve unique content
-        const forumUrl = peptide.forum_topic_url || `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(peptide.peptide_name)}`;
+        const forumUrl = peptide.forum_topic_url || `https://blog.minmaxmuscle.com/forum/search/?keywords=${encodeURIComponent(peptide.peptide_name)}`;
         
         const html = template
             .replace(/{{peptide_name}}/g, peptide.peptide_name)

@@ -263,7 +263,7 @@ function renderP(arr) {
     if (!grid) return;
     
     grid.innerHTML = arr.map(p => {
-        const forumUrl = `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(p.peptide_name)}`;
+        const forumUrl = `https://blog.minmaxmuscle.com/forum/search/?keywords=${encodeURIComponent(p.peptide_name)}`;
         return `
             <div class="bento-card p-8 group flex flex-col h-full relative">
                 <a href="/peptide/${p.slug}" onclick="event.preventDefault(); openPepDossier('${p.slug}')" class="flex-grow block">
@@ -329,7 +329,7 @@ function openPepDossier(slug, push = true) {
     const q = p.faq_questions ? p.faq_questions.split('|||') : [];
     const a = p.faq_answers ? p.faq_answers.split('|||') : [];
     const src = p.Sources ? p.Sources.split(',') : [];
-    const forumUrl = `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(p.peptide_name)}`;
+    const forumUrl = `https://blog.minmaxmuscle.com/forum/search/?keywords=${encodeURIComponent(p.peptide_name)}`;
 
     document.getElementById('modal-content').innerHTML = `
         <div class="grid md:grid-cols-12 min-h-[600px]">
