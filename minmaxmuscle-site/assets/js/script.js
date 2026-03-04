@@ -206,6 +206,9 @@ function navigate(path, push = true) {
     window.scrollTo(0, 0);
     closeModal();
     
+    // Close mobile menu if open
+    document.getElementById('mobile-menu')?.classList.add('hidden');
+    
     if (!path.startsWith('/peptide') && !path.startsWith('/stack')) {
         document.title = routeData.title;
     }
