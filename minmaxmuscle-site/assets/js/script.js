@@ -95,23 +95,32 @@ function renderP(arr) {
     const grid = document.getElementById('pep-grid');
     if (!grid) return;
     
-    grid.innerHTML = arr.map(p => `
-        <a href="/peptide/${p.slug}" onclick="event.preventDefault(); openPepDossier('${p.slug}')" class="bento-card p-8 group block">
-            <div class="flex-grow">
-                <div class="flex justify-between mb-4">
-                    <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${p.Category || 'Core'}</span>
-                    <span class="text-gray-800 text-[10px] font-mono">PX-0${p.id}</span>
+    grid.innerHTML = arr.map(p => {
+        const forumUrl = `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(p.peptide_name)}`;
+        return `
+            <div class="bento-card p-8 group flex flex-col h-full relative">
+                <a href="/peptide/${p.slug}" onclick="event.preventDefault(); openPepDossier('${p.slug}')" class="flex-grow block">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">${p.Category || 'Core'}</span>
+                        <span class="text-gray-800 text-[10px] font-mono">PX-0${p.id}</span>
+                    </div>
+                    <h3 class="text-2xl font-black italic mb-2 uppercase leading-none break-words">${p.peptide_name}</h3>
+                    <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">${p.nicknames ? p.nicknames.split(',')[0] : 'Protocol'}</p>
+                    <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed font-medium">${p.primary_focus || p.research_summary}</p>
+                </a>
+                <div class="mt-auto pt-6 border-t border-white/5 flex justify-between items-center">
+                    <a href="${forumUrl}" target="_blank" class="text-[9px] font-black uppercase text-gray-600 hover:text-blue-400 flex items-center gap-1 transition">
+                        <i data-feather="message-square" class="w-3 h-3"></i>
+                        FORUM
+                    </a>
+                    <a href="/peptide/${p.slug}" onclick="event.preventDefault(); openPepDossier('${p.slug}')" class="text-[9px] font-black uppercase text-gray-600 group-hover:text-blue-500 flex items-center gap-1 transition">
+                        DOSSIER
+                        <i data-feather="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition"></i>
+                    </a>
                 </div>
-                <h3 class="text-2xl font-black italic mb-2 uppercase leading-none break-words">${p.peptide_name}</h3>
-                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-4">${p.nicknames ? p.nicknames.split(',')[0] : 'Protocol'}</p>
-                <p class="text-sm text-gray-400 line-clamp-3 leading-relaxed font-medium">${p.primary_focus || p.research_summary}</p>
             </div>
-            <div class="mt-auto pt-6 border-t border-white/5 flex justify-between items-center text-[9px] font-black uppercase text-gray-600">
-                <span>Rank: ${p.rank}</span>
-                <i data-feather="arrow-right" class="w-3 h-3 group-hover:text-blue-500 group-hover:translate-x-1 transition"></i>
-            </div>
-        </a>
-    `).join('');
+        `;
+    }).join('');
     feather.replace();
 }
 
@@ -153,17 +162,24 @@ function openPepDossier(slug, push = true) {
     const q = p.faq_questions ? p.faq_questions.split('|||') : [];
     const a = p.faq_answers ? p.faq_answers.split('|||') : [];
     const src = p.Sources ? p.Sources.split(',') : [];
+    const forumUrl = `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(p.peptide_name)}`;
 
     document.getElementById('modal-content').innerHTML = `
         <div class="grid md:grid-cols-12 min-h-[600px]">
-            <div class="md:col-span-4 bg-[#050505] p-12 border-r border-white/5">
+            <div class="md:col-span-4 bg-[#050505] p-12 border-r border-white/5 flex flex-col">
                 <h2 class="text-5xl font-black italic uppercase leading-[0.85] mb-4 break-words">${p.peptide_name}</h2>
                 <span class="text-blue-500 text-[10px] font-black uppercase tracking-[0.2em] italic">${p.Category}</span>
-                <div class="mt-12 space-y-4">
+                
+                <div class="mt-8 space-y-4 flex-grow">
                     <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Common Designations</p><p class="text-xs font-bold italic text-white">${p.nicknames || 'None'}</p></div>
                     <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Status</p><p class="text-xs font-bold italic">${p.Status}</p></div>
                     <div class="p-6 bg-white/5 rounded-2xl border border-white/10"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Search Rank</p><p class="text-xs font-bold italic text-blue-500">${p.rank}</p></div>
                 </div>
+
+                <a href="${forumUrl}" target="_blank" class="mt-8 w-full bg-white text-black py-4 rounded-xl font-black text-[10px] uppercase italic text-center hover:bg-blue-600 hover:text-white transition flex items-center justify-center gap-2 shadow-2xl">
+                    <i data-feather="message-circle" class="w-4 h-4"></i>
+                    Join Forum Discussion
+                </a>
             </div>
             <div class="md:col-span-8 p-12 relative">
                 <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-600 hover:text-white transition p-2 bg-white/5 rounded-full"><i data-feather="x" class="w-4 h-4"></i></button>
