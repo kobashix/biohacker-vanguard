@@ -1,6 +1,17 @@
 export async function onRequest(context) {
   const { env } = context;
   
+  // Verify DB binding exists
+  if (!env.DB) {
+    return new Response(JSON.stringify({ 
+      error: "D1 Binding 'DB' not found.", 
+      tip: "Ensure your D1 database is bound to the variable name 'DB' in the Cloudflare Pages dashboard under Settings > Functions > D1 database bindings." 
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
   try {
     // Query Peptides from D1
     const { results: peptides } = await env.DB.prepare(
@@ -12,7 +23,6 @@ export async function onRequest(context) {
       "SELECT * FROM stacks ORDER BY rank ASC"
     ).all();
 
-    // Map stacks to include component lists if they are stored as JSON strings
     const stacks = stacksRaw.map(s => {
       try {
         return {
@@ -24,14 +34,23 @@ export async function onRequest(context) {
       }
     });
 
-    return new Response(JSON.stringify({ peptides, stacks }), {
+    return new Response(JSON.stringify({ 
+      peptides, 
+      stacks,
+      source: "Cloudflare D1 Database",
+      timestamp: new Date().toISOString()
+    }), {
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Cache-Control": "no-cache"
       },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message, details: "Ensure D1 binding name is 'DB' in wrangler.toml or dashboard." }), {
+    return new Response(JSON.stringify({ 
+      error: error.message, 
+      stack: error.stack,
+      context: "Error querying D1 tables 'peptides' or 'stacks'"
+    }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

@@ -210,8 +210,10 @@ function navigate(path, push = true) {
 async function init() {
     try {
         const res = await fetch('/api/peptides');
+        console.log("D1 Fetch Status:", res.status);
         if(res.ok) {
             const data = await res.json();
+            console.log("D1 Data Received:", data.source, data.peptides?.length, "items");
             if (data && data.peptides && data.peptides.length > 0) {
                 // Merge D1 data into our local archive to ensure nothing is missing
                 data.peptides.forEach(p => {
