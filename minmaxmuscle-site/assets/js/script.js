@@ -217,29 +217,29 @@ function navigate(path, push = true) {
 async function init() {
     try {
         const res = await fetch('/api/peptides');
-        console.log("D1 Fetch Status:", res.status);
         if(res.ok) {
             const data = await res.json();
-            console.log("D1 Data Received:", data.source, data.peptides?.length, "items");
             if (data && data.peptides && data.peptides.length > 0) {
-                // Merge D1 data into our local archive to ensure nothing is missing
-                data.peptides.forEach(p => {
-                    const idx = DB.peptides.findIndex(l => l.slug === p.slug);
-                    if (idx !== -1) {
-                        DB.peptides[idx] = { ...DB.peptides[idx], ...p };
-                    } else {
-                        DB.peptides.push(p);
-                    }
-                });
-                if (data.stacks && data.stacks.length > 0) DB.stacks = data.stacks;
-                // Re-sort by rank
-                DB.peptides.sort((a, b) => (a.rank || 99) - (b.rank || 99));
+                console.log("Authoritative D1 Data Loaded:", data.peptides.length, "peptides");
+                // OVERWRITE with D1 data
+                DB.peptides = data.peptides;
+                if (data.stacks) DB.stacks = data.stacks;
+            } else {
+                console.warn("D1 returned empty, using local archive");
             }
+        } else {
+            console.error("D1 API Response Error:", res.status);
         }
     } catch(e) {
-        console.warn("API unavailable, using internal archive", e);
+        console.warn("D1 API Connection Failed, using internal archive", e);
     }
     
+    // Ensure all entries have forum links (fallback to search if missing in D1)
+    DB.peptides = DB.peptides.map(p => ({
+        ...p,
+        forum_topic_url: p.forum_topic_url || `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(p.peptide_name)}`
+    }));
+
     renderP(DB.peptides);
     renderS(DB.stacks);
     handleURL();
