@@ -205,16 +205,24 @@ function navigate(path, push = true) {
  * Initialize application and fetch data
  */
 async function init() {
-    /* 
     try {
-        const fetchPath = window.location.origin.startsWith('http') ? new URL('/api/peptides', window.location.origin).href : '/api/peptides';
+        const fetchPath = '/api/peptides';
         const res = await fetch(fetchPath);
-        if(!res.ok) throw new Error("API unavailable");
-        DB = await res.json();
+        if(res.ok) {
+            const data = await res.json();
+            if (data && data.peptides && data.peptides.length > 0) {
+                // Merge forum links into fetched data if they don't exist
+                DB.peptides = data.peptides.map(p => {
+                    const local = DB.peptides.find(l => l.slug === p.slug);
+                    return { ...p, forum_topic_url: p.forum_topic_url || (local ? local.forum_topic_url : null) };
+                });
+                DB.stacks = data.stacks || DB.stacks;
+            }
+        }
     } catch(e) {
-        console.warn("API Error, falling back to empty database", e);
+        console.warn("API unavailable, using internal archive", e);
     }
-    */
+    
     renderP(DB.peptides);
     renderS(DB.stacks);
     handleURL();
