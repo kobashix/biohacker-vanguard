@@ -1,10 +1,9 @@
 /calculators.html  /calculators  301
 /peptides.html     /peptidesdb.html     301
 /stacks.html       /stacks       301
-/api/peptides      https://minmaxmuscle.com/api/peptides 200
 /about             /about.html          200
 /privacy           /privacy.html        200
 /terms             /terms.html          200
 /disclaimer        /disclaimer.html     200
-/peptide/:slug     /.netlify/functions/[slug] 200
+/peptide/:slug     /peptides/:slug      200
 /* /index.html 200

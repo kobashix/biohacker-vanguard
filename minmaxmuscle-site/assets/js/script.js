@@ -209,17 +209,22 @@ function navigate(path, push = true) {
  */
 async function init() {
     try {
-        const fetchPath = '/api/peptides';
-        const res = await fetch(fetchPath);
+        const res = await fetch('/api/peptides');
         if(res.ok) {
             const data = await res.json();
             if (data && data.peptides && data.peptides.length > 0) {
-                // Merge forum links into fetched data if they don't exist
-                DB.peptides = data.peptides.map(p => {
-                    const local = DB.peptides.find(l => l.slug === p.slug);
-                    return { ...p, forum_topic_url: p.forum_topic_url || (local ? local.forum_topic_url : null) };
+                // Merge D1 data into our local archive to ensure nothing is missing
+                data.peptides.forEach(p => {
+                    const idx = DB.peptides.findIndex(l => l.slug === p.slug);
+                    if (idx !== -1) {
+                        DB.peptides[idx] = { ...DB.peptides[idx], ...p };
+                    } else {
+                        DB.peptides.push(p);
+                    }
                 });
-                DB.stacks = data.stacks || DB.stacks;
+                if (data.stacks) DB.stacks = data.stacks;
+                // Re-sort by rank
+                DB.peptides.sort((a, b) => (a.rank || 99) - (b.rank || 99));
             }
         }
     } catch(e) {
@@ -312,7 +317,7 @@ function openPepDossier(slug, push = true) {
     
     const stacks = DB.stacks.filter(s => {
          if(s.component_list) {
-             return s.component_list.some(c => c.name.toLowerCase() === p.peptide_name.toLowerCase());
+             return s.component_list.some(c => c.slug === p.slug || c.name.toLowerCase() === p.peptide_name.toLowerCase());
          }
          return false;
     });
@@ -341,11 +346,6 @@ function openPepDossier(slug, push = true) {
                         <p class="text-xs font-black italic text-white group-hover:text-blue-400 transition">Discuss this protocol <i data-feather="external-link" class="inline w-2 h-2 ml-1"></i></p>
                     </a>
                 </div>
-
-                <a href="${p.forum_topic_url || forumUrl}" target="_blank" class="mt-8 w-full bg-white text-black py-4 rounded-xl font-black text-[10px] uppercase italic text-center hover:bg-blue-600 hover:text-white transition flex items-center justify-center gap-2 shadow-2xl">
-                    <i data-feather="message-circle" class="w-4 h-4"></i>
-                    Join Forum Discussion
-                </a>
             </div>
             <div class="md:col-span-8 p-12 relative">
                 <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-600 hover:text-white transition p-2 bg-white/5 rounded-full"><i data-feather="x" class="w-4 h-4"></i></button>
