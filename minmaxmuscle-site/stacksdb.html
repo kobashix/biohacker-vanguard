@@ -13,19 +13,33 @@
 
     <nav class="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
         <div class="nav-pill rounded-full px-4 py-2 flex items-center justify-between gap-4 w-full max-w-5xl shadow-2xl">
-            <a href="/" class="flex items-center gap-3 group">
+            <a href="/" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/'); return false; }" class="flex items-center gap-3 group">
                 <img src="https://minmaxmuscle.com/assets/img/logo.png" alt="MinMaxMuscle" class="w-8 h-8 rounded-full bg-white/5 object-contain">
                 <span class="font-bold hidden md:block italic tracking-tighter">MINMAXMUSCLE</span>
             </a>
-            
+
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5 overflow-x-auto">
-                <a href="/peptidesdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">PEPTIDES</a>
-                <a href="/stacksdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-white bg-blue-600 transition whitespace-nowrap">STACKS</a>
-                <a href="/#calculators" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">CALCULATORS</a>
+                <a href="/peptides" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/peptides'); return false; }" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-peptides">PEPTIDES</a>
+                <a href="/stacks" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/stacks'); return false; }" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-white bg-blue-600 transition whitespace-nowrap" id="nav-stacks">STACKS</a>
+                <a href="/#calculators" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/calculators'); return false; }" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-calculators">CALCULATORS</a>
                 <a href="https://blog.minmaxmuscle.com/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">BLOG</a>
                 <a href="https://blog.minmaxmuscle.com/forum/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">FORUMS</a>
-                <a href="/#coaching" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">COACHING</a>
+                <a href="/#coaching" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/coaching'); return false; }" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-white bg-blue-600 hover:bg-blue-500 transition whitespace-nowrap" id="nav-coaching">COACHING</a>
             </div>
+
+            <button class="md:hidden text-white" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <i data-feather="menu"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden fixed top-20 left-4 right-4 bg-[#111] border border-white/10 rounded-2xl p-4 flex flex-col gap-2 shadow-2xl z-50">
+             <a href="/peptides" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/peptides'); return false; }" class="text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-gray-300">PEPTIDES</a>
+             <a href="/stacks" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/stacks'); return false; }" class="text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-gray-300">STACKS</a>
+             <a href="/#calculators" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/calculators'); return false; }" class="text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-gray-300">CALCULATORS</a>
+             <a href="https://blog.minmaxmuscle.com/" class="text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-gray-300">BLOG</a>
+             <a href="https://blog.minmaxmuscle.com/forum/" class="text-left px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-gray-300">FORUMS</a>
+             <a href="/#coaching" onclick="if(location.pathname==='/' || location.pathname=='/index.html') { navigate('/coaching'); return false; }" class="text-left px-4 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold mt-2 text-center">COACHING</a>
         </div>
     </nav>
 
