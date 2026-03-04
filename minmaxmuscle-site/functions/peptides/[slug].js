@@ -30,6 +30,7 @@ exports.handler = async (event, context) => {
             .replace(/{{nicknames}}/g, peptide.nicknames || 'N/A')
             .replace(/{{Status}}/g, peptide.Status || 'Active Research')
             .replace(/{{rank}}/g, peptide.rank || '0')
+            .replace(/{{forum_url}}/g, peptide.forum_topic_url || `https://blog.minmaxmuscle.com/forum/?forumaction=search&search_keywords=${encodeURIComponent(peptide.peptide_name)}`)
             .replace(/{{research_summary}}/g, peptide.primary_focus || peptide.research_summary)
             .replace(/{{molecular_data}}/g, peptide.molecular_data || 'Data Classified - Review Clinical Literature')
             .replace(/{{FAQs}}/g, renderFAQs(peptide))
