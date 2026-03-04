@@ -221,14 +221,10 @@ async function init() {
             const data = await res.json();
             if (data && data.peptides && data.peptides.length > 0) {
                 console.log("Authoritative D1 Data Loaded:", data.peptides.length, "peptides");
-                // OVERWRITE with D1 data
+                // OVERWRITE with D1 data to reflect actual database state
                 DB.peptides = data.peptides;
                 if (data.stacks) DB.stacks = data.stacks;
-            } else {
-                console.warn("D1 returned empty, using local archive");
             }
-        } else {
-            console.error("D1 API Response Error:", res.status);
         }
     } catch(e) {
         console.warn("D1 API Connection Failed, using internal archive", e);
@@ -420,7 +416,7 @@ function openStackDossier(slug, push = true) {
                     }).join('') : '<p class="text-gray-500 text-xs italic">No specific components listed.</p>'}
                 </div>
 
-                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i]}</p></details>` : '').join('')}</div>` : ''}
+                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i] || 'Details pending.'}</p></details>` : '').join('')}</div>` : ''}
             </div>
         </div>
     `;
