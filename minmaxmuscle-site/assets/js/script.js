@@ -8,6 +8,7 @@ const ROUTES = {
     '/peptides': { id: 'view-peptides', title: 'Peptide Database | MINMAXMUSCLE' },
     '/peptidesdb.html': { id: 'view-peptides', title: 'Peptide Database | MINMAXMUSCLE' },
     '/stacks': { id: 'view-stacks', title: 'Protocol Stacks | MINMAXMUSCLE' },
+    '/stacksdb.html': { id: 'view-stacks', title: 'Protocol Stacks | MINMAXMUSCLE' },
     '/calculators': { id: 'view-calculators', title: 'Peptide Calculators | MINMAXMUSCLE' },
     '/coaching': { id: 'view-coaching', title: 'Performance Coaching | MINMAXMUSCLE' },
     '/about': { id: 'view-about', title: 'About Us | MINMAXMUSCLE' },
@@ -175,6 +176,11 @@ function navigate(path, push = true) {
         window.location.href = '/peptidesdb.html';
         return;
     }
+    // Redirect /stacks to the standalone DB page if not on index.html
+    if (path === '/stacks' && !document.getElementById('view-stacks')) {
+        window.location.href = '/stacksdb.html';
+        return;
+    }
 
     const routeData = ROUTES[path] || ROUTES['/'];
     if (!routeData) return;
@@ -193,7 +199,8 @@ function navigate(path, push = true) {
     
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     const lid = 'nav-' + path.replace('/', '');
-    if(document.getElementById(lid)) document.getElementById(lid).classList.add('active');
+    const navEl = document.getElementById(lid);
+    if(navEl) navEl.classList.add('active');
     
     if (push) window.history.pushState({}, '', path);
     window.scrollTo(0, 0);
@@ -224,7 +231,7 @@ async function init() {
                         DB.peptides.push(p);
                     }
                 });
-                if (data.stacks) DB.stacks = data.stacks;
+                if (data.stacks && data.stacks.length > 0) DB.stacks = data.stacks;
                 // Re-sort by rank
                 DB.peptides.sort((a, b) => (a.rank || 99) - (b.rank || 99));
             }
@@ -319,7 +326,7 @@ function openPepDossier(slug, push = true) {
     
     const stacks = DB.stacks.filter(s => {
          if(s.component_list) {
-             return s.component_list.some(c => c.slug === p.slug || c.name.toLowerCase() === p.peptide_name.toLowerCase());
+             return s.component_list.some(c => c.slug === p.slug || (c.name && c.name.toLowerCase() === p.peptide_name.toLowerCase()));
          }
          return false;
     });
@@ -404,7 +411,7 @@ function openStackDossier(slug, push = true) {
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
                     ${comps.length > 0 ? comps.map(c => {
-                        const found = DB.peptides.find(p => p.slug === c.slug || p.peptide_name.toLowerCase() === c.name.toLowerCase());
+                        const found = DB.peptides.find(p => p.slug === c.slug || (c.name && p.peptide_name.toLowerCase() === c.name.toLowerCase()));
                         return `<div ${found ? `onclick="openPepDossier('${found.slug}')"` : ''} class="p-6 bg-white/5 border border-white/10 rounded-2xl flex flex-col justify-between ${found ? 'cursor-pointer hover:border-blue-500/30' : 'opacity-40'} group">
                             <span class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">COMPONENT</span>
                             <span class="font-black uppercase italic text-xl group-hover:text-blue-500 transition mb-2">${c.name}</span>
@@ -413,7 +420,7 @@ function openStackDossier(slug, push = true) {
                     }).join('') : '<p class="text-gray-500 text-xs italic">No specific components listed.</p>'}
                 </div>
 
-                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i]}</p></details>` : '').join('')}</div>` : ''}
+                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i] || 'Details pending.'}</p></details>` : '').join('')}</div>` : ''}
             </div>
         </div>
     `;
@@ -451,7 +458,7 @@ function closeModal() {
     
     const curr = window.location.pathname;
     if (curr.includes('/peptide/') || curr.includes('/stack/')) {
-        const fallback = curr.includes('/peptide/') ? '/peptides' : '/stacks';
+        const fallback = curr.includes('/peptide/') ? '/peptidesdb.html' : '/stacksdb.html';
         window.history.pushState({}, '', fallback);
         document.title = "MINMAXMUSCLE | Peak Human Performance";
     }

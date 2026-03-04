@@ -23,12 +23,11 @@
             <!-- [ISSUE 13] Correct Menu Structure (Removed Training/Nutrition) -->
             <div class="hidden md:flex gap-1 bg-black/20 rounded-full p-1 border border-white/5 overflow-x-auto">
                 <a href="/peptidesdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-peptides">PEPTIDES</a>
-                <button onclick="navigate('/stacks')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-stacks">STACKS</button>
-                <button onclick="navigate('/calculators')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-calculators">CALCULATORS</button>
-                <!-- [ISSUE 9 & 10] Removed target="_blank" -->
+                <a href="/stacksdb.html" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-stacks">STACKS</a>
+                <a href="/#calculators" onclick="navigate('/calculators'); return false;" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-calculators">CALCULATORS</a>
                 <a href="https://blog.minmaxmuscle.com/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">BLOG</a>
                 <a href="https://blog.minmaxmuscle.com/forum/" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap">FORUMS</a>
-                <button onclick="navigate('/coaching')" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-gray-400 hover:text-white transition whitespace-nowrap" id="nav-coaching">COACHING</button>
+                <a href="/#coaching" onclick="navigate('/coaching'); return false;" class="nav-link px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-white bg-blue-600 hover:bg-blue-500 transition whitespace-nowrap" id="nav-coaching">COACHING</a>
             </div>
             
             <button class="md:hidden text-white" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
