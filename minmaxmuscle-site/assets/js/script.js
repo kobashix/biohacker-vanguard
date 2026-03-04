@@ -420,7 +420,7 @@ function openStackDossier(slug, push = true) {
                     }).join('') : '<p class="text-gray-500 text-xs italic">No specific components listed.</p>'}
                 </div>
 
-                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i] || 'Details pending.'}</p></details>` : '').join('')}</div>` : ''}
+                ${q.length && q[0] ? `<h4 class="text-[10px] font-black text-gray-600 uppercase mb-4 italic tracking-widest">Protocol Intelligence</h4><div class="space-y-2">${q.map((qi, i) => qi ? `<details class="bg-white/5 rounded-2xl group"><summary class="p-5 cursor-pointer font-bold text-sm flex justify-between italic uppercase leading-none">${qi}<i data-feather="chevron-down" class="w-4 h-4 text-gray-600 group-open:rotate-180 transition"></i></summary><p class="p-5 pt-0 text-sm text-gray-400 border-t border-white/5 leading-relaxed mt-4">${a[i]}</p></details>` : '').join('')}</div>` : ''}
             </div>
         </div>
     `;

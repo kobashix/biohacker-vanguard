@@ -1,10 +1,22 @@
 /calculators.html  /calculators  301
 /peptides.html     /peptidesdb.html     301
 /stacks.html       /stacksdb.html       301
-/api/peptides      /api/peptides        200
+
+# SPA Routes (Explicit mapping to prevent catch-all from stealing Function traffic)
+/peptides          /index.html          200
+/stacks            /index.html          200
+/calculators       /index.html          200
+/coaching          /index.html          200
+
+# Static Page Routes
 /about             /about.html          200
 /privacy           /privacy.html        200
 /terms             /terms.html          200
 /disclaimer        /disclaimer.html     200
+
+# Function Routes (No redirect needed, Cloudflare will fall through if no static file/redirect exists)
+# We keep these here for clarity and to ensure they aren't caught by a broad rule
 /peptide/:slug     /peptides/:slug      200
+
+# Broad catch-all (Only if not caught by above)
 /* /index.html 200
