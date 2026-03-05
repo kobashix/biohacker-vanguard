@@ -1,25 +1,30 @@
 "use client";
 
 import { PackageOpen } from "lucide-react";
-import Decimal from "decimal.js";
+import { useSubscribe } from "replicache-react";
+import { getReplicache, Vial } from "@/replicache";
 import { estimateRemainingDoses } from "@/inventory";
-import { NEEDLE_DEAD_SPACE_ML } from "@/math";
 
-export function InventoryAlerts() {
-  const inventory = [
-    { id: "1", name: "BPC-157 (5mg)", status: "Active", remaining_ml: new Decimal(2.1), avg_dose_iu: 25 },
-    { id: "2", name: "TB-500 (10mg)", status: "Low Stock", remaining_ml: new Decimal(0.8), avg_dose_iu: 50 },
-    { id: "3", name: "Ipamorelin (2mg)", status: "Active", remaining_ml: new Decimal(1.5), avg_dose_iu: 20 },
-  ];
+export function InventoryAlerts({ userId }: { userId: string }) {
+  const rep = getReplicache(userId);
+
+  const vials = useSubscribe(
+    rep,
+    async (tx) => {
+      const list = await tx.scan({ prefix: "vial/" }).values().toArray();
+      return list as Vial[];
+    },
+    { default: [] }
+  );
 
   return (
     <div className="card">
       <div className="card-header">
         <h3 className="card-title">
           <PackageOpen className="h-5 w-5 text-primary" />
-          Inventory & Adherence Logic
+          Adherence & Predictive Depletion
         </h3>
-        <p className="card-description">Calibrated for {NEEDLE_DEAD_SPACE_ML.toString()}mL needle dead space</p>
+        <p className="card-description">Live stock monitoring based on logged doses</p>
       </div>
       <div className="card-content" style={{ padding: "0" }}>
         <div className="table-wrapper">
@@ -33,14 +38,21 @@ export function InventoryAlerts() {
               </tr>
             </thead>
             <tbody>
-              {inventory.map((item) => {
-                const doses = estimateRemainingDoses(item.remaining_ml, item.avg_dose_iu);
+              {vials.length === 0 && (
+                <tr>
+                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>
+                    No inventory data available.
+                  </td>
+                </tr>
+              )}
+              {vials.map((item) => {
+                const doses = estimateRemainingDoses(item.remaining_volume_ml, 25); // Using 25 IU as default estimate
                 const isLow = doses < 5;
                 
                 return (
                   <tr key={item.id}>
                     <td style={{ fontWeight: 500 }}>{item.name}</td>
-                    <td>{item.remaining_ml.toString()} mL</td>
+                    <td>{item.remaining_volume_ml.toFixed(2)} mL</td>
                     <td>{doses}</td>
                     <td>
                       <span 

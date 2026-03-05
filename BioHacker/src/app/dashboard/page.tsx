@@ -1,48 +1,79 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
 import { PKChart } from "@/components/PKChart";
 import { InventoryAlerts } from "@/components/InventoryAlerts";
-import { ShieldCheck, LogOut } from "lucide-react";
+import { VialManager } from "@/components/VialManager";
+import { ShieldCheck, LogOut, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+      } else {
+        setUser(user);
+      }
+      setLoading(false);
+    };
+    getUser();
+  }, [supabase, router]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  if (loading) {
+    return (
+      <div className="app-container" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
   return (
     <div className="app-container">
       <header className="header">
         <div className="header-title">
           Vanguard Pro <span className="header-badge">v2.0</span>
         </div>
-        <div className="encryption-badge">
-          <ShieldCheck className="h-4 w-4" />
-          JWE Client-Side Encryption Active
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="encryption-badge">
+            <ShieldCheck className="h-4 w-4" />
+            JWE Active: {user.email}
+          </div>
+          <button onClick={handleSignOut} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', border: 'none' }}>
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </header>
 
       <main className="main-content">
         <aside className="sidebar">
           <ReconstitutionEngine />
-          <InventoryAlerts />
+          <VialManager userId={user.id} />
         </aside>
 
         <section className="content-area">
           <PKChart />
-          
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Zero-Knowledge Architecture</h3>
-              <p className="card-description">Security guarantees for your telemetry data</p>
-            </div>
-            <div className="card-content">
-              <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
-                <div style={{ padding: "1rem", backgroundColor: "var(--background)", borderRadius: "var(--radius)", border: "1px solid var(--border)" }}>
-                  <h4 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>WebCrypto API</h4>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>All drug and dose data are encrypted locally before transmission. The server only sees JWE strings.</p>
-                </div>
-                <div style={{ padding: "1rem", backgroundColor: "var(--background)", borderRadius: "var(--radius)", border: "1px solid var(--border)" }}>
-                  <h4 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>PostgreSQL RLS</h4>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Multi-tenant isolation enforced at the database level using Supabase Row-Level Security.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <InventoryAlerts userId={user.id} />
         </section>
       </main>
     </div>
