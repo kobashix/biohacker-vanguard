@@ -1,50 +1,49 @@
-import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
-import { PKChart } from "@/components/PKChart";
-import { InventoryAlerts } from "@/components/InventoryAlerts";
-import { ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Activity, Calculator, PackageOpen } from "lucide-react";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="app-container">
-      <header className="header">
-        <div className="header-title">
-          Vanguard Pro <span className="header-badge">v2.0</span>
-        </div>
-        <div className="encryption-badge">
-          <ShieldCheck className="h-4 w-4" />
-          JWE Client-Side Encryption Active
-        </div>
+    <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
+      <header style={{ marginBottom: '3rem' }}>
+        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, letterSpacing: '-0.05em', marginBottom: '1rem' }}>
+          VANGUARD <span style={{ color: 'var(--primary)' }}>PRO</span>
+        </h1>
+        <p style={{ fontSize: '1.25rem', color: 'var(--muted-foreground)', maxWidth: '600px', margin: '0 auto' }}>
+          The world's first clinical-grade, zero-knowledge bio-tracking platform. 
+          Absolute precision, total privacy.
+        </p>
       </header>
 
-      <main className="main-content">
-        <aside className="sidebar">
-          <ReconstitutionEngine />
-          <InventoryAlerts />
-        </aside>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', maxWidth: '1200px', width: '100%', marginBottom: '4rem' }}>
+        <div className="card" style={{ padding: '2rem' }}>
+          <Calculator className="h-8 w-8 text-primary" style={{ marginBottom: '1rem' }} />
+          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Precision Math Engine</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Decimal.js powered reconstitution logic with calibrated needle dead-space calculations.</p>
+        </div>
+        <div className="card" style={{ padding: '2rem' }}>
+          <Activity className="h-8 w-8 text-primary" style={{ marginBottom: '1rem' }} />
+          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Pharmacokinetic Modeling</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Multi-compartment exponential decay models for complex pharmaceutical regimens.</p>
+        </div>
+        <div className="card" style={{ padding: '2rem' }}>
+          <ShieldCheck className="h-8 w-8 text-primary" style={{ marginBottom: '1rem' }} />
+          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Zero-Knowledge E2EE</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Your data is encrypted on your device using WebCrypto. We can't see it, even if we wanted to.</p>
+        </div>
+      </div>
 
-        <section className="content-area">
-          <PKChart />
-          
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Zero-Knowledge Architecture</h3>
-              <p className="card-description">Security guarantees for your telemetry data</p>
-            </div>
-            <div className="card-content">
-              <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
-                <div style={{ padding: "1rem", backgroundColor: "var(--background)", borderRadius: "var(--radius)", border: "1px solid var(--border)" }}>
-                  <h4 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>WebCrypto API</h4>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>All drug and dose data are encrypted locally before transmission. The server only sees JWE strings.</p>
-                </div>
-                <div style={{ padding: "1rem", backgroundColor: "var(--background)", borderRadius: "var(--radius)", border: "1px solid var(--border)" }}>
-                  <h4 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>PostgreSQL RLS</h4>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Multi-tenant isolation enforced at the database level using Supabase Row-Level Security.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
+          Log In
+        </Link>
+        <Link href="/login" className="btn btn-outline" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
+          Create Account
+        </Link>
+      </div>
+
+      <footer style={{ marginTop: '5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
+        © 2026 Vanguard Pro. Enterprise Grade Bio-Analytics.
+      </footer>
     </div>
   );
 }

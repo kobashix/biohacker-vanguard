@@ -42,3 +42,4 @@ next-env.d.ts
 
 .vercel
 BioHacker day 1.png
+.env*.local
