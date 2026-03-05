@@ -20,11 +20,11 @@ export function calculateVolumeDeduction(dose_iu: number | string | Decimal): De
  * Estimates the remaining number of doses in a vial (liquid or pill).
  */
 export function estimateRemainingDoses(
-  vial: { status: string; remaining_volume_ml: number; remaining_pills?: number },
+  vial: { status: string; remaining_volume_ml: number; pill_count?: number },
   average_dose_val: number | Decimal // IU for liquid, count for pills
 ): number {
   if (vial.status === 'pill') {
-    const rem = new Decimal(vial.remaining_pills || 0);
+    const rem = new Decimal(vial.pill_count || 0);
     const dose = new Decimal(average_dose_val || 1);
     if (dose.isZero()) return 0;
     return rem.dividedBy(dose).floor().toNumber();
