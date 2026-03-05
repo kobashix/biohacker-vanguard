@@ -5,7 +5,7 @@ import { NEEDLE_DEAD_SPACE_ML } from './math';
 export type Compound = {
   name: string;
   mass_mg: number;
-  unit: 'mg' | 'IU';
+  unit: 'mg' | 'IU' | 'g';
 };
 
 export type Vial = {
@@ -22,8 +22,9 @@ export type DoseLog = {
   id: string;
   vial_id: string;
   substance: string;
-  dose_mcg: number;
-  units_iu: number;
+  dose_amount: number; // The raw numerical amount (mcg, mg, IU, or count)
+  unit: string; // The display unit used for this log
+  units_iu: number; // Volume deduction in IU (0 for pills/powders)
   timestamp: number;
 };
 
@@ -63,16 +64,17 @@ const mutators = {
       if (vial.status === 'pill') {
         const updatedVial = {
           ...vial,
-          pill_count: Math.max(0, (vial.pill_count || 0) - log.dose_mcg),
+          pill_count: Math.max(0, (vial.pill_count || 0) - log.dose_amount),
         };
         await tx.set(`vial/${vial.id}`, updatedVial);
-      } else {
+      } else if (vial.status === 'mixed') {
         const updatedVial = {
           ...vial,
           remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - NEEDLE_DEAD_SPACE_ML.toNumber()), 
         };
         await tx.set(`vial/${vial.id}`, updatedVial);
       }
+      // Note: Powder logic for active use can be added here if needed for mass-based decrement
     }
   },
 };
