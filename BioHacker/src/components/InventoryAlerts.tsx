@@ -57,7 +57,7 @@ export function InventoryAlerts({ userId }: { userId: string }) {
                     <td style={{ fontWeight: 500 }}>{item.name}</td>
                     <td>
                       {item.status === 'pill' 
-                        ? `${item.remaining_pills} pills` 
+                        ? `${item.pill_count} pills` 
                         : `${item.remaining_volume_ml.toFixed(2)} mL`}
                     </td>
                     <td>{doses}</td>
