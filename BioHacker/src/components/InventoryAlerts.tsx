@@ -8,11 +8,12 @@ import { estimateRemainingDoses } from "@/inventory";
 export function InventoryAlerts({ userId }: { userId: string }) {
   const rep = getReplicache(userId);
 
-  const vials = useSubscribe(
+  // Filter for only reconstituted vials for the predictive depletion math
+  const activeVials = useSubscribe(
     rep,
     async (tx) => {
       const list = await tx.scan({ prefix: "vial/" }).values().toArray();
-      return list as Vial[];
+      return (list as Vial[]).filter(v => v.status === 'reconstituted');
     },
     { default: [] }
   );
@@ -22,31 +23,31 @@ export function InventoryAlerts({ userId }: { userId: string }) {
       <div className="card-header">
         <h3 className="card-title">
           <PackageOpen className="h-5 w-5 text-primary" />
-          Adherence & Predictive Depletion
+          Active Cycle Monitoring
         </h3>
-        <p className="card-description">Live stock monitoring based on logged doses</p>
+        <p className="card-description">Predictive depletion for mixed compounds</p>
       </div>
       <div className="card-content" style={{ padding: "0" }}>
         <div className="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Compound</th>
+                <th>Active Vial</th>
                 <th>Remaining</th>
                 <th>Est. Doses</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {vials.length === 0 && (
+              {activeVials.length === 0 && (
                 <tr>
                   <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>
-                    No inventory data available.
+                    No active (reconstituted) vials found.
                   </td>
                 </tr>
               )}
-              {vials.map((item) => {
-                const doses = estimateRemainingDoses(item.remaining_volume_ml, 25); // Using 25 IU as default estimate
+              {activeVials.map((item) => {
+                const doses = estimateRemainingDoses(item.remaining_volume_ml, 25);
                 const isLow = doses < 5;
                 
                 return (
