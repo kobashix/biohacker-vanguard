@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (name === 'deleteVial') {
+      await supabase.from('vials').delete().eq('id', args).eq('user_id', session.user.id);
+    }
+
     if (name === 'logDose') {
       await supabase.from('dose_logs').insert({
         id: args.id,

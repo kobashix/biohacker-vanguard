@@ -24,6 +24,9 @@ const mutators = {
   createVial: async (tx: WriteTransaction, vial: Vial) => {
     await tx.set(`vial/${vial.id}`, vial);
   },
+  deleteVial: async (tx: WriteTransaction, id: string) => {
+    await tx.del(`vial/${id}`);
+  },
   logDose: async (tx: WriteTransaction, log: DoseLog) => {
     await tx.set(`log/${log.id}`, log);
     
