@@ -4,7 +4,15 @@ import { useMemo } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
 import { Calendar as CalendarIcon, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { format, addHours, startOfDay, endOfDay, isWithinInterval, isPast } from "date-fns";
+import { format } from "date-fns";
+
+interface TimelineItem {
+  type: 'log' | 'projection';
+  timestamp: number;
+  label: string;
+  amount: string;
+  status: 'completed' | 'upcoming' | 'missed';
+}
 
 export function DosageCalendar({ userId }: { userId: string }) {
   const rep = getReplicache(userId);
@@ -24,10 +32,8 @@ export function DosageCalendar({ userId }: { userId: string }) {
     return list as Vial[];
   }, { default: [] });
 
-  // Generate roadmap for the next 48 hours
   const roadmap = useMemo(() => {
-    const today = new Date();
-    const timeline = [];
+    const timeline: TimelineItem[] = [];
 
     // 1. Process Past Logs (Last 24h)
     logs.filter(l => l.timestamp > Date.now() - 24 * 3600000).forEach(log => {
@@ -45,7 +51,6 @@ export function DosageCalendar({ userId }: { userId: string }) {
       const vial = vials.find(v => v.id === protocol.vial_id);
       if (!vial) return;
 
-      // Find the last log for this protocol
       const lastLog = [...logs]
         .filter(l => l.vial_id === protocol.vial_id)
         .sort((a, b) => b.timestamp - a.timestamp)[0];
@@ -54,7 +59,6 @@ export function DosageCalendar({ userId }: { userId: string }) {
         ? lastLog.timestamp + (protocol.frequency_hours * 3600000)
         : protocol.start_time;
 
-      // project forward for 48 hours
       while (nextDoseTime < Date.now() + 48 * 3600000) {
         if (nextDoseTime > Date.now()) {
           timeline.push({
@@ -65,7 +69,6 @@ export function DosageCalendar({ userId }: { userId: string }) {
             status: 'upcoming'
           });
         } else if (nextDoseTime < Date.now() && (!lastLog || lastLog.timestamp < nextDoseTime - 3600000)) {
-          // It's in the past and no log exists within 1 hour of it
           timeline.push({
             type: 'projection',
             timestamp: nextDoseTime,
@@ -88,7 +91,7 @@ export function DosageCalendar({ userId }: { userId: string }) {
           <CalendarIcon className="h-5 w-5 text-primary" />
           Dosage Roadmap
         </h3>
-        <p className="card-description">Confirmed logs and projected schedule (Next 48h)</p>
+        <p className="card-description">Logs and projections (Next 48h)</p>
       </div>
       <div className="card-content">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
