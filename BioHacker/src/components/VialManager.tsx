@@ -11,7 +11,7 @@ import Decimal from "decimal.js";
 export function VialManager({ userId }: { userId: string }) {
   // Form State
   const [vialName, setVialName] = useState("");
-  const [compounds, setCompounds] = useState<Compound[]>([{ name: "BPC-157", mass_mg: 5, unit: 'mg' }]);
+  const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
   const [volume, setVolume] = useState("2");
   const [count, setCount] = useState("1");
   const [status, setStatus] = useState<'powder' | 'mixed' | 'pill'>('powder');
@@ -34,7 +34,7 @@ export function VialManager({ userId }: { userId: string }) {
   const stackedVials = useMemo(() => {
     const groups: Record<string, { vial: Vial; count: number; ids: string[] }> = {};
     rawVials.forEach(v => {
-      const compoundsKey = (v.compounds || []).map(c => `${c.name}:${c.mass_mg}:${c.unit}`).join('|');
+      const compoundsKey = (v.compounds || []).map(c => `${c.name}:${c.mass_mg}:${c.unit || 'mg'}`).join('|');
       const key = `${v.status}-${compoundsKey}-${v.volume_ml}-${v.remaining_volume_ml}-${v.remaining_pills}`;
       if (!groups[key]) groups[key] = { vial: v, count: 0, ids: [] };
       groups[key].count++;
@@ -62,7 +62,7 @@ export function VialManager({ userId }: { userId: string }) {
         remaining_pills: status === 'pill' ? parseInt(volume) : undefined,
       });
     }
-    setIsAdding(false);
+    setVialName(""); setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]); setIsAdding(false);
   };
 
   const handleUpdateVial = async (e: React.FormEvent) => {
@@ -136,7 +136,7 @@ export function VialManager({ userId }: { userId: string }) {
                     n[idx].mass_mg = parseFloat(e.target.value);
                     editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
                   }} required />
-                  <select className="form-input" value={c.unit} onChange={e => {
+                  <select className="form-input" value={c.unit || 'mg'} onChange={e => {
                     const n = [...(editingVial ? editingVial.compounds : compounds)];
                     n[idx].unit = e.target.value as any;
                     editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
@@ -205,7 +205,7 @@ export function VialManager({ userId }: { userId: string }) {
                   <div>
                     <div style={{ fontWeight: 600 }}>{group.vial.name} {group.count > 1 && <span style={{ color: 'var(--primary)' }}>x{group.count}</span>}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-                      {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit} ${c.name}`).join(' + ')} 
+                      {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')} 
                       {group.vial.status === 'mixed' ? ` | ${group.vial.remaining_volume_ml.toFixed(2)}mL rem.` : group.vial.status === 'pill' ? ` | ${group.vial.remaining_pills} pills rem.` : ' | Powder (Dry)'}
                     </div>
                   </div>

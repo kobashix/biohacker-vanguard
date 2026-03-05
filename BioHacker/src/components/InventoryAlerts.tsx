@@ -23,16 +23,16 @@ export function InventoryAlerts({ userId }: { userId: string }) {
       <div className="card-header">
         <h3 className="card-title">
           <PackageOpen className="h-5 w-5 text-primary" />
-          Active Cycle Monitoring
+          Active Monitoring
         </h3>
-        <p className="card-description">Predictive depletion for mixed compounds</p>
+        <p className="card-description">Predictive depletion for active compounds</p>
       </div>
       <div className="card-content" style={{ padding: "0" }}>
         <div className="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Active Vial</th>
+                <th>Item</th>
                 <th>Remaining</th>
                 <th>Est. Doses</th>
                 <th>Status</th>
@@ -42,18 +42,24 @@ export function InventoryAlerts({ userId }: { userId: string }) {
               {activeVials.length === 0 && (
                 <tr>
                   <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>
-                    No active (reconstituted) vials found.
+                    No active (mixed or pill) compounds found.
                   </td>
                 </tr>
               )}
               {activeVials.map((item) => {
-                const doses = estimateRemainingDoses(item.remaining_volume_ml, 25);
+                // For estimation: 25 IU for liquid, 1 pill for orals
+                const doseVal = item.status === 'pill' ? 1 : 25;
+                const doses = estimateRemainingDoses(item, doseVal);
                 const isLow = doses < 5;
                 
                 return (
                   <tr key={item.id}>
                     <td style={{ fontWeight: 500 }}>{item.name}</td>
-                    <td>{item.remaining_volume_ml.toFixed(2)} mL</td>
+                    <td>
+                      {item.status === 'pill' 
+                        ? `${item.remaining_pills} pills` 
+                        : `${item.remaining_volume_ml.toFixed(2)} mL`}
+                    </td>
                     <td>{doses}</td>
                     <td>
                       <span 
