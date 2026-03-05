@@ -8,12 +8,12 @@ import { estimateRemainingDoses } from "@/inventory";
 export function InventoryAlerts({ userId }: { userId: string }) {
   const rep = getReplicache(userId);
 
-  // Filter for only reconstituted vials for the predictive depletion math
+  // Filter for mixed (liquid) or pill vials for the predictive depletion math
   const activeVials = useSubscribe(
     rep,
     async (tx) => {
       const list = await tx.scan({ prefix: "vial/" }).values().toArray();
-      return (list as Vial[]).filter(v => v.status === 'reconstituted');
+      return (list as Vial[]).filter(v => v.status === 'mixed' || v.status === 'pill');
     },
     { default: [] }
   );
