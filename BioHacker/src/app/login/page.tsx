@@ -63,7 +63,7 @@ export default function LoginPage() {
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </h1>
           <p className="card-description">
-            Vanguard Pro Zero-Knowledge Portal
+            BioHacker (by MMM) Zero-Knowledge Portal
           </p>
         </div>
         

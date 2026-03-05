@@ -52,7 +52,7 @@ export default function DashboardPage() {
     <div className="app-container">
       <header className="header">
         <div className="header-title">
-          Vanguard Pro <span className="header-badge">v2.0</span>
+          BioHacker (by MMM) <span className="header-badge">v2.0</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div className="encryption-badge">

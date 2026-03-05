@@ -6,7 +6,7 @@ export default function LandingPage() {
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
       <header style={{ marginBottom: '3rem' }}>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 800, letterSpacing: '-0.05em', marginBottom: '1rem' }}>
-          VANGUARD <span style={{ color: 'var(--primary)' }}>PRO</span>
+          BIOHACKER <span style={{ color: 'var(--primary)' }}>PRO</span>
         </h1>
         <p style={{ fontSize: '1.25rem', color: 'var(--muted-foreground)', maxWidth: '600px', margin: '0 auto' }}>
           The world's first clinical-grade, zero-knowledge bio-tracking platform. 
@@ -42,7 +42,7 @@ export default function LandingPage() {
       </div>
 
       <footer style={{ marginTop: '5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-        © 2026 Vanguard Pro. Enterprise Grade Bio-Analytics.
+        © 2026 BioHacker (by MMM). Enterprise Grade Bio-Analytics.
       </footer>
     </div>
   );
