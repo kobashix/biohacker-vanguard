@@ -24,6 +24,12 @@ const mutators = {
   createVial: async (tx: WriteTransaction, vial: Vial) => {
     await tx.set(`vial/${vial.id}`, vial);
   },
+  updateVial: async (tx: WriteTransaction, update: Partial<Vial> & { id: string }) => {
+    const prev = (await tx.get(`vial/${update.id}`)) as Vial | undefined;
+    if (prev) {
+      await tx.set(`vial/${update.id}`, { ...prev, ...update });
+    }
+  },
   deleteVial: async (tx: WriteTransaction, id: string) => {
     await tx.del(`vial/${id}`);
   },
@@ -35,7 +41,7 @@ const mutators = {
     if (vial) {
       const updatedVial = {
         ...vial,
-        remaining_volume_ml: vial.remaining_volume_ml - (log.units_iu / 100) - 0.05, // 0.05mL dead space
+        remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - 0.05), // 0.05mL dead space
       };
       await tx.set(`vial/${vial.id}`, updatedVial);
     }

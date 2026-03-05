@@ -41,18 +41,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (name === 'updateVial') {
+      await supabase.from('vials').update({
+        encrypted_payload: JSON.stringify(args),
+        remaining_volume_ml: args.remaining_volume_ml
+      }).eq('id', args.id).eq('user_id', session.user.id);
+    }
+
     if (name === 'deleteVial') {
       await supabase.from('vials').delete().eq('id', args).eq('user_id', session.user.id);
     }
 
     if (name === 'logDose') {
+      // 1. Record the log
       await supabase.from('dose_logs').insert({
         id: args.id,
         user_id: session.user.id,
         vial_id: args.vial_id,
         encrypted_payload: JSON.stringify(args),
-        dosage_iu: args.dosage_iu,
+        dosage_iu: args.units_iu,
       });
+
+      // 2. Decrement vial volume in DB
+      const { data: vial } = await supabase.from('vials').select('remaining_volume_ml').eq('id', args.vial_id).single();
+      if (vial) {
+        const newVol = Math.max(0, vial.remaining_volume_ml - (args.units_iu / 100) - 0.05);
+        await supabase.from('vials').update({ remaining_volume_ml: newVol }).eq('id', args.vial_id);
+      }
     }
   }
 
