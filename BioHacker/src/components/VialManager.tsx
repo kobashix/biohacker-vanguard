@@ -9,22 +9,20 @@ import { calculateRequiredUnits } from "@/math";
 import Decimal from "decimal.js";
 
 export function VialManager({ userId }: { userId: string }) {
-  // Form State
   const [vialName, setVialName] = useState("");
   const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
   const [volume, setVolume] = useState("2");
   const [count, setCount] = useState("1");
   const [status, setStatus] = useState<'powder' | 'mixed' | 'pill'>('powder');
   const [isAdding, setIsAdding] = useState(false);
-  
-  // UI States
   const [editingVial, setEditingVial] = useState<Vial | null>(null);
   const [loggingVial, setLoggingVial] = useState<Vial | null>(null);
   const [schedulingVial, setSchedulingVial] = useState<Vial | null>(null);
   
   // Protocol Form State
-  const [doseAmount, setDoseAmount] = useState("2");
+  const [doseAmount, setDoseAmount] = useState("250");
   const [frequency, setFrequency] = useState("24");
+  const [targetCompoundIndex, setTargetCompoundIndex] = useState(0);
 
   const rep = getReplicache(userId);
   const rawVials = useSubscribe(rep, async (tx) => {
@@ -69,9 +67,7 @@ export function VialManager({ userId }: { userId: string }) {
         pill_count: status === 'pill' ? Math.floor(val) : undefined,
       });
     }
-    setIsAdding(false);
-    setVialName("");
-    setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]);
+    setIsAdding(false); setVialName(""); setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]);
   };
 
   const handleUpdateVial = async (e: React.FormEvent) => {
@@ -92,15 +88,15 @@ export function VialManager({ userId }: { userId: string }) {
     setSchedulingVial(null);
   };
 
-  const handleLogDose = async (vial: Vial, amount: number) => {
+  const handleLogDose = async (vial: Vial, amount: number, compoundIdx: number) => {
     if (!rep) return;
-    const compound = vial.compounds[0];
+    const compound = vial.compounds[compoundIdx];
     let units_iu = 0;
     if (vial.status === 'mixed') {
-      units_iu = calculateRequiredUnits(compound.mass_mg, vial.volume_ml, amount).toNumber();
+      units_iu = calculateRequiredUnits(compound.mass_mg, vial.volume_ml, amount, compound.unit).toNumber();
     }
     await rep.mutate.logDose({
-      id: nanoid(), vial_id: vial.id, substance: vial.name,
+      id: nanoid(), vial_id: vial.id, substance: `${vial.name} (${compound.name})`,
       dose_mcg: amount, units_iu, timestamp: Date.now(),
     });
     setLoggingVial(null);
@@ -108,17 +104,16 @@ export function VialManager({ userId }: { userId: string }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* GLOBAL ADD / EDIT FORM */}
+      {/* ADD/EDIT FORM */}
       {(isAdding || editingVial) && (
         <div className="card" style={{ border: '1px solid var(--primary)', background: 'rgba(37, 99, 235, 0.02)' }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="card-title">{editingVial ? `Edit ${editingVial.name}` : 'Add New Inventory Item'}</h3>
+            <h3 className="card-title">{editingVial ? `Edit ${editingVial.name}` : 'New Inventory Item'}</h3>
             <button onClick={() => { setIsAdding(false); setEditingVial(null); }} className="btn btn-outline" style={{ border: 'none' }}><X className="h-5 w-5" /></button>
           </div>
           <div className="card-content">
             <form onSubmit={editingVial ? handleUpdateVial : handleAddVial}>
               <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={editingVial ? editingVial.name : vialName} onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} /></div>
-              
               <div style={{ marginBottom: '1rem' }}>
                 <label className="form-label">Compounds</label>
                 {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
@@ -131,23 +126,16 @@ export function VialManager({ userId }: { userId: string }) {
                 ))}
                 <button type="button" onClick={() => { const n = [...(editingVial ? editingVial.compounds : compounds), { name: "", mass_mg: 0, unit: 'mg' as const }]; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline" style={{ width: '100%', fontSize: '0.7rem' }}><PlusCircle className="h-3 w-3 mr-2" /> Add Blend</button>
               </div>
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group"><label className="form-label">State</label><select className="form-input" value={editingVial ? editingVial.status : status} onChange={e => { const s = e.target.value as any; editingVial ? setEditingVial({...editingVial, status: s}) : setStatus(s); }}><option value="powder">Powder (Dry)</option><option value="mixed">Mixed (Liquid)</option><option value="pill">Pill (Oral)</option></select></div>
                 {!editingVial && <div className="form-group"><label className="form-label">Quantity</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>}
               </div>
-
               {(editingVial ? editingVial.status : status) !== 'powder' && (
-                <div className="form-group">
-                  <label className="form-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Total Vol (mL)'}</label>
-                  <input className="form-input" type="number" step="0.1" 
-                    value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume} 
-                    onChange={e => editingVial ? (editingVial.status === 'pill' ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)}) : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)})) : setVolume(e.target.value)} 
-                  />
+                <div className="form-group"><label className="form-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Total Vol (mL)'}</label>
+                  <input className="form-input" type="number" step="0.1" value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume} onChange={e => editingVial ? (editingVial.status === 'pill' ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)}) : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)})) : setVolume(e.target.value)} />
                 </div>
               )}
-
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>{editingVial ? 'Apply Changes' : 'Save Item to Inventory'}</button>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>{editingVial ? 'Apply Changes' : 'Save Item'}</button>
             </form>
           </div>
         </div>
@@ -156,17 +144,11 @@ export function VialManager({ userId }: { userId: string }) {
       {/* ACTIVE PROTOCOL SECTION */}
       <div className="card">
         <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 className="card-title" style={{ color: 'var(--primary)' }}><Activity className="h-5 w-5" /> Active Protocol</h3>
-            <p className="card-description">Currently in-use</p>
-          </div>
+          <div><h3 className="card-title" style={{ color: 'var(--primary)' }}><Activity className="h-5 w-5" /> Active Protocol</h3></div>
           <button onClick={() => { setIsAdding(true); setEditingVial(null); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-primary" style={{ padding: '0.25rem 0.75rem' }}><Plus className="h-4 w-4" /></button>
         </div>
         <div className="card-content">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {inventory.active.length === 0 && !isAdding && (
-              <p style={{ textAlign: 'center', color: 'var(--muted-foreground)', fontSize: '0.875rem', padding: '1rem' }}>No active compounds. Click + or reconstitute from stockpile.</p>
-            )}
             {inventory.active.map(group => (
               <div key={group.vial.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'var(--background)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -174,28 +156,28 @@ export function VialManager({ userId }: { userId: string }) {
                     <div style={{ padding: '0.5rem', borderRadius: '50%', background: group.vial.status === 'mixed' ? 'rgba(37, 99, 235, 0.1)' : 'rgba(16, 185, 129, 0.1)' }}>{group.vial.status === 'mixed' ? <Droplets className="h-4 w-4 text-primary" /> : <CircleDot className="h-4 w-4 text-success" />}</div>
                     <div>
                       <div style={{ fontWeight: 600 }}>{group.vial.name}</div>
-                      {group.protocol ? <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 500 }}>Protocol: {group.protocol.dose_amount}{group.vial.status === 'pill' ? ' pills' : 'mcg'} every {group.protocol.frequency_hours}h</div> : <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)' }}>No protocol set</div>}
+                      <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)' }}>{(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button onClick={() => setLoggingVial(loggingVial?.id === group.vial.id ? null : group.vial)} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Log Dose"><Syringe className="h-4 w-4 text-primary" /></button>
-                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "2"); }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Set Protocol"><Calendar className="h-4 w-4 text-success" /></button>
-                    <button onClick={() => { setEditingVial(group.vial); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Edit"><Edit3 className="h-4 w-4" /></button>
+                    <button onClick={() => setLoggingVial(loggingVial?.id === group.vial.id ? null : group.vial)} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Syringe className="h-4 w-4 text-primary" /></button>
+                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Calendar className="h-4 w-4 text-success" /></button>
+                    <button onClick={() => { setEditingVial(group.vial); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Edit3 className="h-4 w-4" /></button>
                   </div>
                 </div>
+
+                {/* LOG DOSE FORM (BLEND AWARE) */}
                 {loggingVial?.id === group.vial.id && (
                   <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(37, 99, 235, 0.05)', borderRadius: 'var(--radius)', border: '1px solid var(--primary)' }}>
-                    <button onClick={() => handleLogDose(group.vial, group.protocol?.dose_amount || 250)} className="btn btn-primary" style={{ width: '100%', fontSize: '0.75rem' }}>Log {group.protocol ? `${group.protocol.dose_amount}${group.vial.status === 'pill' ? ' pills' : 'mcg'}` : 'Default Dose'} Now</button>
-                  </div>
-                )}
-                {schedulingVial?.id === group.vial.id && (
-                  <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius)', border: '1px solid var(--success)' }}>
-                    <p style={{ fontSize: '0.75rem', fontWeight: 600, marginBottom: '0.5rem' }}>Set Dosing Protocol</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.5rem' }}>
                       <div className="form-group"><label className="form-label" style={{fontSize: '0.7rem'}}>Dose</label><input className="form-input" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label" style={{fontSize: '0.7rem'}}>Hours</label><input className="form-input" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label" style={{fontSize: '0.7rem'}}>Compound</label>
+                        <select className="form-input" value={targetCompoundIndex} onChange={e => setTargetCompoundIndex(parseInt(e.target.value))}>
+                          {group.vial.compounds.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
+                        </select>
+                      </div>
                     </div>
-                    <button onClick={() => handleSaveProtocol(group.vial.id)} className="btn btn-primary" style={{ width: '100%', fontSize: '0.75rem', background: 'var(--success)' }}>Save Protocol</button>
+                    <button onClick={() => handleLogDose(group.vial, parseFloat(doseAmount), targetCompoundIndex)} className="btn btn-primary" style={{ width: '100%', fontSize: '0.75rem' }}>Record Dose</button>
                   </div>
                 )}
               </div>
@@ -207,10 +189,7 @@ export function VialManager({ userId }: { userId: string }) {
       {/* STRATEGIC STOCKPILE SECTION */}
       <div className="card" style={{ borderStyle: 'dashed', opacity: 0.8 }}>
         <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 className="card-title" style={{ color: 'var(--muted-foreground)' }}><Archive className="h-5 w-5" /> Strategic Stockpile</h3>
-            <p className="card-description">Reserve inventory</p>
-          </div>
+          <div><h3 className="card-title" style={{ color: 'var(--muted-foreground)' }}><Archive className="h-5 w-5" /> Strategic Stockpile</h3></div>
           <button onClick={() => { setIsAdding(true); setEditingVial(null); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline" style={{ padding: '0.25rem 0.75rem' }}><Plus className="h-4 w-4" /></button>
         </div>
         <div className="card-content">
@@ -218,10 +197,7 @@ export function VialManager({ userId }: { userId: string }) {
             {inventory.stockpile.map(group => (
               <div key={group.vial.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--background)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                 <div><div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{group.vial.name} <span>x{group.count}</span></div></div>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <button onClick={() => { setEditingVial(group.vial); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline" style={{ padding: '0.15rem', border: 'none' }} title="Mix/Edit"><Edit3 className="h-3 w-3" /></button>
-                  <button onClick={async () => { if(confirm("Delete stockpile?")) for(const id of group.ids) await rep?.mutate.deleteVial(id) }} className="btn btn-outline" style={{ padding: '0.15rem', border: 'none' }} title="Delete"><Trash2 className="h-3 w-3 text-destructive" /></button>
-                </div>
+                <button onClick={() => { setEditingVial(group.vial); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline" style={{ padding: '0.15rem', border: 'none' }}><Edit3 className="h-3 w-3" /></button>
               </div>
             ))}
           </div>

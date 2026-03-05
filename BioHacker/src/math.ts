@@ -1,5 +1,5 @@
 /**
- * Vanguard Pro: Precision Mathematical Engine
+ * BioHacker: Precision Mathematical Engine
  * Powered by Decimal.js for high-accuracy pharmaceutical dosing.
  */
 import Decimal from "decimal.js";
@@ -16,36 +16,42 @@ export const NEEDLE_DEAD_SPACE_ML = new Decimal(0.05);
 
 /**
  * Calculates the required IU (Insulin Units) for a target dose.
+ * Handles both mg-based (mcg dose) and IU-based (IU dose) compounds.
  * 
- * @param mass_mg - Lyophilized peptide mass in mg
- * @param volume_ml - Solvent (BAC Water) volume in mL
- * @param target_mcg - Desired dose in mcg
+ * @param total_mass - Total amount in vial (mg or IU)
+ * @param volume_ml - BAC Water volume in mL
+ * @param target_dose - Desired dose (mcg if mg-based, IU if IU-based)
+ * @param unit - 'mg' or 'IU'
  * @returns Decimal object representing required units (IU)
  */
 export function calculateRequiredUnits(
-  mass_mg: number | string,
-  volume_ml: number | string,
-  target_mcg: number | string
+  total_mass: number | string | Decimal,
+  volume_ml: number | string | Decimal,
+  target_dose: number | string | Decimal,
+  unit: 'mg' | 'IU' = 'mg'
 ): Decimal {
-  const mass = new Decimal(mass_mg || 0);
+  const mass = new Decimal(total_mass || 0);
   const volume = new Decimal(volume_ml || 1);
-  const dose = new Decimal(target_mcg || 0);
+  const dose = new Decimal(target_dose || 0);
 
   if (mass.isZero() || volume.isZero()) return new Decimal(0);
 
-  // 1. Calculate concentration (mcg per mL)
-  const total_mcg = mass.times(1000);
-  const mcg_per_ml = total_mcg.dividedBy(volume);
-
-  // 2. Calculate mcg per IU (Assuming U-100 syringe: 100 IU = 1mL)
-  const mcg_per_unit = mcg_per_ml.dividedBy(100);
-
-  // 3. Calculate required units
-  return dose.dividedBy(mcg_per_unit);
+  if (unit === 'mg') {
+    // 1. MG to MCG Math
+    const total_mcg = mass.times(1000);
+    const mcg_per_ml = total_mcg.dividedBy(volume);
+    const mcg_per_unit = mcg_per_ml.dividedBy(100); // 100 IU per 1mL
+    return dose.dividedBy(mcg_per_unit);
+  } else {
+    // 2. IU to IU Math (e.g. HGH)
+    // Potency per Unit = (Total IU / Total mL) / 100
+    const potency_per_unit = mass.dividedBy(volume).dividedBy(100);
+    return dose.dividedBy(potency_per_unit);
+  }
 }
 
 /**
- * Validates dose safety against standard syringe capacities and measurement precision.
+ * Validates dose safety against standard syringe capacities.
  */
 export function validateDoseSafety(units: Decimal, syringe_scale: number = 1.0) {
   const errors: string[] = [];
@@ -59,8 +65,5 @@ export function validateDoseSafety(units: Decimal, syringe_scale: number = 1.0) 
     errors.push("Dose volume too small for accurate measurement (< 2 IU).");
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+  return { isValid: errors.length === 0, errors };
 }
