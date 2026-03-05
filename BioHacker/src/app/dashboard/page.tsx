@@ -6,6 +6,7 @@ import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
 import { PKChart } from "@/components/PKChart";
 import { InventoryAlerts } from "@/components/InventoryAlerts";
 import { VialManager } from "@/components/VialManager";
+import { DosageCalendar } from "@/components/DosageCalendar";
 import { ShieldCheck, LogOut, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -72,8 +73,11 @@ export default function DashboardPage() {
         </aside>
 
         <section className="content-area">
-          <PKChart />
-          <InventoryAlerts userId={user.id} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+            <DosageCalendar userId={user.id} />
+            <PKChart />
+            <InventoryAlerts userId={user.id} />
+          </div>
         </section>
       </main>
     </div>
