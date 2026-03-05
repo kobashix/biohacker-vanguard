@@ -2,7 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Activity } from 'lucide-react';
-import { generatePKModel, Injection, Ester } from '@/lib/pk';
+import { generatePKModel, Injection, Ester } from '@/pk';
 
 const CYPI_ESTER: Ester = { name: "Cypionate", half_life_hours: 192 }; // 8 days
 const ACE_ESTER: Ester = { name: "Acetate", half_life_hours: 48 }; // 2 days

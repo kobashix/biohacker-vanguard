@@ -2,8 +2,8 @@
 
 import { PackageOpen } from "lucide-react";
 import Decimal from "decimal.js";
-import { estimateRemainingDoses } from "@/lib/inventory";
-import { NEEDLE_DEAD_SPACE_ML } from "@/lib/math";
+import { estimateRemainingDoses } from "@/inventory";
+import { NEEDLE_DEAD_SPACE_ML } from "@/math";
 
 export function InventoryAlerts() {
   const inventory = [

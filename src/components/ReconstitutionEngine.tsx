@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Calculator } from "lucide-react";
-import { calculateRequiredUnits, validateDoseSafety, SYRINGE_SCALES } from "@/lib/math";
+import { calculateRequiredUnits, validateDoseSafety, SYRINGE_SCALES } from "@/math";
 
 export function ReconstitutionEngine() {
   const [mass, setMass] = useState<string>("5"); // mg
