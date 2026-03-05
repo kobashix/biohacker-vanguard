@@ -47,7 +47,7 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
         type: 'log',
         timestamp: log.timestamp,
         label: log.substance,
-        amount: `${log.dose_mcg}${log.units_iu === 0 ? ' pills' : 'mcg'}`,
+        amount: `${log.dose_amount} ${log.unit}`,
         status: 'completed',
         vialId: log.vial_id
       });
@@ -68,20 +68,22 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
 
       while (nextDoseTime < Date.now() + 48 * 3600000) {
         if (nextDoseTime > Date.now()) {
+          const unit = vial.status === 'pill' ? 'pills' : (vial.compounds[0]?.unit === 'g' ? 'mg' : 'mcg');
           timeline.push({
             type: 'projection',
             timestamp: nextDoseTime,
             label: vial.name,
-            amount: `${protocol.dose_amount}${vial.status === 'pill' ? ' pills' : 'mcg'}`,
+            amount: `${protocol.dose_amount} ${unit}`,
             status: 'upcoming',
             vialId: vial.id
           });
         } else if (nextDoseTime < Date.now() && (!lastLog || lastLog.timestamp < nextDoseTime - 3600000)) {
+          const unit = vial.status === 'pill' ? 'pills' : (vial.compounds[0]?.unit === 'g' ? 'mg' : 'mcg');
           timeline.push({
             type: 'projection',
             timestamp: nextDoseTime,
             label: vial.name,
-            amount: `${protocol.dose_amount}${vial.status === 'pill' ? ' pills' : 'mcg'}`,
+            amount: `${protocol.dose_amount} ${unit}`,
             status: 'missed',
             vialId: vial.id
           });
@@ -135,12 +137,6 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
           ))}
         </div>
       </div>
-      <style jsx>{`
-        .roadmap-item:hover {
-          opacity: 0.8;
-          border-left-color: var(--primary);
-        }
-      `}</style>
     </div>
   );
 }
