@@ -12,9 +12,15 @@ interface TimelineItem {
   label: string;
   amount: string;
   status: 'completed' | 'upcoming' | 'missed';
+  vialId?: string;
 }
 
-export function DosageCalendar({ userId }: { userId: string }) {
+interface DosageCalendarProps {
+  userId: string;
+  onSelectVial: (vialId: string) => void;
+}
+
+export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
   const rep = getReplicache(userId);
 
   const logs = useSubscribe(rep, async (tx) => {
@@ -42,11 +48,12 @@ export function DosageCalendar({ userId }: { userId: string }) {
         timestamp: log.timestamp,
         label: log.substance,
         amount: `${log.dose_mcg}${log.units_iu === 0 ? ' pills' : 'mcg'}`,
-        status: 'completed'
+        status: 'completed',
+        vialId: log.vial_id
       });
     });
 
-    // 2. Project Future Doses from Protocols (Next 48h)
+    // 2. Project Future Doses
     protocols.forEach(protocol => {
       const vial = vials.find(v => v.id === protocol.vial_id);
       if (!vial) return;
@@ -66,7 +73,8 @@ export function DosageCalendar({ userId }: { userId: string }) {
             timestamp: nextDoseTime,
             label: vial.name,
             amount: `${protocol.dose_amount}${vial.status === 'pill' ? ' pills' : 'mcg'}`,
-            status: 'upcoming'
+            status: 'upcoming',
+            vialId: vial.id
           });
         } else if (nextDoseTime < Date.now() && (!lastLog || lastLog.timestamp < nextDoseTime - 3600000)) {
           timeline.push({
@@ -74,7 +82,8 @@ export function DosageCalendar({ userId }: { userId: string }) {
             timestamp: nextDoseTime,
             label: vial.name,
             amount: `${protocol.dose_amount}${vial.status === 'pill' ? ' pills' : 'mcg'}`,
-            status: 'missed'
+            status: 'missed',
+            vialId: vial.id
           });
         }
         nextDoseTime += (protocol.frequency_hours * 3600000);
@@ -91,15 +100,25 @@ export function DosageCalendar({ userId }: { userId: string }) {
           <CalendarIcon className="h-5 w-5 text-primary" />
           Dosage Roadmap
         </h3>
-        <p className="card-description">Logs and projections (Next 48h)</p>
+        <p className="card-description">Click an upcoming dose to log it</p>
       </div>
       <div className="card-content">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {roadmap.length === 0 && (
-            <p style={{ textAlign: 'center', color: 'var(--muted-foreground)', fontSize: '0.875rem' }}>No scheduled doses or recent logs.</p>
+            <p style={{ textAlign: 'center', color: 'var(--muted-foreground)', fontSize: '0.875rem' }}>No scheduled doses.</p>
           )}
           {roadmap.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', paddingBottom: '1rem', borderLeft: '2px solid var(--border)', marginLeft: '0.5rem', paddingLeft: '1.5rem', position: 'relative' }}>
+            <div 
+              key={idx} 
+              onClick={() => item.vialId && onSelectVial(item.vialId)}
+              className="roadmap-item"
+              style={{ 
+                display: 'flex', gap: '1rem', alignItems: 'flex-start', paddingBottom: '1rem', 
+                borderLeft: '2px solid var(--border)', marginLeft: '0.5rem', paddingLeft: '1.5rem', 
+                position: 'relative', cursor: item.status !== 'completed' ? 'pointer' : 'default',
+                transition: 'opacity 0.2s'
+              }}
+            >
               <div style={{ position: 'absolute', left: '-9px', top: '0', background: 'var(--card)', borderRadius: '50%', padding: '2px' }}>
                 {item.status === 'completed' && <CheckCircle2 className="h-4 w-4 text-success" />}
                 {item.status === 'upcoming' && <Clock className="h-4 w-4 text-primary" />}
@@ -107,7 +126,7 @@ export function DosageCalendar({ userId }: { userId: string }) {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{item.label}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: item.status === 'missed' ? 'var(--destructive)' : 'inherit' }}>{item.label}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{format(new Date(item.timestamp), 'MMM d, h:mm a')}</div>
                 </div>
                 <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{item.amount} • {item.status.toUpperCase()}</div>
@@ -116,6 +135,12 @@ export function DosageCalendar({ userId }: { userId: string }) {
           ))}
         </div>
       </div>
+      <style jsx>{`
+        .roadmap-item:hover {
+          opacity: 0.8;
+          border-left-color: var(--primary);
+        }
+      `}</style>
     </div>
   );
 }

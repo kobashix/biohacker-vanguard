@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeLoggingVialId, setActiveLoggingVialId] = useState<string | null>(null);
+  
   const router = useRouter();
 
   const supabase = createBrowserClient(
@@ -69,12 +71,12 @@ export default function DashboardPage() {
       <main className="main-content">
         <aside className="sidebar">
           <ReconstitutionEngine />
-          <VialManager userId={user.id} />
+          <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
         </aside>
 
         <section className="content-area">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-            <DosageCalendar userId={user.id} />
+            <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
             <PKChart />
             <InventoryAlerts userId={user.id} />
           </div>
