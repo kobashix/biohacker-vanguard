@@ -7,6 +7,7 @@ export type Vial = {
   mass_mg: number;
   volume_ml: number;
   remaining_volume_ml: number;
+  status: 'lyophilized' | 'reconstituted';
 };
 
 export type DoseLog = {
