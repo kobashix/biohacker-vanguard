@@ -30,6 +30,7 @@ export function VialManager({ userId }: { userId: string }) {
     return list as Vial[];
   }, { default: [] });
 
+  // AUTOMATIC STACKING
   const stackedVials = useMemo(() => {
     const groups: Record<string, { vial: Vial; count: number; ids: string[] }> = {};
     rawVials.forEach(v => {
@@ -102,63 +103,97 @@ export function VialManager({ userId }: { userId: string }) {
         <div>
           <h3 className="card-title"><Beaker className="h-5 w-5 text-primary" /> Inventory</h3>
         </div>
-        <button onClick={() => setIsAdding(!isAdding)} className="btn btn-outline" style={{ padding: '0.25rem 0.75rem' }}>
+        <button onClick={() => { setIsAdding(!isAdding); setEditingVial(null); }} className="btn btn-outline" style={{ padding: '0.25rem 0.75rem' }}>
           {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
         </button>
       </div>
 
       <div className="card-content">
-        {isAdding && (
-          <form onSubmit={handleAddVial} style={{ marginBottom: '1.5rem', padding: '1rem', border: '1px solid var(--primary)', borderRadius: 'var(--radius)' }}>
-            <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={vialName} onChange={e => setVialName(e.target.value)} placeholder="e.g. Bulk Stock" /></div>
+        {/* ADD / FULL EDIT FORM */}
+        {(isAdding || editingVial) && (
+          <form onSubmit={editingVial ? handleUpdateVial : handleAddVial} style={{ marginBottom: '1.5rem', padding: '1.25rem', border: '1px solid var(--primary)', borderRadius: 'var(--radius)', background: 'rgba(37, 99, 235, 0.02)' }}>
+            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem' }}>{editingVial ? `Editing ${editingVial.name}` : 'Add New Inventory'}</h4>
+            
+            <div className="form-group">
+              <label className="form-label">Label</label>
+              <input className="form-input" 
+                value={editingVial ? editingVial.name : vialName} 
+                onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} 
+              />
+            </div>
+
             <div style={{ marginBottom: '1rem' }}>
               <label className="form-label">Compounds</label>
-              {compounds.map((c, idx) => (
+              {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
                 <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 60px 30px', gap: '0.4rem', marginBottom: '0.5rem' }}>
-                  <input className="form-input" value={c.name} onChange={e => { const n = [...compounds]; n[idx].name = e.target.value; setCompounds(n); }} required />
-                  <input className="form-input" type="number" value={c.mass_mg || ""} onChange={e => { const n = [...compounds]; n[idx].mass_mg = parseFloat(e.target.value); setCompounds(n); }} required />
-                  <select className="form-input" value={c.unit} onChange={e => { const n = [...compounds]; n[idx].unit = e.target.value as any; setCompounds(n); }}>
+                  <input className="form-input" value={c.name} onChange={e => {
+                    const n = [...(editingVial ? editingVial.compounds : compounds)];
+                    n[idx].name = e.target.value;
+                    editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
+                  }} required />
+                  <input className="form-input" type="number" value={c.mass_mg || ""} onChange={e => {
+                    const n = [...(editingVial ? editingVial.compounds : compounds)];
+                    n[idx].mass_mg = parseFloat(e.target.value);
+                    editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
+                  }} required />
+                  <select className="form-input" value={c.unit} onChange={e => {
+                    const n = [...(editingVial ? editingVial.compounds : compounds)];
+                    n[idx].unit = e.target.value as any;
+                    editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
+                  }}>
                     <option value="mg">mg</option><option value="IU">IU</option>
                   </select>
-                  <button type="button" onClick={() => setCompounds(compounds.filter((_, i) => i !== idx))} className="btn btn-outline" style={{ border: 'none' }} disabled={compounds.length === 1}><X className="h-4 w-4 text-destructive" /></button>
+                  <button type="button" onClick={() => {
+                    const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx);
+                    editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
+                  }} className="btn btn-outline" style={{ border: 'none' }} disabled={(editingVial ? editingVial.compounds : compounds).length === 1}><X className="h-4 w-4 text-destructive" /></button>
                 </div>
               ))}
-              <button type="button" onClick={() => setCompounds([...compounds, { name: "", mass_mg: 0, unit: 'mg' }])} className="btn btn-outline" style={{ width: '100%', fontSize: '0.7rem' }}><PlusCircle className="h-3 w-3 mr-2" /> Add Blend</button>
+              <button type="button" onClick={() => {
+                const n = [...(editingVial ? editingVial.compounds : compounds), { name: "", mass_mg: 0, unit: 'mg' as const }];
+                editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n);
+              }} className="btn btn-outline" style={{ width: '100%', fontSize: '0.7rem' }}><PlusCircle className="h-3 w-3 mr-2" /> Add Blend</button>
             </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group"><label className="form-label">State</label>
-                <select className="form-input" value={status} onChange={e => setStatus(e.target.value as any)}>
+                <select className="form-input" value={editingVial ? editingVial.status : status} onChange={e => {
+                  const s = e.target.value as any;
+                  editingVial ? setEditingVial({...editingVial, status: s}) : setStatus(s);
+                }}>
                   <option value="powder">Powder (Dry)</option><option value="mixed">Mixed (Liquid)</option><option value="pill">Pill (Oral)</option>
                 </select>
               </div>
-              <div className="form-group"><label className="form-label">Count</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>
+              {!editingVial && <div className="form-group"><label className="form-label">Quantity</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>}
             </div>
-            <div className="form-group"><label className="form-label">{status === 'pill' ? "Pills" : "Volume (mL)"}</label><input className="form-input" type="number" value={volume} onChange={e => setVolume(e.target.value)} /></div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Save Inventory</button>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">{ (editingVial ? editingVial.status : status) === 'pill' ? "Pills Total" : "Total Vol (mL)"}</label>
+                <input className="form-input" type="number" step="0.1" 
+                  value={editingVial ? editingVial.volume_ml : volume} 
+                  onChange={e => editingVial ? setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value)}) : setVolume(e.target.value)} 
+                />
+              </div>
+              {editingVial && (
+                <div className="form-group">
+                  <label className="form-label">{editingVial.status === 'pill' ? "Pills Rem." : "Vol Rem. (mL)"}</label>
+                  <input className="form-input" type="number" step="0.01" 
+                    value={editingVial.status === 'pill' ? (editingVial.remaining_pills || 0) : editingVial.remaining_volume_ml} 
+                    onChange={e => setEditingVial({...editingVial, remaining_volume_ml: editingVial.status !== 'pill' ? parseFloat(e.target.value) : 0, remaining_pills: editingVial.status === 'pill' ? parseInt(e.target.value) : 0})} 
+                  />
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editingVial ? 'Save Changes' : 'Add to Inventory'}</button>
+              {editingVial && <button type="button" onClick={() => setEditingVial(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>}
+            </div>
           </form>
         )}
 
-        {editingVial && (
-          <form onSubmit={handleUpdateVial} style={{ marginBottom: '1.5rem', padding: '1rem', border: '1px solid var(--success)', borderRadius: 'var(--radius)' }}>
-            <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={editingVial.name} onChange={e => setEditingVial({...editingVial, name: e.target.value})} /></div>
-            <div className="form-group">
-              <label className="form-label">{editingVial.status === 'pill' ? 'Remaining Pills' : 'Remaining mL'}</label>
-              <input className="form-input" type="number" step="0.01" 
-                value={editingVial.status === 'pill' ? (editingVial.remaining_pills || 0) : editingVial.remaining_volume_ml} 
-                onChange={e => setEditingVial({
-                  ...editingVial, 
-                  remaining_volume_ml: editingVial.status !== 'pill' ? parseFloat(e.target.value) : editingVial.remaining_volume_ml,
-                  remaining_pills: editingVial.status === 'pill' ? parseInt(e.target.value) : editingVial.remaining_pills
-                })} 
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="submit" className="btn btn-primary" style={{ flex: 1 }}><Save className="h-4 w-4 mr-2" /> Update</button>
-              <button type="button" onClick={() => setEditingVial(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
-            </div>
-          </form>
-        )}
-
+        {/* LIST */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {stackedVials.map(group => (
             <div key={group.vial.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.75rem', background: 'var(--background)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
@@ -171,16 +206,16 @@ export function VialManager({ userId }: { userId: string }) {
                     <div style={{ fontWeight: 600 }}>{group.vial.name} {group.count > 1 && <span style={{ color: 'var(--primary)' }}>x{group.count}</span>}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
                       {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit} ${c.name}`).join(' + ')} 
-                      {group.vial.status === 'mixed' ? ` | ${group.vial.remaining_volume_ml.toFixed(2)}mL rem.` : group.vial.status === 'pill' ? ` | ${group.vial.remaining_pills} pills rem.` : ' | Powder'}
+                      {group.vial.status === 'mixed' ? ` | ${group.vial.remaining_volume_ml.toFixed(2)}mL rem.` : group.vial.status === 'pill' ? ` | ${group.vial.remaining_pills} pills rem.` : ' | Powder (Dry)'}
                     </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   {group.vial.status !== 'powder' && (
-                    <button onClick={() => setLoggingVial(loggingVial?.id === group.vial.id ? null : group.vial)} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Log Dose"><Syringe className="h-4 w-4 text-primary" /></button>
+                    <button onClick={() => setLoggingVial(loggingVial?.id === group.vial.id ? null : group.vial)} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Syringe className="h-4 w-4 text-primary" /></button>
                   )}
-                  <button onClick={() => setEditingVial(group.vial)} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Edit"><Edit3 className="h-4 w-4" /></button>
-                  <button onClick={async () => { if(confirm("Delete?")) for(const id of group.ids) await rep?.mutate.deleteVial(id) }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }} title="Delete"><Trash2 className="h-4 w-4 text-destructive" /></button>
+                  <button onClick={() => { setEditingVial(group.vial); setIsAdding(false); }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Edit3 className="h-4 w-4" /></button>
+                  <button onClick={async () => { if(confirm("Delete?")) for(const id of group.ids) await rep?.mutate.deleteVial(id) }} className="btn btn-outline" style={{ padding: '0.25rem', border: 'none' }}><Trash2 className="h-4 w-4 text-destructive" /></button>
                 </div>
               </div>
               {loggingVial?.id === group.vial.id && (
