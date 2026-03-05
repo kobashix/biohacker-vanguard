@@ -5,76 +5,55 @@ export async function POST(request: NextRequest) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key',
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-      },
-    }
+    { cookies: { get(name: string) { return request.cookies.get(name)?.value; } } }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return new Response('Unauthorized', { status: 401 });
 
-  if (!session) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  const { clientGroupID, mutations } = await request.json();
+  if (clientGroupID !== user.id) return new Response('Forbidden', { status: 403 });
 
-  const pushRequest = await request.json();
-  const { clientGroupID, mutations } = pushRequest;
+  for (const m of mutations) {
+    const { name, args } = m;
 
-  // Tenant Verification
-  if (clientGroupID !== session.user.id) {
-    return new Response('Forbidden', { status: 403 });
-  }
-
-  for (const mutation of mutations) {
-    const { name, args } = mutation;
-
-    // Last-Write-Wins (LWW) Conflict Resolution via DB Overwrite
-    if (name === 'createVial') {
-      await supabase.from('vials').insert({
-        id: args.id,
-        user_id: session.user.id,
-        encrypted_payload: JSON.stringify(args),
-        remaining_volume_ml: args.remaining_volume_ml || 0,
+    if (name === 'createVial' || name === 'updateVial') {
+      await supabase.from('vials').upsert({
+        id: args.id, user_id: user.id, name: args.name, status: args.status,
+        volume_ml: args.volume_ml, remaining_volume_ml: args.remaining_volume_ml,
+        pill_count: args.pill_count, compounds: args.compounds
       });
-    }
-
-    if (name === 'updateVial') {
-      await supabase.from('vials').update({
-        encrypted_payload: JSON.stringify(args),
-        remaining_volume_ml: args.remaining_volume_ml || 0
-      }).eq('id', args.id).eq('user_id', session.user.id);
     }
 
     if (name === 'deleteVial') {
-      await supabase.from('vials').delete().eq('id', args).eq('user_id', session.user.id);
+      await supabase.from('vials').delete().eq('id', args).eq('user_id', user.id);
+    }
+
+    if (name === 'createProtocol') {
+      await supabase.from('protocols').upsert({
+        id: args.id, user_id: user.id, vial_id: args.vial_id,
+        dose_amount: args.dose_amount, frequency_hours: args.frequency_hours, start_time: args.start_time
+      });
+    }
+
+    if (name === 'deleteProtocol') {
+      await supabase.from('protocols').delete().eq('id', args).eq('user_id', user.id);
     }
 
     if (name === 'logDose') {
-      // 1. Record the log
       await supabase.from('dose_logs').insert({
-        id: args.id,
-        user_id: session.user.id,
-        vial_id: args.vial_id,
-        encrypted_payload: JSON.stringify(args),
-        dosage_iu: args.units_iu || args.dose_mcg, // units_iu for liquid, dose_mcg for pills
+        id: args.id, user_id: user.id, vial_id: args.vial_id,
+        substance: args.substance, dose_amount: args.dose_mcg, units_iu: args.units_iu, timestamp: args.timestamp
       });
 
-      // 2. Decrement vial volume/pill count in DB
-      const { data: vial } = await supabase.from('vials').select('encrypted_payload').eq('id', args.vial_id).single();
+      // Unified Decrement
+      const { data: vial } = await supabase.from('vials').select('*').eq('id', args.vial_id).single();
       if (vial) {
-        const payload = JSON.parse(vial.encrypted_payload);
-        if (payload.status === 'pill') {
-          payload.pill_count = Math.max(0, (payload.pill_count || 0) - args.dose_mcg);
+        if (vial.status === 'pill') {
+          await supabase.from('vials').update({ pill_count: Math.max(0, (vial.pill_count || 0) - args.dose_mcg) }).eq('id', args.vial_id);
         } else {
-          payload.remaining_volume_ml = Math.max(0, (payload.remaining_volume_ml || 0) - (args.units_iu / 100) - 0.05);
+          await supabase.from('vials').update({ remaining_volume_ml: Math.max(0, (vial.remaining_volume_ml || 0) - (args.units_iu / 100) - 0.05) }).eq('id', args.vial_id);
         }
-        await supabase.from('vials').update({ 
-          encrypted_payload: JSON.stringify(payload),
-          remaining_volume_ml: payload.remaining_volume_ml || 0 
-        }).eq('id', args.vial_id);
       }
     }
   }
