@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Beaker, Droplets } from "lucide-react";
+import { Plus, Trash2, Beaker, Droplets, Layers } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial } from "@/replicache";
 import { nanoid } from "nanoid";
@@ -10,6 +10,7 @@ export function VialManager({ userId }: { userId: string }) {
   const [name, setName] = useState("");
   const [mass, setMass] = useState("5");
   const [volume, setVolume] = useState("2");
+  const [count, setCount] = useState("1");
   const [status, setStatus] = useState<'lyophilized' | 'reconstituted'>('lyophilized');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -28,27 +29,30 @@ export function VialManager({ userId }: { userId: string }) {
     e.preventDefault();
     if (!rep) return;
 
-    const id = nanoid();
+    const vialCount = parseInt(count) || 1;
     const vol = status === 'reconstituted' ? parseFloat(volume) : 0;
     
-    const newVial: Vial = {
-      id,
-      name,
-      mass_mg: parseFloat(mass),
-      volume_ml: vol,
-      remaining_volume_ml: vol,
-      status,
-    };
+    // Perform bulk addition
+    for (let i = 0; i < vialCount; i++) {
+      const id = nanoid();
+      const newVial: Vial = {
+        id,
+        name: vialCount > 1 ? `${name} #${i + 1}` : name,
+        mass_mg: parseFloat(mass),
+        volume_ml: vol,
+        remaining_volume_ml: vol,
+        status,
+      };
+      await rep.mutate.createVial(newVial);
+    }
 
-    await rep.mutate.createVial(newVial);
     setName("");
+    setCount("1");
     setIsAdding(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!rep) return;
-    // In a full implementation, we'd add a delete mutator to replicache.ts
-    // For now, we'll alert the architecture limitation
     alert("Delete functionality pending server-side mutator sync.");
   };
 
@@ -79,21 +83,38 @@ export function VialManager({ userId }: { userId: string }) {
               <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. BPC-157" required />
             </div>
             
-            <div className="form-group">
-              <label className="form-label">Vial State</label>
-              <select 
-                className="form-input" 
-                value={status} 
-                onChange={e => setStatus(e.target.value as any)}
-              >
-                <option value="lyophilized">Lyophilized (Dry Powder)</option>
-                <option value="reconstituted">Reconstituted (Mixed)</option>
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Vial State</label>
+                <select 
+                  className="form-input" 
+                  value={status} 
+                  onChange={e => setStatus(e.target.value as any)}
+                >
+                  <option value="lyophilized">Lyophilized</option>
+                  <option value="reconstituted">Reconstituted</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Vial Count</label>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    className="form-input" 
+                    type="number" 
+                    min="1" 
+                    max="20" 
+                    value={count} 
+                    onChange={e => setCount(e.target.value)} 
+                    required 
+                  />
+                  <Layers className="h-4 w-4 text-muted-foreground" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
-                <label className="form-label">Total Mass (mg)</label>
+                <label className="form-label">Mass (mg)</label>
                 <input className="form-input" type="number" step="0.1" value={mass} onChange={e => setMass(e.target.value)} required />
               </div>
               
@@ -106,7 +127,7 @@ export function VialManager({ userId }: { userId: string }) {
             </div>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
-              Add to Inventory
+              Add {count} Vial{parseInt(count) > 1 ? 's' : ''}
             </button>
           </form>
         )}
