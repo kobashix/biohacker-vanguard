@@ -46,10 +46,16 @@ export function VialManager({ userId }: { userId: string }) {
     if (!rep) return;
     const vialCount = parseInt(count) || 1;
     const vol = status === 'reconstituted' ? parseFloat(volume) : 0;
+    
     for (let i = 0; i < vialCount; i++) {
+      // Don't suffix lyophilized vials so they group correctly by name
+      const displayName = (status === 'reconstituted' && vialCount > 1) 
+        ? `${name} #${i + 1}` 
+        : name;
+
       await rep.mutate.createVial({
         id: nanoid(),
-        name: vialCount > 1 ? `${name} #${i + 1}` : name,
+        name: displayName,
         mass_mg: parseFloat(mass),
         volume_ml: vol,
         remaining_volume_ml: vol,
