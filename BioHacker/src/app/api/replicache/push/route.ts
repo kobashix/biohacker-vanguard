@@ -37,14 +37,14 @@ export async function POST(request: NextRequest) {
         id: args.id,
         user_id: session.user.id,
         encrypted_payload: JSON.stringify(args),
-        remaining_volume_ml: args.remaining_volume_ml,
+        remaining_volume_ml: args.remaining_volume_ml || 0,
       });
     }
 
     if (name === 'updateVial') {
       await supabase.from('vials').update({
         encrypted_payload: JSON.stringify(args),
-        remaining_volume_ml: args.remaining_volume_ml
+        remaining_volume_ml: args.remaining_volume_ml || 0
       }).eq('id', args.id).eq('user_id', session.user.id);
     }
 
@@ -59,14 +59,22 @@ export async function POST(request: NextRequest) {
         user_id: session.user.id,
         vial_id: args.vial_id,
         encrypted_payload: JSON.stringify(args),
-        dosage_iu: args.units_iu,
+        dosage_iu: args.units_iu || args.dose_mcg, // units_iu for liquid, dose_mcg for pills
       });
 
-      // 2. Decrement vial volume in DB
-      const { data: vial } = await supabase.from('vials').select('remaining_volume_ml').eq('id', args.vial_id).single();
+      // 2. Decrement vial volume/pill count in DB
+      const { data: vial } = await supabase.from('vials').select('encrypted_payload').eq('id', args.vial_id).single();
       if (vial) {
-        const newVol = Math.max(0, vial.remaining_volume_ml - (args.units_iu / 100) - 0.05);
-        await supabase.from('vials').update({ remaining_volume_ml: newVol }).eq('id', args.vial_id);
+        const payload = JSON.parse(vial.encrypted_payload);
+        if (payload.status === 'pill') {
+          payload.remaining_pills = Math.max(0, (payload.remaining_pills || 0) - args.dose_mcg);
+        } else {
+          payload.remaining_volume_ml = Math.max(0, (payload.remaining_volume_ml || 0) - (args.units_iu / 100) - 0.05);
+        }
+        await supabase.from('vials').update({ 
+          encrypted_payload: JSON.stringify(payload),
+          remaining_volume_ml: payload.remaining_volume_ml || 0 
+        }).eq('id', args.vial_id);
       }
     }
   }

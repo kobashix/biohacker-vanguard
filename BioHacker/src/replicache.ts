@@ -4,15 +4,18 @@ import type { WriteTransaction } from 'replicache';
 export type Compound = {
   name: string;
   mass_mg: number;
+  unit: 'mg' | 'IU';
 };
 
 export type Vial = {
   id: string;
-  name: string; // The display label
+  name: string;
   compounds: Compound[];
   volume_ml: number;
   remaining_volume_ml: number;
-  status: 'lyophilized' | 'reconstituted';
+  status: 'powder' | 'mixed' | 'pill';
+  pill_count?: number;
+  remaining_pills?: number;
 };
 
 export type DoseLog = {
@@ -41,14 +44,21 @@ const mutators = {
   logDose: async (tx: WriteTransaction, log: DoseLog) => {
     await tx.set(`log/${log.id}`, log);
     
-    // Optimistic inventory decrement
     const vial = (await tx.get(`vial/${log.vial_id}`)) as Vial | undefined;
     if (vial) {
-      const updatedVial = {
-        ...vial,
-        remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - 0.05), // 0.05mL dead space
-      };
-      await tx.set(`vial/${vial.id}`, updatedVial);
+      if (vial.status === 'pill') {
+        const updatedVial = {
+          ...vial,
+          remaining_pills: Math.max(0, (vial.remaining_pills || 0) - log.dose_mcg), // For pills, dose_mcg stores pill count
+        };
+        await tx.set(`vial/${vial.id}`, updatedVial);
+      } else {
+        const updatedVial = {
+          ...vial,
+          remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - 0.05), // 0.05mL dead space
+        };
+        await tx.set(`vial/${vial.id}`, updatedVial);
+      }
     }
   },
 };
