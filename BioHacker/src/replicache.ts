@@ -26,10 +26,25 @@ export type DoseLog = {
   timestamp: number;
 };
 
+export type Protocol = {
+  id: string;
+  vial_id: string;
+  dose_amount: number; // mcg or count
+  frequency_hours: number;
+  start_time: number; // timestamp
+  notes?: string;
+};
+
 // Define mutators for LWW (Last-Write-Wins) strategy
 const mutators = {
   createVial: async (tx: WriteTransaction, vial: Vial) => {
     await tx.set(`vial/${vial.id}`, vial);
+  },
+  createProtocol: async (tx: WriteTransaction, protocol: Protocol) => {
+    await tx.set(`protocol/${protocol.id}`, protocol);
+  },
+  deleteProtocol: async (tx: WriteTransaction, id: string) => {
+    await tx.del(`protocol/${id}`);
   },
   updateVial: async (tx: WriteTransaction, update: Partial<Vial> & { id: string }) => {
     const prev = (await tx.get(`vial/${update.id}`)) as Vial | undefined;
