@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive } from "lucide-react";
+import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial, Compound } from "@/replicache";
 import { nanoid } from "nanoid";
