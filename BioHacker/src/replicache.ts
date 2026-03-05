@@ -1,10 +1,15 @@
 import { Replicache } from 'replicache';
 import type { WriteTransaction } from 'replicache';
 
-export type Vial = {
-  id: string;
+export type Compound = {
   name: string;
   mass_mg: number;
+};
+
+export type Vial = {
+  id: string;
+  name: string; // The display label
+  compounds: Compound[];
   volume_ml: number;
   remaining_volume_ml: number;
   status: 'lyophilized' | 'reconstituted';
