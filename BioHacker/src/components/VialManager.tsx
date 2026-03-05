@@ -30,7 +30,7 @@ export function VialManager({ userId }: { userId: string }) {
     const groups: Record<string, { vial: Vial; count: number; ids: string[] }> = {};
     rawVials.forEach(v => {
       const compoundsKey = (v.compounds || []).map(c => `${c.name}:${c.mass_mg}:${c.unit || 'mg'}`).join('|');
-      const key = `${v.status}-${compoundsKey}-${v.volume_ml}-${v.remaining_volume_ml}-${v.remaining_pills}`;
+      const key = `${v.status}-${compoundsKey}-${v.volume_ml}-${v.remaining_volume_ml}-${v.pill_count}`;
       if (!groups[key]) groups[key] = { vial: v, count: 0, ids: [] };
       groups[key].count++;
       groups[key].ids.push(v.id);
@@ -42,7 +42,7 @@ export function VialManager({ userId }: { userId: string }) {
     e.preventDefault();
     if (!rep) return;
     const vialCount = parseInt(count) || 1;
-    const volVal = (status === 'mixed' || status === 'pill') ? parseFloat(volume) : 0;
+    const val = parseFloat(volume);
     const finalName = vialName || compounds.map(c => c.name).join(' / ');
 
     for (let i = 0; i < vialCount; i++) {
@@ -50,14 +50,13 @@ export function VialManager({ userId }: { userId: string }) {
         id: nanoid(),
         name: finalName,
         compounds,
-        volume_ml: status === 'mixed' ? volVal : 0,
-        remaining_volume_ml: status === 'mixed' ? volVal : 0,
+        volume_ml: status === 'mixed' ? val : 0,
+        remaining_volume_ml: status === 'mixed' ? val : 0,
         status,
-        pill_count: status === 'pill' ? volVal : undefined,
-        remaining_pills: status === 'pill' ? volVal : undefined,
+        pill_count: status === 'pill' ? Math.floor(val) : undefined,
       });
     }
-    setIsAdding(false);
+    setVialName(""); setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]); setIsAdding(false);
   };
 
   const handleUpdateVial = async (e: React.FormEvent) => {
@@ -85,7 +84,7 @@ export function VialManager({ userId }: { userId: string }) {
       id: nanoid(),
       vial_id: vial.id,
       substance: `${vial.name} (${compound.name})`,
-      dose_mcg: parseFloat(targetDose),
+      dose_mcg: parseFloat(targetDose), // Stores count for pills
       units_iu,
       timestamp: Date.now(),
     });
@@ -125,19 +124,12 @@ export function VialManager({ userId }: { userId: string }) {
               {!editingVial && <div className="form-group"><label className="form-label">Quantity</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              { (editingVial ? editingVial.status : status) !== 'powder' && (
-                <div className="form-group">
-                  <label className="form-label">{ (editingVial ? editingVial.status : status) === 'pill' ? "Pills Total" : "Total Vol (mL)"}</label>
-                  <input className="form-input" type="number" step="0.1" value={editingVial ? editingVial.volume_ml || editingVial.pill_count : volume} onChange={e => editingVial ? (editingVial.status === 'pill' ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)}) : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value)})) : setVolume(e.target.value)} />
-                </div>
-              )}
-              {editingVial && editingVial.status !== 'powder' && (
-                <div className="form-group">
-                  <label className="form-label">{editingVial.status === 'pill' ? "Pills Rem." : "Vol Rem. (mL)"}</label>
-                  <input className="form-input" type="number" step="0.01" value={editingVial.status === 'pill' ? (editingVial.remaining_pills || 0) : editingVial.remaining_volume_ml} onChange={e => setEditingVial({...editingVial, remaining_volume_ml: editingVial.status !== 'pill' ? parseFloat(e.target.value) : 0, remaining_pills: editingVial.status === 'pill' ? parseInt(e.target.value) : 0})} />
-                </div>
-              )}
+            <div className="form-group">
+              <label className="form-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Total Vol (mL)'}</label>
+              <input className="form-input" type="number" step="0.1" 
+                value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume} 
+                onChange={e => editingVial ? (editingVial.status === 'pill' ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)}) : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)})) : setVolume(e.target.value)} 
+              />
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
@@ -155,7 +147,7 @@ export function VialManager({ userId }: { userId: string }) {
                   <div style={{ padding: '0.5rem', borderRadius: '50%', background: group.vial.status === 'mixed' ? 'rgba(37, 99, 235, 0.1)' : group.vial.status === 'pill' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(161, 161, 170, 0.1)' }}>{group.vial.status === 'mixed' ? <Droplets className="h-4 w-4 text-primary" /> : group.vial.status === 'pill' ? <CircleDot className="h-4 w-4 text-success" /> : <Package className="h-4 w-4 text-muted-foreground" />}</div>
                   <div>
                     <div style={{ fontWeight: 600 }}>{group.vial.name} {group.count > 1 && <span style={{ color: 'var(--primary)' }}>x{group.count}</span>}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')} {group.vial.status === 'mixed' ? ` | ${group.vial.remaining_volume_ml.toFixed(2)}mL rem.` : group.vial.status === 'pill' ? ` | ${group.vial.remaining_pills} pills rem.` : ' | Powder (Dry)'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')} {group.vial.status === 'mixed' ? ` | ${group.vial.remaining_volume_ml.toFixed(2)}mL rem.` : group.vial.status === 'pill' ? ` | ${group.vial.pill_count} pills rem.` : ' | Powder (Dry)'}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>

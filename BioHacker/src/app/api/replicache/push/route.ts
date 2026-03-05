@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       if (vial) {
         const payload = JSON.parse(vial.encrypted_payload);
         if (payload.status === 'pill') {
-          payload.remaining_pills = Math.max(0, (payload.remaining_pills || 0) - args.dose_mcg);
+          payload.pill_count = Math.max(0, (payload.pill_count || 0) - args.dose_mcg);
         } else {
           payload.remaining_volume_ml = Math.max(0, (payload.remaining_volume_ml || 0) - (args.units_iu / 100) - 0.05);
         }

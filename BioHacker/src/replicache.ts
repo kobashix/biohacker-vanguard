@@ -14,8 +14,7 @@ export type Vial = {
   volume_ml: number;
   remaining_volume_ml: number;
   status: 'powder' | 'mixed' | 'pill';
-  pill_count?: number;
-  remaining_pills?: number;
+  pill_count?: number; // Universal current count for pills
 };
 
 export type DoseLog = {
@@ -49,7 +48,7 @@ const mutators = {
       if (vial.status === 'pill') {
         const updatedVial = {
           ...vial,
-          remaining_pills: Math.max(0, (vial.remaining_pills || 0) - log.dose_mcg), // For pills, dose_mcg stores pill count
+          pill_count: Math.max(0, (vial.pill_count || 0) - log.dose_mcg), // dose_mcg stores count for pills
         };
         await tx.set(`vial/${vial.id}`, updatedVial);
       } else {
