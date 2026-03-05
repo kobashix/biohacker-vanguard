@@ -30,7 +30,19 @@ export function VialManager({ userId }: { userId: string }) {
     const groups: Record<string, { vial: Vial; count: number; ids: string[] }> = {};
     rawVials.forEach(v => {
       const compoundsKey = (v.compounds || []).map(c => `${c.name}:${c.mass_mg}:${c.unit || 'mg'}`).join('|');
-      const key = `${v.status}-${compoundsKey}-${v.volume_ml}-${v.remaining_volume_ml}-${v.pill_count}`;
+      
+      // State-aware key: Only include relevant physical properties
+      let physicalKey = '';
+      if (v.status === 'powder') {
+        physicalKey = 'dry';
+      } else if (v.status === 'pill') {
+        physicalKey = `p:${v.pill_count || 0}`;
+      } else {
+        physicalKey = `v:${v.volume_ml || 0}-${v.remaining_volume_ml || 0}`;
+      }
+
+      const key = `${v.status}-${compoundsKey}-${physicalKey}`;
+      
       if (!groups[key]) groups[key] = { vial: v, count: 0, ids: [] };
       groups[key].count++;
       groups[key].ids.push(v.id);
