@@ -1,61 +1,100 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area } from 'recharts';
 import { Activity } from 'lucide-react';
-import { generatePKModel, Injection, Ester } from '@/pk';
+import { useSubscribe } from "replicache-react";
+import { getReplicache, DoseLog, Vial } from "@/replicache";
+import { calculateEliminationConstant } from "@/pk";
+import Decimal from "decimal.js";
 
-const CYPI_ESTER: Ester = { name: "Cypionate", half_life_hours: 192 }; // 8 days
-const ACE_ESTER: Ester = { name: "Acetate", half_life_hours: 48 }; // 2 days
+export function PKChart({ userId }: { userId: string }) {
+  const rep = getReplicache(userId);
 
-export function PKChart() {
-  const injections: Injection[] = [
-    { timestamp: new Date(Date.now() - 48 * 3600000), dose_mg: 100, ester: CYPI_ESTER },
-    { timestamp: new Date(Date.now() - 24 * 3600000), dose_mg: 50, ester: ACE_ESTER },
-    { timestamp: new Date(), dose_mg: 100, ester: CYPI_ESTER },
-  ];
+  const logs = useSubscribe(rep, async (tx) => {
+    const list = await tx.scan({ prefix: "log/" }).values().toArray();
+    return list as DoseLog[];
+  }, { default: [] });
 
-  const data = generatePKModel(injections, 168, 4); // 7 day projection, 4h steps
+  const vials = useSubscribe(rep, async (tx) => {
+    const list = await tx.scan({ prefix: "vial/" }).values().toArray();
+    return list as Vial[];
+  }, { default: [] });
+
+  const chartData = useMemo(() => {
+    if (logs.length === 0) return [];
+
+    const data = [];
+    const now = Date.now();
+    const startTime = now - (72 * 3600000); // 3 days ago
+    const endTime = now + (48 * 3600000); // 2 days ahead
+    
+    for (let t = startTime; t <= endTime; t += 3600000) { // 1 hour steps
+      let totalSerum = new Decimal(0);
+
+      logs.forEach(log => {
+        const timeDiffHours = (t - log.timestamp) / 3600000;
+        if (timeDiffHours >= 0) {
+          // Find the vial to get half-life or default to 24h
+          const halfLife = 24; // Default half-life in hours
+          const k = calculateEliminationConstant(halfLife);
+          const level = new Decimal(log.dose_amount).times(Math.exp(-k * timeDiffHours));
+          totalSerum = totalSerum.plus(level);
+        }
+      });
+
+      data.push({
+        time: t,
+        displayTime: new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        level: totalSerum.toNumber(),
+      });
+    }
+    return data;
+  }, [logs]);
 
   return (
     <div className="card">
       <div className="card-header">
         <h3 className="card-title">
           <Activity className="h-5 w-5 text-primary" />
-          Multi-Compartment PK Modeling
+          Serum Concentration Model
         </h3>
-        <p className="card-description">Cumulative serum levels for concurrent esters (Cyp vs Ace)</p>
+        <p className="card-description">Modeled blood levels based on injection history (72h past, 48h future)</p>
       </div>
       <div className="card-content">
-        <div className="chart-container">
+        <div className="h-[300px] w-full mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis 
-                dataKey="time_hours" 
-                stroke="var(--muted-foreground)" 
-                fontSize={12} 
-                tickFormatter={(val) => `${val}h`}
+                dataKey="time" 
+                hide 
               />
               <YAxis 
-                stroke="var(--primary)" 
-                fontSize={12} 
-                tickFormatter={(val) => `${val.toFixed(1)} mg`}
+                stroke="var(--muted-foreground)" 
+                fontSize={10} 
+                tickFormatter={(val) => `${val.toFixed(0)}`}
               />
               <Tooltip 
+                labelFormatter={(label) => new Date(label).toLocaleString()}
                 contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-                itemStyle={{ color: 'var(--foreground)' }}
               />
-              <Line 
+              <Area 
                 type="monotone" 
-                dataKey="serum_level" 
-                name="Total Serum Level" 
+                dataKey="level" 
                 stroke="var(--primary)" 
-                strokeWidth={3} 
-                dot={false} 
+                fillOpacity={1} 
+                fill="url(#colorLevel)" 
+                strokeWidth={2}
               />
-              <ReferenceLine y={150} label="Therapeutic Peak" stroke="var(--destructive)" strokeDasharray="3 3" />
-              <ReferenceLine y={50} label="Minimum Stable" stroke="var(--success)" strokeDasharray="3 3" />
-            </LineChart>
+              <ReferenceLine x={Date.now()} stroke="var(--destructive)" label={{ position: 'top', value: 'NOW', fill: 'var(--destructive)', fontSize: 10 }} />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
