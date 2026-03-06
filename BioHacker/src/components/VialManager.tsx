@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { calculateRequiredUnits } from "@/math";
 import Decimal from "decimal.js";
 import { format } from "date-fns";
+import { COMPOUND_DATABASE } from "@/lib/compoundsDb";
 
 interface VialManagerProps {
   userId: string;
@@ -194,9 +195,17 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                 <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={editingVial ? editingVial.name : vialName} onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} /></div>
                 <div style={{ marginBottom: '1rem' }}>
                   <label className="form-label">Compounds</label>
+                  
+                  {/* Native Autocomplete Datalist */}
+                  <datalist id="compounds-list">
+                    {COMPOUND_DATABASE.map((comp) => (
+                      <option key={comp} value={comp} />
+                    ))}
+                  </datalist>
+
                   {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
                     <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 60px 30px', gap: '0.4rem', marginBottom: '0.5rem' }}>
-                      <input className="form-input" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} required />
+                      <input list="compounds-list" className="form-input" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search..." required />
                       <input className="form-input" type="number" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} required />
                       <select className="form-input" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
                         <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
