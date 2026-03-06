@@ -32,10 +32,17 @@ BioHacker is a clinical-grade, zero-knowledge, local-first bio-tracking platform
 - **Log Dose:** Active logging interface that decrements physical inventory.
 - **Wastage Calibration:** Automatic $0.05\text{mL}$ Needle Dead Space factor for every injection.
 - **Pill Tracking:** Direct decrement of pill count for oral compounds.
+- **Protocol Patterns:** Support for "X days on / Y days off" and custom intervals.
 
-### E. Zero-Knowledge Security (E2EE)
-- **Encryption:** All medical data encrypted client-side into JWE strings via PBKDF2-100k.
-- **Auth Wall:** Primary middleware enforcing session validation for all dashboard and API routes.
+### E. Health & Correlation (New)
+- **Subjective Metrics:** Daily tracking of Mood, Energy, Sleep, and Pain.
+- **Injection Site Rotation:** Visual log of administration locations to prevent scarring.
+- **Correlation Engine:** Overlaying subjective health data on top of PK serum graphs.
+
+### F. Professional Features
+- **iCal Integration:** Cryptographically signed URLs for standard calendar app syncing.
+- **Data Portability:** Export clinical logs to CSV/JSON for medical review.
+- **Unified App Shell:** Sidebar navigation with specialized workspaces.
 
 ---
 
@@ -46,7 +53,7 @@ BioHacker is a clinical-grade, zero-knowledge, local-first bio-tracking platform
     - WebCrypto JWE encryption wrappers verified.
 - [x] **Task 2: Reconstitution Engine Core**
     - `Decimal.js` conversion logic live.
-    - Multi-unit (mg/IU) support added.
+    - Multi-unit (mg/IU/g) support added.
 - [x] **Task 3: Multi-Compartment PK Model**
     - Elimination constant $k$ logic implemented.
     - Support for concurrent esters added.
@@ -56,10 +63,14 @@ BioHacker is a clinical-grade, zero-knowledge, local-first bio-tracking platform
     - Pill/Oral form tracking implemented.
 - [x] **Task 5: Replicache & Supabase Sync**
     - Tenant-aware Push/Pull handlers live.
-    - Full-stack deletion and update logic implemented.
+    - Seamless multi-device sync without passphrase gate.
 - [x] **Task 6: Branding & UX**
     - Globally rebranded to BioHacker (by MMM).
-    - Clinical-grade landing page and login portal live.
+    - Professional Sidebar & Multi-page architecture.
+- [ ] **Task 7: Clinical Polish (Upcoming)**
+    - Injection site rotation.
+    - Subjective health logging.
+    - CSV Export functionality.
 
 ---
-*Last Updated: 2026-03-05 | Lead Architect: Gemini CLI*
+*Last Updated: 2026-03-06 | Lead Architect: Gemini CLI*

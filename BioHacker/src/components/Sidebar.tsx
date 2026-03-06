@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Beaker, Calendar, Settings, LogOut, ShieldCheck, Menu, X } from "lucide-react";
+import { LayoutDashboard, Beaker, Calendar, Settings, LogOut, ShieldCheck, Menu, X, History } from "lucide-react";
 import { useState } from "react";
 
 export function Sidebar({ onSignOut }: { onSignOut: () => void }) {
@@ -13,6 +13,7 @@ export function Sidebar({ onSignOut }: { onSignOut: () => void }) {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Inventory", href: "/dashboard/inventory", icon: Beaker },
     { name: "Protocol Scheduler", href: "/dashboard/scheduler", icon: Calendar },
+    { name: "Clinical History", href: "/dashboard/history", icon: History },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 

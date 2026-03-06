@@ -7,6 +7,7 @@ import { PKChart } from "@/components/PKChart";
 import { InventoryAlerts } from "@/components/InventoryAlerts";
 import { VialManager } from "@/components/VialManager";
 import { DosageCalendar } from "@/components/DosageCalendar";
+import { SubjectiveLogger } from "@/components/SubjectiveLogger";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -30,18 +31,19 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold">Protocol Dashboard</h1>
-        <p className="text-muted-foreground">High-level overview of your current performance metrics.</p>
+        <h1 className="text-3xl font-bold">Clinical Overview</h1>
+        <p className="text-muted-foreground">Real-time status of your protocols and physical wellbeing.</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Calendar & Alerts */}
+        {/* Left Column: Calendar & Subjective Tracking */}
         <div className="lg:col-span-8 space-y-8">
           <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
+          <SubjectiveLogger userId={user.id} />
           <PKChart />
         </div>
 
-        {/* Right Column: Active Inventory & Reconstitution */}
+        {/* Right Column: Inventory & Math */}
         <div className="lg:col-span-4 space-y-8">
           <InventoryAlerts userId={user.id} />
           <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />

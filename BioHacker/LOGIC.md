@@ -14,6 +14,10 @@ The system uses `Decimal.js` to ensure zero floating-point errors when convertin
 1. **Potency per Unit:** $IU/IU = (Total\_IU / Volume_{mL}) / 100$
 2. **Required Volume:** $Units_{IU} = Target\_IU / (Potency\_per\_Unit)$
 
+### Gram-Based Compounds
+1. **Potency per Unit:** $mg/IU = (Mass_{g} \times 1000) / Volume_{mL} / 100$
+2. **Required Volume:** $Units_{IU} = Dose_{mg} / (Potency\_per\_Unit)$
+
 ---
 
 ## 2. Inventory Depletion Logic
@@ -30,35 +34,31 @@ Pill inventory is a simple integer decrement.
 
 ---
 
-## 3. Automatic Stacking Logic
-To prevent UI clutter, the interface automatically collapses duplicate inventory items into a single stack.
+## 3. Advanced Protocol Logic (New)
+BioHacker supports complex administration patterns beyond simple intervals.
 
-- **Stacking Key:** `[Name] + [Status] + [Compound_Array] + [Current_Volume/Pill_Count]`
-- **Behavior:** If a new vial matches an existing stack exactly (including its remaining volume), it is added to the count.
-- **Isolation:** Mixed vials with different remaining volumes will *not* stack, as they represent distinct physical solutions.
-
----
-
-## 4. Multi-Compound (Blend) Logic
-Vials containing multiple compounds (e.g., BPC-157 + TB-500) are treated as a single physical entity with multiple mathematical potencies.
-
-- **Dose Calculation:** The user selects a "Target Compound" from the blend.
-- **Execution:** The math engine runs the Reconstitution Logic using only the mass/unit of the *selected* compound, but decrements the *entire* vial's volume.
+### X Days On / Y Days Off
+- **Cycle Length:** $Total\_Period = X + Y$
+- **Eligibility:** A dose is projected if $(Days\_Since\_Start \pmod{Total\_Period}) < X$.
+- **Adherence:** Missed doses are flagged if the current time exceeds the `start_time` + `interval` and no log exists for that window.
 
 ---
 
-## 5. Security Logic (Zero-Knowledge)
-Decryption keys never reach the server. The server acts as a "dumb" blob store for JWE strings.
+## 4. Health & Subjective Logic (New)
+### Correlation Engine
+Subjective metrics (Mood, Energy, Sleep) are mapped on a 1-10 scale.
+- **Overlay:** These data points are timestamped and overlaid on the PK serum graph.
+- **Goal:** Identify the "Therapeutic Window" where subjective wellbeing is highest relative to serum concentration.
 
-1. **Key Derivation:** $Password + Salt \xrightarrow{\text{PBKDF2-100k}} 256\text{-bit AES Key}$
-2. **Encryption:** $Payload_{JSON} \xrightarrow{\text{AES-GCM-256}} JWE\text{ String}$
-3. **Storage:** Only the JWE string and the `user_id` are sent to Supabase.
+### Injection Site Rotation
+Tracks the physical location of the last administration to minimize tissue trauma.
+- **Logic:** Recommends the next site based on the least recently used location in a 4-point or 8-point map.
 
 ---
 
-## 6. Pharmacokinetic (PK) Logic
-Predicts blood serum levels based on injection history using exponential decay.
+## 5. Security Logic (Seamless)
+Decryption keys are managed by Supabase Auth and protected by PostgreSQL Row-Level Security (RLS).
 
-- **Elimination Constant:** $k = \ln(2) / t_{1/2}$
-- **Serum Level at time $t$:** $C(t) = Dose \times e^{-kt}$
-- **Accumulation:** For multiple injections, $C_{total}(t) = \sum (Dose_i \times e^{-k(t-t_i)})$
+1. **Identity Protection:** All queries are filtered by `auth.uid() = user_id`.
+2. **Encryption at Rest:** All structured columns are encrypted using AES-256 by the infrastructure provider.
+3. **Multi-Device Sync:** Replicache handles sub-millisecond local-to-server synchronization using a Last-Write-Wins (LWW) conflict resolution strategy.

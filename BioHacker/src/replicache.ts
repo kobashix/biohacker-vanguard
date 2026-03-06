@@ -22,10 +22,11 @@ export type DoseLog = {
   id: string;
   vial_id: string;
   substance: string;
-  dose_amount: number; // The raw numerical amount (mcg, mg, IU, or count)
-  unit: string; // The display unit used for this log
-  units_iu: number; // Volume deduction in IU (0 for pills/powders)
+  dose_amount: number;
+  unit: string; 
+  units_iu: number; 
   timestamp: number;
+  injection_site?: string; // e.g. "Left Abdomen"
 };
 
 export type Protocol = {
@@ -33,7 +34,19 @@ export type Protocol = {
   vial_id: string;
   dose_amount: number;
   frequency_hours: number;
+  days_on?: number; // For "X days on"
+  days_off?: number; // For "Y days off"
   start_time: number;
+  notes?: string;
+};
+
+export type SubjectiveLog = {
+  id: string;
+  timestamp: number;
+  mood: number; // 1-10
+  energy: number; // 1-10
+  sleep_quality: number; // 1-10
+  soreness: number; // 1-10
   notes?: string;
 };
 
@@ -58,24 +71,23 @@ const mutators = {
   },
   logDose: async (tx: WriteTransaction, log: DoseLog) => {
     await tx.set(`log/${log.id}`, log);
-    
     const vial = (await tx.get(`vial/${log.vial_id}`)) as Vial | undefined;
     if (vial) {
       if (vial.status === 'pill') {
-        const updatedVial = {
+        await tx.set(`vial/${vial.id}`, {
           ...vial,
           pill_count: Math.max(0, (vial.pill_count || 0) - log.dose_amount),
-        };
-        await tx.set(`vial/${vial.id}`, updatedVial);
+        });
       } else if (vial.status === 'mixed') {
-        const updatedVial = {
+        await tx.set(`vial/${vial.id}`, {
           ...vial,
           remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - NEEDLE_DEAD_SPACE_ML.toNumber()), 
-        };
-        await tx.set(`vial/${vial.id}`, updatedVial);
+        });
       }
-      // Note: Powder logic for active use can be added here if needed for mass-based decrement
     }
+  },
+  logSubjective: async (tx: WriteTransaction, log: SubjectiveLog) => {
+    await tx.set(`subjective/${log.id}`, log);
   },
 };
 

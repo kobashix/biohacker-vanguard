@@ -3,8 +3,8 @@ import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key',
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
     { cookies: { get(name: string) { return request.cookies.get(name)?.value; } } }
   );
 
@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
     if (name === 'createProtocol') {
       await supabase.from('protocols').upsert({
         id: args.id, user_id: user.id, vial_id: args.vial_id,
-        dose_amount: args.dose_amount, frequency_hours: args.frequency_hours, start_time: args.start_time
+        dose_amount: args.dose_amount, frequency_hours: args.frequency_hours,
+        days_on: args.days_on, days_off: args.days_off, start_time: args.start_time
       });
     }
 
@@ -40,18 +41,27 @@ export async function POST(request: NextRequest) {
       await supabase.from('protocols').delete().eq('id', args).eq('user_id', user.id);
     }
 
+    if (name === 'logSubjective') {
+      await supabase.from('subjective_logs').upsert({
+        id: args.id, user_id: user.id, timestamp: args.timestamp,
+        mood: args.mood, energy: args.energy, sleep_quality: args.sleep_quality,
+        soreness: args.soreness, notes: args.notes
+      });
+    }
+
     if (name === 'logDose') {
       await supabase.from('dose_logs').insert({
         id: args.id, user_id: user.id, vial_id: args.vial_id,
-        substance: args.substance, dose_amount: args.dose_mcg, units_iu: args.units_iu, timestamp: args.timestamp
+        substance: args.substance, dose_amount: args.dose_amount, 
+        units_iu: args.units_iu, timestamp: args.timestamp,
+        injection_site: args.injection_site
       });
 
-      // Unified Decrement
       const { data: vial } = await supabase.from('vials').select('*').eq('id', args.vial_id).single();
       if (vial) {
         if (vial.status === 'pill') {
-          await supabase.from('vials').update({ pill_count: Math.max(0, (vial.pill_count || 0) - args.dose_mcg) }).eq('id', args.vial_id);
-        } else {
+          await supabase.from('vials').update({ pill_count: Math.max(0, (vial.pill_count || 0) - args.dose_amount) }).eq('id', args.vial_id);
+        } else if (vial.status === 'mixed') {
           await supabase.from('vials').update({ remaining_volume_ml: Math.max(0, (vial.remaining_volume_ml || 0) - (args.units_iu / 100) - 0.05) }).eq('id', args.vial_id);
         }
       }
