@@ -7,6 +7,7 @@ import { getReplicache, Vial, Compound, Protocol } from "@/replicache";
 import { nanoid } from "nanoid";
 import { calculateRequiredUnits } from "@/math";
 import Decimal from "decimal.js";
+import { format } from "date-fns";
 
 interface VialManagerProps {
   userId: string;
@@ -31,6 +32,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
   const [frequency, setFrequency] = useState("24");
   const [daysOn, setDaysOn] = useState("7");
   const [daysOff, setDaysOff] = useState("0");
+  const [preferredStartTime, setPreferredStartTime] = useState("08:00");
   
   // Logging State
   const [targetCompoundIndex, setTargetCompoundIndex] = useState(0);
@@ -113,12 +115,18 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
     if (!rep) return;
     const existing = protocols.find(p => p.vial_id === vialId);
     if (existing) await rep.mutate.deleteProtocol(existing.id);
+
+    // Calculate start timestamp based on today and preferred time
+    const [hours, minutes] = preferredStartTime.split(':').map(Number);
+    const start = new Date();
+    start.setHours(hours, minutes, 0, 0);
+
     await rep.mutate.createProtocol({
       id: nanoid(), vial_id: vialId, dose_amount: parseFloat(doseAmount),
       frequency_hours: parseFloat(frequency), 
       days_on: parseInt(daysOn),
       days_off: parseInt(daysOff),
-      start_time: Date.now(),
+      start_time: start.getTime(),
     });
     setSchedulingVial(null);
   };
@@ -172,7 +180,6 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
               </div>
             ) : (
               <form onSubmit={editingVial ? (e) => { e.preventDefault(); handleUpdateVial(e); } : handleAddVial}>
-                {/* (Previous Form Logic Preserved) */}
                 <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={editingVial ? editingVial.name : vialName} onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} /></div>
                 <div style={{ marginBottom: '1rem' }}>
                   <label className="form-label">Compounds</label>
@@ -237,8 +244,9 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   <div className="mt-2 p-3 bg-success/5 rounded border border-success space-y-3">
                     <p className="text-xs font-bold uppercase text-success">Protocol Configuration</p>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="form-group"><label className="form-label text-[10px]">Amount ({getDoseUnitLabel(group.vial, 0)})</label><input className="form-input text-xs" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label text-[10px]">Amount</label><input className="form-input text-xs" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
                       <div className="form-group"><label className="form-label text-[10px]">Frequency (Hours)</label><input className="form-input text-xs" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label text-[10px]">First Dose Time</label><input className="form-input text-xs" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
                       <div className="form-group"><label className="form-label text-[10px]">Days ON</label><input className="form-input text-xs" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
                       <div className="form-group"><label className="form-label text-[10px]">Days OFF</label><input className="form-input text-xs" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
                     </div>

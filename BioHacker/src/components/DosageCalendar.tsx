@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
 import { Calendar as CalendarIcon, CheckCircle2, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays } from "date-fns";
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay } from "date-fns";
 
 interface DosageCalendarProps {
   userId: string;
@@ -37,6 +37,8 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
 
   const getDosesForDay = (day: Date) => {
     const dailyDoses: any[] = [];
+    const dayStart = startOfDay(day).getTime();
+    const dayEnd = endOfDay(day).getTime();
     
     protocols.forEach(protocol => {
       const vial = vials.find(v => v.id === protocol.vial_id);
@@ -47,30 +49,49 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
       const daysOff = protocol.days_off || 0;
       const cycleLength = daysOn + daysOff;
       
-      const startOfDosing = new Date(protocol.start_time);
-      const diffDays = differenceInDays(day, startOfDosing);
+      const protocolStart = new Date(protocol.start_time);
+      const diffDays = differenceInDays(day, startOfDay(protocolStart));
       
-      // Eligibility check
-      const isDayOn = (diffDays % cycleLength) < daysOn;
+      const isDayOn = (diffDays >= 0) && (diffDays % cycleLength) < daysOn;
       if (!isDayOn) return;
 
-      const logForDay = logs.find(l => l.vial_id === vial.id && isSameDay(new Date(l.timestamp), day));
-      
-      let unit = 'mcg';
-      if (vial.status === 'pill') unit = 'pills';
-      else if (vial.compounds[0]?.unit === 'g') unit = 'mg';
-      else if (vial.compounds[0]?.unit === 'IU') unit = 'IU';
+      // Calculate all occurrences for this specific day
+      // We start from the protocol start time and add the frequency until we hit this day
+      let occurrenceTime = protocolStart.getTime();
+      const frequencyMs = protocol.frequency_hours * 3600000;
 
-      dailyDoses.push({
-        vialId: vial.id,
-        name: vial.name,
-        amount: `${protocol.dose_amount} ${unit}`,
-        completed: !!logForDay,
-        time: format(new Date(protocol.start_time), 'h:mm a')
-      });
+      // Advance occurrence to the beginning of the target day
+      while (occurrenceTime < dayStart) {
+        occurrenceTime += frequencyMs;
+      }
+
+      // Collect all occurrences that fall within this day's window
+      while (occurrenceTime <= dayEnd) {
+        // Find if a log exists near this specific occurrence (within 2 hours window)
+        const isCompleted = logs.some(l => 
+          l.vial_id === vial.id && 
+          Math.abs(l.timestamp - occurrenceTime) < 7200000 // 2 hour grace period
+        );
+
+        let unit = 'mcg';
+        if (vial.status === 'pill') unit = 'pills';
+        else if (vial.compounds[0]?.unit === 'g') unit = 'mg';
+        else if (vial.compounds[0]?.unit === 'IU') unit = 'IU';
+
+        dailyDoses.push({
+          vialId: vial.id,
+          name: vial.name,
+          amount: `${protocol.dose_amount} ${unit}`,
+          completed: isCompleted,
+          time: format(new Date(occurrenceTime), 'h:mm a'),
+          rawTime: occurrenceTime
+        });
+
+        occurrenceTime += frequencyMs;
+      }
     });
 
-    return dailyDoses;
+    return dailyDoses.sort((a, b) => a.rawTime - b.rawTime);
   };
 
   return (
@@ -78,7 +99,7 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 className="card-title"><CalendarIcon className="h-5 w-5 text-primary" /> Weekly Protocol</h3>
-          <p className="card-description">Interactive schedule with on/off cycle support</p>
+          <p className="card-description">Interactive schedule showing all daily occurrences</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronLeft className="h-4 w-4"/></button>
@@ -104,7 +125,7 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
                       <span className="truncate">{dose.name}</span>
                       {dose.completed && <CheckCircle2 className="h-3 w-3 text-success flex-shrink-0" />}
                     </div>
-                    <div className="text-[9px] text-muted-foreground">{dose.amount}</div>
+                    <div className="text-[9px] text-muted-foreground">{dose.time} • {dose.amount}</div>
                   </div>
                 ))}
               </div>
