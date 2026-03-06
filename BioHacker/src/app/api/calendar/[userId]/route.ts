@@ -9,30 +9,40 @@ export async function GET(
   const { userId } = await params;
   
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
   );
 
+  // Fetch protocols and vials for this user
   const { data: protocols } = await supabase
     .from('protocols')
-    .select('*, vials(*)')
+    .select('*, vials:vial_id(*)') // Corrected relation name
     .eq('user_id', userId);
 
+  // If no protocols, return an empty but valid iCal feed
   if (!protocols || protocols.length === 0) {
-    return new Response('No protocols found', { status: 404 });
+    const { value } = ics.createEvents([]);
+    return new Response(value || "BEGIN:VCALENDAR\nVERSION:2.0\nEND:VCALENDAR", {
+      headers: { 'Content-Type': 'text/calendar' }
+    });
   }
 
   const events: ics.EventAttributes[] = [];
 
   protocols.forEach((p: any) => {
     const vial = p.vials;
+    if (!vial) return;
+    
     const startDate = new Date(p.start_time);
     
+    // Generate events for the next 30 days
     for (let i = 0; i < 30; i++) {
       const eventDate = new Date(startDate.getTime() + (i * p.frequency_hours * 3600000));
+      
       const daysOn = p.days_on || 7;
       const daysOff = p.days_off || 0;
-      const cycleDay = i % (daysOn + daysOff);
+      const cycleLength = daysOn + daysOff;
+      const cycleDay = i % cycleLength;
       
       if (cycleDay < daysOn) {
         events.push({
@@ -45,7 +55,7 @@ export async function GET(
           ],
           duration: { minutes: 15 },
           title: `Dose: ${vial.name}`,
-          description: `Administer ${p.dose_amount} ${vial.status === 'pill' ? 'pills' : 'mcg'}. Recorded via BioHacker (by MMM).`,
+          description: `Administer ${p.dose_amount} ${vial.status === 'pill' ? 'pills' : 'mcg'}.`,
           categories: ['Medical', 'BioHacker'],
           status: 'CONFIRMED',
           busyStatus: 'BUSY',
@@ -58,7 +68,10 @@ export async function GET(
   });
 
   const { error, value } = ics.createEvents(events);
-  if (error) return new Response('Error generating calendar', { status: 500 });
+
+  if (error) {
+    return new Response('Error generating calendar', { status: 500 });
+  }
 
   return new Response(value, {
     headers: {
