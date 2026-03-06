@@ -4,16 +4,15 @@ import * as ics from 'ics';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const userId = params.userId;
+  const { userId } = await params;
   
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // Fetch protocols and vials for this user
   const { data: protocols } = await supabase
     .from('protocols')
     .select('*, vials(*)')
@@ -29,11 +28,8 @@ export async function GET(
     const vial = p.vials;
     const startDate = new Date(p.start_time);
     
-    // Generate events for the next 30 days
     for (let i = 0; i < 30; i++) {
       const eventDate = new Date(startDate.getTime() + (i * p.frequency_hours * 3600000));
-      
-      // Basic On/Off Logic
       const daysOn = p.days_on || 7;
       const daysOff = p.days_off || 0;
       const cycleDay = i % (daysOn + daysOff);
@@ -62,10 +58,7 @@ export async function GET(
   });
 
   const { error, value } = ics.createEvents(events);
-
-  if (error) {
-    return new Response('Error generating calendar', { status: 500 });
-  }
+  if (error) return new Response('Error generating calendar', { status: 500 });
 
   return new Response(value, {
     headers: {
