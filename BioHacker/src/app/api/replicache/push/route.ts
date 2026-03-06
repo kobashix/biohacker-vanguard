@@ -3,8 +3,8 @@ import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_PImzukJvV70WqN1GwWUtuQ_ewZGSmoe',
     { cookies: { get(name: string) { return request.cookies.get(name)?.value; } } }
   );
 
@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
       await supabase.from('protocols').upsert({
         id: args.id, user_id: user.id, vial_id: args.vial_id,
         dose_amount: args.dose_amount, frequency_hours: args.frequency_hours,
-        days_on: args.days_on, days_off: args.days_off, start_time: args.start_time
+        days_on: args.days_on, days_off: args.days_off, start_time: args.start_time,
+        skip_weekends: args.skip_weekends, time_buckets: args.time_buckets
       });
     }
 
@@ -46,6 +47,20 @@ export async function POST(request: NextRequest) {
         id: args.id, user_id: user.id, timestamp: args.timestamp,
         mood: args.mood, energy: args.energy, sleep_quality: args.sleep_quality,
         soreness: args.soreness, notes: args.notes
+      });
+    }
+
+    if (name === 'updateSupply') {
+      await supabase.from('supplies').upsert({
+        id: args.id, user_id: user.id, name: args.name,
+        count: args.count, unit: args.unit
+      });
+    }
+
+    if (name === 'createCycle') {
+      await supabase.from('cycles').upsert({
+        id: args.id, user_id: user.id, name: args.name,
+        start_date: args.start_date, end_date: args.end_date, notes: args.notes
       });
     }
 

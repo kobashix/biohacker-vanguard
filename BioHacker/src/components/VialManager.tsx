@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin } from "lucide-react";
+import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin, Clock } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial, Compound, Protocol } from "@/replicache";
 import { nanoid } from "nanoid";
@@ -32,6 +32,8 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
   const [frequency, setFrequency] = useState("24");
   const [daysOn, setDaysOn] = useState("7");
   const [daysOff, setDaysOff] = useState("0");
+  const [skipWeekends, setSkipWeekends] = useState(false);
+  const [timeBuckets, setTimeBuckets] = useState<('morning' | 'afternoon' | 'night')[]>([]);
   const [preferredStartTime, setPreferredStartTime] = useState("08:00");
   
   // Logging State
@@ -116,7 +118,6 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
     const existing = protocols.find(p => p.vial_id === vialId);
     if (existing) await rep.mutate.deleteProtocol(existing.id);
 
-    // Calculate start timestamp based on today and preferred time
     const [hours, minutes] = preferredStartTime.split(':').map(Number);
     const start = new Date();
     start.setHours(hours, minutes, 0, 0);
@@ -126,6 +127,8 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
       frequency_hours: parseFloat(frequency), 
       days_on: parseInt(daysOn),
       days_off: parseInt(daysOff),
+      skip_weekends: skipWeekends,
+      time_buckets: timeBuckets,
       start_time: start.getTime(),
     });
     setSchedulingVial(null);
@@ -144,6 +147,14 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
       injection_site: vial.status === 'mixed' ? injectionSite : undefined
     });
     setLoggingVial(null); if (onLoggingComplete) onLoggingComplete();
+  };
+
+  const toggleBucket = (bucket: 'morning' | 'afternoon' | 'night') => {
+    if (timeBuckets.includes(bucket)) {
+      setTimeBuckets(timeBuckets.filter(b => b !== bucket));
+    } else {
+      setTimeBuckets([...timeBuckets, bucket]);
+    }
   };
 
   return (
@@ -187,7 +198,9 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                     <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 60px 30px', gap: '0.4rem', marginBottom: '0.5rem' }}>
                       <input className="form-input" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} required />
                       <input className="form-input" type="number" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} required />
-                      <select className="form-input" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}><option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option></select>
+                      <select className="form-input" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
+                        <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
+                      </select>
                       <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline" style={{ border: 'none' }} disabled={(editingVial ? editingVial.compounds : compounds).length === 1}><X className="h-4 w-4 text-destructive" /></button>
                     </div>
                   ))}
@@ -229,28 +242,65 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   </div>
                   <div className="flex gap-1">
                     <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1" title="Log Dose"><Syringe className="h-4 w-4 text-primary" /></button>
-                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); }} className="btn btn-outline border-none p-1" title="Set Protocol"><Calendar className="h-4 w-4 text-success" /></button>
+                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="btn btn-outline border-none p-1" title="Set Protocol"><Calendar className="h-4 w-4 text-success" /></button>
                     <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1" title="Edit"><Edit3 className="h-4 w-4" /></button>
                   </div>
                 </div>
                 
                 {group.protocol && (
-                  <div className="text-[10px] uppercase font-bold text-primary bg-primary/5 p-1 rounded inline-block w-fit">
-                    {group.protocol.dose_amount}{getDoseUnitLabel(group.vial, 0)} every {group.protocol.frequency_hours}h ({group.protocol.days_on} on / {group.protocol.days_off} off)
+                  <div className="flex flex-wrap gap-1">
+                    <div className="text-[10px] uppercase font-bold text-primary bg-primary/5 p-1 rounded">
+                      {group.protocol.dose_amount}{getDoseUnitLabel(group.vial, 0)} every {group.protocol.frequency_hours}h
+                    </div>
+                    {group.protocol.skip_weekends && <div className="text-[10px] uppercase font-bold text-orange-500 bg-orange-500/5 p-1 rounded">No Weekends</div>}
+                    {group.protocol.time_buckets?.map(b => (
+                      <div key={b} className="text-[10px] uppercase font-bold text-success bg-success/5 p-1 rounded">{b}</div>
+                    ))}
                   </div>
                 )}
 
                 {schedulingVial?.id === group.vial.id && (
                   <div className="mt-2 p-3 bg-success/5 rounded border border-success space-y-3">
-                    <p className="text-xs font-bold uppercase text-success">Protocol Configuration</p>
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs font-bold uppercase text-success">Protocol Settings</p>
+                      <button onClick={() => setSchedulingVial(null)}><X className="h-3 w-3 text-muted-foreground"/></button>
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-3">
                       <div className="form-group"><label className="form-label text-[10px]">Amount</label><input className="form-input text-xs" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
                       <div className="form-group"><label className="form-label text-[10px]">Frequency (Hours)</label><input className="form-input text-xs" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label text-[10px]">First Dose Time</label><input className="form-input text-xs" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label text-[10px]">Days ON</label><input className="form-input text-xs" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label text-[10px]">Days OFF</label><input className="form-input text-xs" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
                     </div>
-                    <button onClick={() => handleSaveProtocol(group.vial.id)} className="btn btn-primary w-full bg-success text-xs py-1">Apply Protocol</button>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Schedule Pattern</label>
+                      <div className="flex items-center gap-2 p-2 bg-background border border-border rounded-md">
+                        <input type="checkbox" checked={skipWeekends} onChange={e => setSkipWeekends(e.target.checked)} className="accent-primary" />
+                        <span className="text-xs">Skip Weekends (Mon-Fri only)</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Time Slots (Select multiple)</label>
+                      <div className="flex gap-2">
+                        {['morning', 'afternoon', 'night'].map((b: any) => (
+                          <button 
+                            key={b} 
+                            type="button"
+                            onClick={() => toggleBucket(b)}
+                            className={`flex-1 text-[10px] uppercase font-bold p-1 rounded border transition-colors ${timeBuckets.includes(b) ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted/20 text-muted-foreground border-border'}`}
+                          >
+                            {b}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="form-group"><label className="form-label text-[10px]">Start Time</label><input className="form-input text-xs p-1" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label text-[10px]">Days ON</label><input className="form-input text-xs p-1" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
+                      <div className="form-group"><label className="form-label text-[10px]">Days OFF</label><input className="form-input text-xs p-1" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
+                    </div>
+                    <button onClick={() => handleSaveProtocol(group.vial.id)} className="btn btn-primary w-full bg-success text-xs py-1">Save Clinical Protocol</button>
                   </div>
                 )}
               </div>

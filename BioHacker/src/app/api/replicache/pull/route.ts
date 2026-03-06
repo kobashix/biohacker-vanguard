@@ -3,8 +3,8 @@ import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_PImzukJvV70WqN1GwWUtuQ_ewZGSmoe',
     { cookies: { get(name: string) { return request.cookies.get(name)?.value; } } }
   );
 
@@ -16,11 +16,13 @@ export async function POST(request: NextRequest) {
 
   if (clientGroupID !== user.id) return new Response('Forbidden', { status: 403 });
 
-  const [vialsRes, logsRes, protocolsRes, subjectiveRes] = await Promise.all([
+  const [vialsRes, logsRes, protocolsRes, subjectiveRes, suppliesRes, cyclesRes] = await Promise.all([
     supabase.from('vials').select('*').eq('user_id', user.id),
     supabase.from('dose_logs').select('*').eq('user_id', user.id),
     supabase.from('protocols').select('*').eq('user_id', user.id),
     supabase.from('subjective_logs').select('*').eq('user_id', user.id),
+    supabase.from('supplies').select('*').eq('user_id', user.id),
+    supabase.from('cycles').select('*').eq('user_id', user.id),
   ]);
 
   const patch = [];
@@ -30,6 +32,8 @@ export async function POST(request: NextRequest) {
   logsRes.data?.forEach(l => patch.push({ op: 'put', key: `log/${l.id}`, value: l }));
   protocolsRes.data?.forEach(p => patch.push({ op: 'put', key: `protocol/${p.id}`, value: p }));
   subjectiveRes.data?.forEach(s => patch.push({ op: 'put', key: `subjective/${s.id}`, value: s }));
+  suppliesRes.data?.forEach(sup => patch.push({ op: 'put', key: `supply/${sup.id}`, value: sup }));
+  cyclesRes.data?.forEach(c => patch.push({ op: 'put', key: `cycle/${c.id}`, value: c }));
 
   return NextResponse.json({ cookie: Date.now(), lastMutationID: 0, patch });
 }

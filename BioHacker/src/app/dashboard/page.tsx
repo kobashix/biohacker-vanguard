@@ -10,6 +10,7 @@ import { InventoryAlerts } from "@/components/InventoryAlerts";
 import { VialManager } from "@/components/VialManager";
 import { DosageCalendar } from "@/components/DosageCalendar";
 import { SubjectiveLogger } from "@/components/SubjectiveLogger";
+import { HelpGuides } from "@/components/HelpGuides";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -41,7 +42,10 @@ export default function DashboardPage() {
         {/* Left Column: Calendar & Subjective Tracking */}
         <div className="lg:col-span-8 space-y-8">
           <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
-          <SubjectiveLogger userId={user.id} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <SubjectiveLogger userId={user.id} />
+            <HelpGuides />
+          </div>
           <PKChart userId={user.id} />
         </div>
 

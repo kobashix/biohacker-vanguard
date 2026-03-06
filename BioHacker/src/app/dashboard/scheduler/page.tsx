@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { DosageCalendar } from "@/components/DosageCalendar";
 import { VialManager } from "@/components/VialManager";
+import { CycleManager } from "@/components/CycleManager";
 import { Plus, X } from "lucide-react";
 
 export default function SchedulerPage() {
@@ -29,11 +30,11 @@ export default function SchedulerPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-20">
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold">Protocol Scheduler</h1>
-          <p className="text-muted-foreground">Manage your weekly dosing routines and adherence.</p>
+          <p className="text-muted-foreground">Manage your weekly dosing routines and cycle boundaries.</p>
         </div>
         <button 
           onClick={() => setIsAddingProtocol(!isAddingProtocol)} 
@@ -55,12 +56,17 @@ export default function SchedulerPage() {
         </div>
       )}
 
-      <div className="w-full">
-        <DosageCalendar userId={user.id} onSelectVial={(id) => {
-          setSelectedVialId(id);
-          setIsAddingProtocol(true);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }} />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div className="xl:col-span-9">
+          <DosageCalendar userId={user.id} onSelectVial={(id) => {
+            setSelectedVialId(id);
+            setIsAddingProtocol(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }} />
+        </div>
+        <div className="xl:col-span-3">
+          <CycleManager userId={user.id} />
+        </div>
       </div>
     </div>
   );

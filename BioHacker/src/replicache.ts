@@ -26,7 +26,7 @@ export type DoseLog = {
   unit: string; 
   units_iu: number; 
   timestamp: number;
-  injection_site?: string; // e.g. "Left Abdomen"
+  injection_site?: string;
 };
 
 export type Protocol = {
@@ -34,19 +34,36 @@ export type Protocol = {
   vial_id: string;
   dose_amount: number;
   frequency_hours: number;
-  days_on?: number; // For "X days on"
-  days_off?: number; // For "Y days off"
+  days_on?: number;
+  days_off?: number;
   start_time: number;
+  skip_weekends?: boolean;
+  time_buckets?: ('morning' | 'afternoon' | 'night')[];
   notes?: string;
 };
 
 export type SubjectiveLog = {
   id: string;
   timestamp: number;
-  mood: number; // 1-10
-  energy: number; // 1-10
-  sleep_quality: number; // 1-10
-  soreness: number; // 1-10
+  mood: number;
+  energy: number;
+  sleep_quality: number;
+  soreness: number;
+  notes?: string;
+};
+
+export type Supply = {
+  id: string;
+  name: string;
+  count: number;
+  unit: string;
+};
+
+export type Cycle = {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date?: string;
   notes?: string;
 };
 
@@ -88,6 +105,12 @@ const mutators = {
   },
   logSubjective: async (tx: WriteTransaction, log: SubjectiveLog) => {
     await tx.set(`subjective/${log.id}`, log);
+  },
+  updateSupply: async (tx: WriteTransaction, supply: Supply) => {
+    await tx.set(`supply/${supply.id}`, supply);
+  },
+  createCycle: async (tx: WriteTransaction, cycle: Cycle) => {
+    await tx.set(`cycle/${cycle.id}`, cycle);
   },
   seedDemoData: async (tx: WriteTransaction, { vials, protocols, logs }: { vials: Vial[], protocols: Protocol[], logs: DoseLog[] }) => {
     for (const v of vials) await tx.set(`vial/${v.id}`, v);
