@@ -11,6 +11,8 @@ import { VialManager } from "@/components/VialManager";
 import { DosageCalendar } from "@/components/DosageCalendar";
 import { SubjectiveLogger } from "@/components/SubjectiveLogger";
 import { HelpGuides } from "@/components/HelpGuides";
+import { CycleManager } from "@/components/CycleManager";
+import { SupplyTracker } from "@/components/SupplyTracker";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -39,9 +41,13 @@ export default function DashboardPage() {
         <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium">Real-time status of your active protocols and systemic response metrics.</p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 mt-8">
         {/* Main Column: Calendar & Health */}
         <div className="xl:col-span-8 flex flex-col gap-10">
+          <section id="scheduler" className="scroll-mt-8">
+            <CycleManager userId={user.id} />
+          </section>
+
           <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -55,7 +61,12 @@ export default function DashboardPage() {
         {/* Side Column: Inventory & Tools */}
         <div className="xl:col-span-4 flex flex-col gap-10">
           <InventoryAlerts userId={user.id} />
-          <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
+          
+          <section id="inventory" className="flex flex-col gap-10 scroll-mt-8">
+            <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
+            <SupplyTracker userId={user.id} />
+          </section>
+
           <ReconstitutionEngine />
         </div>
       </div>

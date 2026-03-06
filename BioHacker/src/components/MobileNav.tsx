@@ -9,8 +9,8 @@ export function MobileNav() {
 
   const navItems = [
     { name: "Dash", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Vials", href: "/dashboard/inventory", icon: Beaker },
-    { name: "Plan", href: "/dashboard/scheduler", icon: Calendar },
+    { name: "Vials", href: "/dashboard#inventory", icon: Beaker },
+    { name: "Plan", href: "/dashboard#scheduler", icon: Calendar },
     { name: "Logs", href: "/dashboard/history", icon: History },
     { name: "Set", href: "/dashboard/settings", icon: Settings },
   ];

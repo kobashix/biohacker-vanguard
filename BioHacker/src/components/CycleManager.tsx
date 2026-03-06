@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, Plus, Trash2, X } from "lucide-react";
 import { useSubscribe } from "replicache-react";
-import { getReplicache, Cycle } from "@/replicache";
+import { getReplicache, Cycle, Supply } from "@/replicache";
 import { nanoid } from "nanoid";
 import { format } from "date-fns";
 
@@ -28,6 +28,22 @@ export function CycleManager({ userId }: { userId: string }) {
       start_date: startDate,
       end_date: endDate || undefined,
     });
+
+    // Auto-sync: deduct basic estimated supplies (e.g., ~30 uses for a standard phase block)
+    const currentSupplies = await rep.query(async (tx) => {
+      return await tx.scan({ prefix: "supply/" }).values().toArray();
+    }) as Supply[];
+    
+    for (const supply of currentSupplies) {
+      const nameLower = supply.name.toLowerCase();
+      if (nameLower.includes("syringe") || nameLower.includes("needle") || nameLower.includes("wipe") || nameLower.includes("swab")) {
+        await rep.mutate.updateSupply({
+          ...supply,
+          count: Math.max(0, supply.count - 30)
+        });
+      }
+    }
+
     setName(""); setIsAdding(false);
   };
 

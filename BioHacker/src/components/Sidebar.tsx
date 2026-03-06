@@ -11,8 +11,8 @@ export function Sidebar({ onSignOut }: { onSignOut: () => void }) {
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Inventory", href: "/dashboard/inventory", icon: Beaker },
-    { name: "Protocol Scheduler", href: "/dashboard/scheduler", icon: Calendar },
+    { name: "Inventory", href: "/dashboard#inventory", icon: Beaker },
+    { name: "Protocol Scheduler", href: "/dashboard#scheduler", icon: Calendar },
     { name: "Clinical History", href: "/dashboard/history", icon: History },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];

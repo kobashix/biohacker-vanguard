@@ -54,14 +54,14 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Primary Auth Wall: Protect /dashboard and /api/* (except auth callback)
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard')
   const isApi = request.nextUrl.pathname.startsWith('/api')
   const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback')
 
-  if ((isDashboard || isApi) && !isAuthCallback && !session) {
+  if ((isDashboard || isApi) && !isAuthCallback && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
