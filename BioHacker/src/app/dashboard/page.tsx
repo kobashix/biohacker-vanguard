@@ -32,25 +32,28 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold">Clinical Overview</h1>
-        <p className="text-muted-foreground">Real-time status of your protocols and physical wellbeing.</p>
-      </header>
+    <div className="flex flex-col gap-10">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight text-white">Clinical Overview</h1>
+        <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium">Real-time status of your active protocols and systemic response metrics.</p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Calendar & Subjective Tracking */}
-        <div className="lg:col-span-8 space-y-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        {/* Main Column: Calendar & Health */}
+        <div className="xl:col-span-8 flex flex-col gap-10">
           <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <SubjectiveLogger userId={user.id} />
             <HelpGuides />
           </div>
+          
           <PKChart userId={user.id} />
         </div>
 
-        {/* Right Column: Inventory & Math */}
-        <div className="lg:col-span-4 space-y-8">
+        {/* Side Column: Inventory & Tools */}
+        <div className="xl:col-span-4 flex flex-col gap-10">
           <InventoryAlerts userId={user.id} />
           <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
           <ReconstitutionEngine />

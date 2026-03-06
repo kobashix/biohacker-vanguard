@@ -18,34 +18,7 @@
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Core Utility Classes - Hardened for Reliability */
-.hidden { display: none !important; }
-.block { display: block !important; }
-.flex { display: flex !important; }
-.flex-col { flex-direction: column !important; }
-.items-center { align-items: center !important; }
-.justify-between { justify-content: space-between !important; }
-.gap-2 { gap: 0.5rem !important; }
-.gap-3 { gap: 0.75rem !important; }
-.gap-4 { gap: 1rem !important; }
-.pb-20 { padding-bottom: 5rem !important; }
-.w-full { width: 100% !important; }
-.max-w-7xl { max-w: 80rem !important; }
-.mx-auto { margin-left: auto !important; margin-right: auto !important; }
-
-@media (min-width: 1024px) {
-  .lg\:hidden { display: none !important; }
-  .lg\:block { display: block !important; }
-  .lg\:flex { display: flex !important; }
-  .lg\:pb-0 { padding-bottom: 0 !important; }
-  .lg\:static { position: static !important; }
-  .lg\:translate-x-0 { transform: translateX(0) !important; }
-}
-
-@media (min-width: 640px) {
-  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-}
-
+/* Base resets */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -60,108 +33,62 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Base card styling */
+/* Professional Card Styling */
 .card {
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  @apply bg-[#18181b] border border-[#27272a] rounded-lg overflow-hidden flex flex-col;
 }
 
 .card-header {
-  padding: 1.25rem 1.25rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  @apply p-5 pb-0 flex flex-col gap-1;
 }
 
 .card-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  @apply text-lg font-semibold flex items-center gap-2;
 }
 
 .card-description {
-  font-size: 0.8rem;
-  color: var(--muted-foreground);
+  @apply text-sm text-[#a1a1aa];
 }
 
 .card-content {
-  padding: 1.25rem;
-  flex: 1;
+  @apply p-5 flex-1;
 }
 
-/* Form Elements */
+/* Unified Form Elements */
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
+  @apply flex flex-col gap-1.5 mb-4;
 }
 
 .form-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  @apply text-[11px] font-bold text-[#a1a1aa] uppercase tracking-wider;
 }
 
 .form-input {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  background-color: var(--background);
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
-  color: var(--foreground);
-  font-size: 0.875rem;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--primary);
+  @apply w-full p-2.5 bg-[#09090b] border border-[#27272a] rounded-md text-sm text-[#fafafa] transition-colors focus:outline-none focus:border-[#2563eb];
 }
 
 /* Button styles */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  border-radius: calc(var(--radius) - 2px);
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.6rem 1rem;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold px-4 py-2 transition-all cursor-pointer border-none;
 }
 
 .btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
+  @apply bg-[#2563eb] text-white hover:bg-[#1d4ed8];
 }
 
 .btn-outline {
-  background-color: transparent;
-  border: 1px solid var(--border);
-  color: var(--foreground);
+  @apply bg-transparent border border-[#27272a] text-[#fafafa] hover:bg-[#27272a];
 }
 
-.btn-outline:hover {
-  background-color: var(--muted);
+/* Status Indicators */
+.status-indicator {
+  @apply inline-block w-2 h-2 rounded-full mr-2;
 }
 
-/* Utilities */
+.status-active { @apply bg-[#10b981]; }
+.status-low { @apply bg-[#ef4444]; }
+
+/* Animations */
 .animate-spin {
   animation: spin 1s linear infinite;
 }
@@ -171,39 +98,24 @@ body {
   to { transform: rotate(360deg); }
 }
 
-.text-primary { color: var(--primary); }
-.text-success { color: var(--success); }
-.text-destructive { color: var(--destructive); }
-.text-muted-foreground { color: var(--muted-foreground); }
-.bg-background { background-color: var(--background); }
-.bg-card { background-color: var(--card); }
-.border-border { border-color: var(--border); }
-.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-.font-bold { font-weight: 700; }
-.text-xs { font-size: 0.75rem; }
-.text-sm { font-size: 0.875rem; }
-.text-lg { font-size: 1.125rem; }
-.text-3xl { font-size: 1.875rem; }
-
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-
-.space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }
-.space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
-.space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
-.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
-.space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
-
-/* Android App Specific Styles */
+/* Mobile App Optimization */
 .pb-safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Table styling */
+.table-wrapper {
+  @apply w-full overflow-x-auto;
+}
+
+table {
+  @apply w-full border-collapse;
+}
+
+th, td {
+  @apply p-3 text-left border-b border-[#27272a] text-sm;
+}
+
+th {
+  @apply text-[#a1a1aa] font-medium uppercase text-[10px] tracking-widest;
 }
