@@ -1,19 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
-import { Calendar as CalendarIcon, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import { format } from "date-fns";
-
-interface TimelineItem {
-  type: 'log' | 'projection';
-  timestamp: number;
-  label: string;
-  amount: string;
-  status: 'completed' | 'upcoming' | 'missed';
-  vialId?: string;
-}
+import { Calendar as CalendarIcon, CheckCircle2, Clock, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks } from "date-fns";
 
 interface DosageCalendarProps {
   userId: string;
@@ -21,6 +12,7 @@ interface DosageCalendarProps {
 }
 
 export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
+  const [currentWeek, setCurrentWeek] = useState(new Date());
   const rep = getReplicache(userId);
 
   const logs = useSubscribe(rep, async (tx) => {
@@ -38,100 +30,70 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
     return list as Vial[];
   }, { default: [] });
 
-  const roadmap = useMemo(() => {
-    const timeline: TimelineItem[] = [];
+  const days = useMemo(() => {
+    const start = startOfWeek(currentWeek);
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  }, [currentWeek]);
 
-    // 1. Process Past Logs (Last 24h)
-    logs.filter(l => l.timestamp > Date.now() - 24 * 3600000).forEach(log => {
-      timeline.push({
-        type: 'log',
-        timestamp: log.timestamp,
-        label: log.substance,
-        amount: `${log.dose_amount} ${log.unit}`,
-        status: 'completed',
-        vialId: log.vial_id
-      });
-    });
-
-    // 2. Project Future Doses
+  const getDosesForDay = (day: Date) => {
+    const dailyDoses: any[] = [];
+    
     protocols.forEach(protocol => {
       const vial = vials.find(v => v.id === protocol.vial_id);
       if (!vial) return;
 
-      const lastLog = [...logs]
-        .filter(l => l.vial_id === protocol.vial_id)
-        .sort((a, b) => b.timestamp - a.timestamp)[0];
+      const logForDay = logs.find(l => l.vial_id === vial.id && isSameDay(new Date(l.timestamp), day));
+      const unit = vial.status === 'pill' ? 'pills' : (vial.compounds[0]?.unit === 'g' ? 'mg' : (vial.compounds[0]?.unit === 'IU' ? 'IU' : 'mcg'));
 
-      let nextDoseTime = lastLog 
-        ? lastLog.timestamp + (protocol.frequency_hours * 3600000)
-        : protocol.start_time;
-
-      while (nextDoseTime < Date.now() + 48 * 3600000) {
-        if (nextDoseTime > Date.now()) {
-          const unit = vial.status === 'pill' ? 'pills' : (vial.compounds[0]?.unit === 'g' ? 'mg' : 'mcg');
-          timeline.push({
-            type: 'projection',
-            timestamp: nextDoseTime,
-            label: vial.name,
-            amount: `${protocol.dose_amount} ${unit}`,
-            status: 'upcoming',
-            vialId: vial.id
-          });
-        } else if (nextDoseTime < Date.now() && (!lastLog || lastLog.timestamp < nextDoseTime - 3600000)) {
-          const unit = vial.status === 'pill' ? 'pills' : (vial.compounds[0]?.unit === 'g' ? 'mg' : 'mcg');
-          timeline.push({
-            type: 'projection',
-            timestamp: nextDoseTime,
-            label: vial.name,
-            amount: `${protocol.dose_amount} ${unit}`,
-            status: 'missed',
-            vialId: vial.id
-          });
-        }
-        nextDoseTime += (protocol.frequency_hours * 3600000);
-      }
+      dailyDoses.push({
+        vialId: vial.id,
+        name: vial.name,
+        amount: `${protocol.dose_amount} ${unit}`,
+        completed: !!logForDay,
+        time: format(new Date(protocol.start_time), 'h:mm a')
+      });
     });
 
-    return timeline.sort((a, b) => a.timestamp - b.timestamp);
-  }, [logs, protocols, vials]);
+    return dailyDoses;
+  };
 
   return (
     <div className="card">
-      <div className="card-header">
-        <h3 className="card-title">
-          <CalendarIcon className="h-5 w-5 text-primary" />
-          Dosage Roadmap
-        </h3>
-        <p className="card-description">Click an upcoming dose to log it</p>
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h3 className="card-title"><CalendarIcon className="h-5 w-5 text-primary" /> Weekly Protocol</h3>
+          <p className="card-description">Tap a dose to log completion</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="btn btn-outline" style={{padding: '0.25rem'}}><ChevronLeft className="h-4 w-4"/></button>
+          <button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="btn btn-outline" style={{padding: '0.25rem'}}><ChevronRight className="h-4 w-4"/></button>
+        </div>
       </div>
-      <div className="card-content">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {roadmap.length === 0 && (
-            <p style={{ textAlign: 'center', color: 'var(--muted-foreground)', fontSize: '0.875rem' }}>No scheduled doses.</p>
-          )}
-          {roadmap.map((item, idx) => (
-            <div 
-              key={idx} 
-              onClick={() => item.vialId && onSelectVial(item.vialId)}
-              className="roadmap-item"
-              style={{ 
-                display: 'flex', gap: '1rem', alignItems: 'flex-start', paddingBottom: '1rem', 
-                borderLeft: '2px solid var(--border)', marginLeft: '0.5rem', paddingLeft: '1.5rem', 
-                position: 'relative', cursor: item.status !== 'completed' ? 'pointer' : 'default',
-                transition: 'opacity 0.2s'
-              }}
-            >
-              <div style={{ position: 'absolute', left: '-9px', top: '0', background: 'var(--card)', borderRadius: '50%', padding: '2px' }}>
-                {item.status === 'completed' && <CheckCircle2 className="h-4 w-4 text-success" />}
-                {item.status === 'upcoming' && <Clock className="h-4 w-4 text-primary" />}
-                {item.status === 'missed' && <AlertTriangle className="h-4 w-4 text-destructive" />}
+      <div className="card-content" style={{ padding: '0', overflowX: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))', borderTop: '1px solid var(--border)' }}>
+          {days.map((day, i) => (
+            <div key={i} style={{ borderRight: i < 6 ? '1px solid var(--border)' : 'none', minHeight: '150px' }}>
+              <div style={{ padding: '0.5rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>{format(day, 'EEE')}</div>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{format(day, 'd')}</div>
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: item.status === 'missed' ? 'var(--destructive)' : 'inherit' }}>{item.label}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>{format(new Date(item.timestamp), 'MMM d, h:mm a')}</div>
-                </div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{item.amount} • {item.status.toUpperCase()}</div>
+              <div style={{ padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {getDosesForDay(day).map((dose, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => onSelectVial(dose.vialId)}
+                    style={{ 
+                      padding: '0.4rem', borderRadius: '4px', background: dose.completed ? 'rgba(16, 185, 129, 0.1)' : 'var(--card)', 
+                      border: `1px solid ${dose.completed ? 'var(--success)' : 'var(--border)'}`, cursor: 'pointer', fontSize: '0.75rem' 
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, display: 'flex', justifyContent: 'space-between' }}>
+                      {dose.name}
+                      {dose.completed && <CheckCircle2 className="h-3 w-3 text-success" />}
+                    </div>
+                    <div style={{ color: 'var(--muted-foreground)', fontSize: '0.7rem' }}>{dose.amount}</div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
