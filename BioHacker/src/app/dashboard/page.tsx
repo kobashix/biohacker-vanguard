@@ -40,7 +40,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-8 space-y-8">
           <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
           <SubjectiveLogger userId={user.id} />
-          <PKChart />
+          <PKChart userId={user.id} />
         </div>
 
         {/* Right Column: Inventory & Math */}
