@@ -48,7 +48,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background pb-20 lg:pb-0">
-      <Sidebar onSignOut={handleSignOut} />
+      <div className="hidden lg:block">
+        <Sidebar onSignOut={handleSignOut} />
+      </div>
+      
       <main className="flex-1 overflow-y-auto p-4 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {children}
@@ -68,7 +71,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </footer>
         </div>
       </main>
-      <MobileNav />
+
+      <div className="lg:hidden">
+        <MobileNav />
+      </div>
     </div>
   );
 }
