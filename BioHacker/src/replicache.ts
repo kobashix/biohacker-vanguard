@@ -89,6 +89,11 @@ const mutators = {
   logSubjective: async (tx: WriteTransaction, log: SubjectiveLog) => {
     await tx.set(`subjective/${log.id}`, log);
   },
+  seedDemoData: async (tx: WriteTransaction, { vials, protocols, logs }: { vials: Vial[], protocols: Protocol[], logs: DoseLog[] }) => {
+    for (const v of vials) await tx.set(`vial/${v.id}`, v);
+    for (const p of protocols) await tx.set(`protocol/${p.id}`, p);
+    for (const l of logs) await tx.set(`log/${l.id}`, l);
+  },
 };
 
 export type M = typeof mutators;
