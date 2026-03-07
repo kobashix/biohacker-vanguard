@@ -255,12 +255,12 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
       <div className="card">
         <div className="card-header flex justify-between items-center">
           <div><h3 className="card-title text-primary flex items-center gap-2"><Activity className="h-5 w-5" /> Active Protocol</h3></div>
-          <button onClick={() => { setIsAdding(true); setEditingVial(null); setLoggingVial(null); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-primary px-3 py-1"><Plus className="h-4 w-4" /></button>
+          <button onClick={() => { setIsAdding(true); setEditingVial(null); setLoggingVial(null); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-primary px-3 py-1 text-xs"><Plus className="h-3 w-3 sm:h-4 sm:w-4" /></button>
         </div>
         <div className="card-content">
           <div className="flex flex-col gap-3">
             {inventory.active.map(group => (
-              <div key={group.vial.id} className="p-4 bg-background rounded-xl border border-border flex flex-col gap-3 shadow-sm hover:border-primary/30 transition-colors">
+              <div key={group.vial.id} className="p-3 lg:p-4 bg-background rounded-xl border border-border flex flex-col gap-3 shadow-sm hover:border-primary/30 transition-colors">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                   <div className="flex gap-3 items-start sm:items-center">
                     <div className="p-2 sm:p-3 rounded-xl flex-shrink-0" style={{ background: group.vial.status === 'mixed' ? 'rgba(37, 99, 235, 0.1)' : group.vial.status === 'pill' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(161, 161, 170, 0.1)' }}>
@@ -275,11 +275,11 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   </div>
                   
                   {/* Action Buttons */}
-                  <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                    <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 sm:flex-none btn btn-outline bg-primary/5 hover:bg-primary/10 border-primary/20 p-2" title="Log Dose">
+                  <div className="flex gap-1 w-full sm:w-auto mt-2 sm:mt-0">
+                    <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 sm:flex-none btn btn-outline bg-primary/5 hover:bg-primary/10 border-primary/20 p-2 sm:px-3" title="Log Dose">
                       <Syringe className="h-4 w-4 text-primary mx-auto" />
                     </button>
-                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="flex-1 sm:flex-none btn btn-outline bg-success/5 hover:bg-success/10 border-success/20 p-2" title="Set Protocol">
+                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="flex-1 sm:flex-none btn btn-outline bg-success/5 hover:bg-success/10 border-success/20 p-2 sm:px-3" title="Set Protocol">
                       <Calendar className="h-4 w-4 text-success mx-auto" />
                     </button>
                     <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline p-2 border-border" title="Edit">

@@ -142,7 +142,7 @@ export default function SettingsPage() {
     <div className="space-y-8">
       <header><h1 className="text-3xl font-bold">Settings</h1><p className="text-muted-foreground">Manage your clinical integrations and data safety.</p></header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         {/* iCal Integration */}
         <div className="card border-primary bg-primary/5">
           <div className="card-header"><h3 className="card-title text-primary"><Calendar className="h-5 w-5" /> Calendar Sync</h3><p className="card-description">Get native dose reminders on all your devices.</p></div>
@@ -162,7 +162,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Data & Tools */}
-        <div className="space-y-8">
+        <div className="space-y-6 lg:space-y-8">
           <div className="card">
             <div className="card-header"><h3 className="card-title"><Beaker className="h-5 w-5 text-primary" /> Setup Tools</h3><p className="card-description">Speed up your clinical environment setup.</p></div>
             <div className="card-content space-y-4">

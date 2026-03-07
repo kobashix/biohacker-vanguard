@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-4 lg:p-10 pb-32 lg:pb-10">
+        <main className="flex-1 overflow-y-auto px-4 py-6 lg:p-10 pb-28 lg:pb-10">
           <div className="max-w-[1400px] mx-auto w-full">
             {children}
             
