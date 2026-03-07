@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { LayoutDashboard, Beaker, Calendar, Settings, History } from "lucide-react";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'dash';
 
   const navItems = [
-    { name: "Dash", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Vials", href: "/dashboard#inventory", icon: Beaker },
-    { name: "Plan", href: "/dashboard#scheduler", icon: Calendar },
+    { name: "Dash", href: "/dashboard?tab=dash", icon: LayoutDashboard },
+    { name: "Vials", href: "/dashboard?tab=vials", icon: Beaker },
+    { name: "Plan", href: "/dashboard?tab=plan", icon: Calendar },
     { name: "Logs", href: "/dashboard/history", icon: History },
     { name: "Set", href: "/dashboard/settings", icon: Settings },
   ];
@@ -19,7 +21,14 @@ export function MobileNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center p-1 pb-safe-bottom shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.3)]">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        
+        let isActive = false;
+        if (item.href.includes("?tab=")) {
+          isActive = pathname === "/dashboard" && currentTab === item.href.split('=')[1];
+        } else {
+          isActive = pathname === item.href;
+        }
+
         return (
           <Link
             key={item.name}
