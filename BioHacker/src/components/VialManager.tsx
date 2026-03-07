@@ -7,7 +7,35 @@ import { getReplicache, Vial, Compound, Protocol } from "@/replicache";
 import { calculateRequiredUnits } from "@/math";
 import Decimal from "decimal.js";
 import { format } from "date-fns";
-import { COMPOUND_DATABASE } from "@/lib/compoundsDb";
+import { COMPOUND_DATABASE, STACK_PRESETS } from "@/lib/compoundsDb";
+
+// Build category groups for the compound select dropdown
+const COMPOUND_GROUPS: Record<string, string[]> = {};
+for (const comp of COMPOUND_DATABASE) {
+  // Infer the group from the COMPOUND_DATABASE ordering comments by matching keyword patterns
+  const grp =
+    ['BPC','TB-500','KPV','VIP','LL-37','Thymosin Alpha','Larazotide','GHK','Epitalon','Semax','Selank','Humanin','SS-31','MOTS-c'].some(k => comp.startsWith(k)) ? 'Peptides: Recovery' :
+    ['CJC','Ipamorelin','GHRP','Hexarelin','Sermorelin','Tesamorelin','AOD','HGH Frag','MK-677','HGH','IGF','PEG','MGF','Kisspeptin'].some(k => comp.includes(k)) ? 'Peptides: GH / Secretagogues' :
+    ['Semaglutide','Tirzepatide','Retatrutide','Liraglutide','Cagrilintide','Tesofensine'].some(k => comp.includes(k)) ? 'Peptides: GLP-1 / Fat Loss' :
+    ['Dihexa','P21','Cerebrolysin','NSI-189','Pinealon','DSIP'].some(k => comp.includes(k)) ? 'Peptides: Cognitive' :
+    ['PT-141','Melanotan','Kisspeptin'].some(k => comp.includes(k)) ? 'Peptides: Sexual Health' :
+    ['5-Amino','Angiotensin','Thymosin Beta-4 Frag'].some(k => comp.includes(k)) ? 'Peptides: Misc' :
+    ['Ostarine','Ligandrol','RAD-140','Andarine','Cardarine','Stenabolic','YK-11','S23','LGD-3303','AC-262','ACP-105','TLB-150'].some(k => comp.includes(k)) ? 'SARMs' :
+    ['Testosterone Cyp','Testosterone Enan','Testosterone Prop','Testosterone Und','Testosterone Sus','Testosterone Susp','Sustanon'].some(k => comp.includes(k)) ? 'Testosterone' :
+    ['Nandrolone','Trenbolone','Masteron','Primobolan','Equipoise','Boldenone','Parabolan','EQ +','Test E + Deca','Supertest'].some(k => comp.includes(k)) ? 'Steroids: Injectable' :
+    ['Oxandrolone','Stanozolol','Methandrostenolone','Oxymetholone','Halotestin','Superdrol','Turinabol','Proviron','Clenbuterol','T3','T4','Ephedrine','Albuterol','AICAR','MK-677 (Oral)'].some(k => comp.includes(k)) ? 'Steroids & Orals' :
+    ['Anastrozole','Exemestane','Letrozole','Tamoxifen','Clomiphene','Raloxifene','Enclomiphene','hCG','Kisspeptin-10 (LH'].some(k => comp.includes(k)) ? 'Ancillaries / PCT / AI' :
+    ['DHEA','Pregnenolone','Progesterone','Estradiol','TRT dose','Pellets'].some(k => comp.includes(k)) ? 'TRT / HRT' :
+    ['Vitamin','Glutathione','NAD+','Zinc','Magnesium'].some(k => comp.includes(k)) ? 'Vitamins & IV' :
+    ['Bacteriostatic','Sterile Saline'].some(k => comp.includes(k)) ? 'Reconstitution' :
+    'Other';
+  if (!COMPOUND_GROUPS[grp]) COMPOUND_GROUPS[grp] = [];
+  COMPOUND_GROUPS[grp].push(comp);
+}
+
+// Group presets by category
+const PRESET_CATEGORIES = [...new Set(STACK_PRESETS.map(p => p.category))];
+
 
 interface VialManagerProps {
   userId: string;
@@ -255,24 +283,27 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
 
                 {!editingVial && (
                   <div className="sheet-section">
-                    <p className="sheet-section-label">Quick Stack Presets</p>
+                    <p className="sheet-section-label">Stack Presets</p>
                     <select
                       className="form-input"
-                      style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
+                      style={{ background: '#18181b', fontSize: '0.95rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
                       value={activePreset}
                       onChange={e => {
                         const val = e.target.value;
                         setActivePreset(val);
-                        if (val === 'wolverine') setCompounds([{name: 'BPC-157', mass_mg: 5, unit: 'mg'}, {name: 'TB-500', mass_mg: 5, unit: 'mg'}]);
-                        else if (val === 'mass') setCompounds([{name: 'Testosterone Cypionate', mass_mg: 200, unit: 'mg'}, {name: 'Nandrolone Decanoate', mass_mg: 100, unit: 'mg'}]);
-                        else if (val === 'shred') setCompounds([{name: 'Tirzepatide', mass_mg: 5, unit: 'mg'}, {name: 'AOD-9604', mass_mg: 2, unit: 'mg'}]);
+                        const preset = STACK_PRESETS.find(p => p.id === val);
+                        if (preset) setCompounds(preset.compounds.map(c => ({ ...c })));
                         else setCompounds([{ name: '', mass_mg: 0, unit: 'mg' }]);
                       }}
                     >
-                      <option value="custom">Custom</option>
-                      <option value="wolverine">🐺 Wolverine — BPC-157 + TB-500</option>
-                      <option value="mass">💪 Mass Builder — Test C + Deca</option>
-                      <option value="shred">🔥 Shredding — Tirzepatide + AOD</option>
+                      <option value="custom">— Custom —</option>
+                      {PRESET_CATEGORIES.map(cat => (
+                        <optgroup key={cat} label={cat}>
+                          {STACK_PRESETS.filter(p => p.category === cat).map(p => (
+                            <option key={p.id} value={p.id}>{p.emoji} {p.label} — {p.description}</option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
                   </div>
                 )}
@@ -296,15 +327,21 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                             >Remove</button>
                           )}
                         </div>
-                        <input
-                          list="compounds-list"
+                        {/* Compound name — full select dropdown */}
+                        <select
                           className="form-input"
-                          style={{ marginBottom: '0.625rem', background: '#09090b' }}
+                          style={{ marginBottom: '0.625rem', background: '#09090b', fontWeight: 600 }}
                           value={c.name}
                           onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
-                          placeholder="Compound name..."
                           required
-                        />
+                        >
+                          <option value="">— Select Compound —</option>
+                          {Object.entries(COMPOUND_GROUPS).map(([grp, items]) => (
+                            <optgroup key={grp} label={grp}>
+                              {items.map(comp => <option key={comp} value={comp}>{comp}</option>)}
+                            </optgroup>
+                          ))}
+                        </select>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '0.5rem' }}>
                           <input
                             className="form-input"
