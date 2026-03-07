@@ -53,13 +53,18 @@ export default function SettingsPage() {
     setPurging(true);
     try {
       const res = await fetch('/api/user/purge', { method: 'DELETE' });
-      if (!res.ok) throw new Error('Server error');
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const backendError = data?.errors?.join(', ') || 'Unknown server error';
+        throw new Error(backendError);
+      }
       // Clear local Replicache store
       if (rep) await rep.close();
       alert('All data purged. You will be redirected.');
       window.location.href = '/dashboard';
-    } catch (e) {
-      alert('Purge failed. Please try again.');
+    } catch (e: any) {
+      console.error(e);
+      alert(`Purge failed: ${e.message}`);
     } finally {
       setPurging(false);
     }
