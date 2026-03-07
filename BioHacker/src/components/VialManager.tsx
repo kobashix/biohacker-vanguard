@@ -167,126 +167,223 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
 
   return (
     <div className="flex flex-col gap-8">
-      {/* FORM HUB TAKEOVER */}
+      {/* ── COMPOUND FORM SHEET ── */}
       {(isAdding || editingVial || loggingVial) && (
-        <div className="fixed inset-0 z-[100] bg-background overflow-y-auto w-full h-full">
-          <div className="max-w-2xl mx-auto p-4 lg:p-8">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
-              <button onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if(onLoggingComplete) onLoggingComplete(); }} className="btn btn-outline border-transparent hover:bg-muted/30 p-2 -ml-2"><ArrowLeft className="h-6 w-6" /></button>
-              <h2 className="text-xl font-bold text-primary">
-                {editingVial ? `Edit ${editingVial.name}` : loggingVial ? `Log Dose: ${loggingVial.name}` : 'New Compound'}
-              </h2>
+        <div className="sheet-overlay">
+          <div className="sheet-inner">
+            {/* sticky header */}
+            <div className="sheet-header">
+              <button
+                className="sheet-back-btn"
+                onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if (onLoggingComplete) onLoggingComplete(); }}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <span className="sheet-title">
+                {loggingVial ? `Log Pin — ${loggingVial.name}` : editingVial ? `Edit — ${editingVial.name}` : 'New Compound'}
+              </span>
             </div>
-            <div className="space-y-4">
+
+            {/* ── LOG PIN FORM ── */}
             {loggingVial ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="form-group"><label className="form-label">Dose ({getDoseUnitLabel(loggingVial, targetCompoundIndex)})</label><input className="form-input" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
-                  <div className="form-group"><label className="form-label">Compound</label>
-                    <select className="form-input" value={targetCompoundIndex} onChange={e => setTargetCompoundIndex(parseInt(e.target.value))}>
+              <div>
+                {loggingVial.compounds.length > 1 && (
+                  <div className="sheet-section">
+                    <p className="sheet-section-label">Compound</p>
+                    <select
+                      className="form-input"
+                      style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
+                      value={targetCompoundIndex}
+                      onChange={e => setTargetCompoundIndex(parseInt(e.target.value))}
+                    >
                       {loggingVial.compounds.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
                     </select>
                   </div>
+                )}
+
+                <div className="sheet-section">
+                  <p className="sheet-section-label">Dose ({getDoseUnitLabel(loggingVial, targetCompoundIndex)})</p>
+                  <input
+                    className="big-input"
+                    type="number"
+                    inputMode="decimal"
+                    value={doseAmount}
+                    onChange={e => setDoseAmount(e.target.value)}
+                    autoFocus
+                  />
                 </div>
+
                 {loggingVial.status === 'mixed' && (
-                  <div className="form-group">
-                    <label className="form-label flex items-center gap-2"><MapPin className="h-3 w-3" /> Injection Site</label>
-                    <select className="form-input" value={injectionSite} onChange={e => setInjectionSite(e.target.value)}>
-                      {INJECTION_SITES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                  <div className="sheet-section">
+                    <p className="sheet-section-label">Injection Site</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      {INJECTION_SITES.map(s => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setInjectionSite(s)}
+                          style={{
+                            padding: '0.75rem 0.5rem',
+                            borderRadius: '0.625rem',
+                            border: `2px solid ${injectionSite === s ? '#2563eb' : '#27272a'}`,
+                            background: injectionSite === s ? 'rgba(37,99,235,0.15)' : '#18181b',
+                            color: injectionSite === s ? '#60a5fa' : '#a1a1aa',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
-                <button onClick={() => handleLogDose(loggingVial, parseFloat(doseAmount), targetCompoundIndex)} className="btn btn-primary w-full">Record Administration</button>
+
+                <button
+                  className="sheet-cta success"
+                  onClick={() => handleLogDose(loggingVial, parseFloat(doseAmount), targetCompoundIndex)}
+                >
+                  <Syringe className="inline h-5 w-5 mr-2" style={{ verticalAlign: 'middle' }} />
+                  Log This Pin
+                </button>
               </div>
             ) : (
-              <form onSubmit={editingVial ? (e) => { e.preventDefault(); handleUpdateVial(e); } : handleAddVial} className="space-y-5">
-                
+              /* ── ADD / EDIT COMPOUND FORM ── */
+              <form onSubmit={editingVial ? (e) => { e.preventDefault(); handleUpdateVial(e); } : handleAddVial}>
+
                 {!editingVial && (
-                  <div className="form-group mb-2">
-                    <label className="form-label">Quick Stack Presets</label>
-                    <select 
-                      className="form-input w-full bg-[#09090b] text-sm py-2" 
-                      value={activePreset} 
+                  <div className="sheet-section">
+                    <p className="sheet-section-label">Quick Stack Presets</p>
+                    <select
+                      className="form-input"
+                      style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
+                      value={activePreset}
                       onChange={e => {
                         const val = e.target.value;
                         setActivePreset(val);
-                        if (val === 'wolverine') {
-                          setCompounds([{name: 'BPC-157', mass_mg: 5, unit: 'mg'}, {name: 'TB-500', mass_mg: 5, unit: 'mg'}]);
-                        } else if (val === 'mass') {
-                          setCompounds([{name: 'Testosterone Cypionate', mass_mg: 200, unit: 'mg'}, {name: 'Nandrolone Decanoate', mass_mg: 100, unit: 'mg'}]);
-                        } else if (val === 'shred') {
-                          setCompounds([{name: 'Tirzepatide', mass_mg: 5, unit: 'mg'}, {name: 'AOD-9604', mass_mg: 2, unit: 'mg'}]);
-                        } else {
-                          setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]);
-                        }
+                        if (val === 'wolverine') setCompounds([{name: 'BPC-157', mass_mg: 5, unit: 'mg'}, {name: 'TB-500', mass_mg: 5, unit: 'mg'}]);
+                        else if (val === 'mass') setCompounds([{name: 'Testosterone Cypionate', mass_mg: 200, unit: 'mg'}, {name: 'Nandrolone Decanoate', mass_mg: 100, unit: 'mg'}]);
+                        else if (val === 'shred') setCompounds([{name: 'Tirzepatide', mass_mg: 5, unit: 'mg'}, {name: 'AOD-9604', mass_mg: 2, unit: 'mg'}]);
+                        else setCompounds([{ name: '', mass_mg: 0, unit: 'mg' }]);
                       }}
                     >
-                      <option value="custom">Custom Configuration</option>
-                      <option value="wolverine">Wolverine (BPC-157 + TB-500)</option>
-                      <option value="mass">Mass Builder (Test C + Deca)</option>
-                      <option value="shred">Shredding (Tirzepatide + AOD)</option>
+                      <option value="custom">Custom</option>
+                      <option value="wolverine">🐺 Wolverine — BPC-157 + TB-500</option>
+                      <option value="mass">💪 Mass Builder — Test C + Deca</option>
+                      <option value="shred">🔥 Shredding — Tirzepatide + AOD</option>
                     </select>
                   </div>
                 )}
-                
-                <div className="space-y-3">
-                  <label className="form-label block border-b border-border pb-2">Compounds</label>
-                  
-                  {/* Native Autocomplete Datalist */}
-                  <datalist id="compounds-list">
-                    {COMPOUND_DATABASE.map((comp) => (
-                      <option key={comp} value={comp} />
-                    ))}
-                  </datalist>
 
-                  {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
-                    <div key={idx} className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center p-4 sm:p-0 bg-[#18181b]/50 sm:bg-transparent rounded-lg border border-[#27272a] sm:border-none relative">
-                      
-                      {/* Name Row: Full width on mobile, flex-1 on desktop */}
-                      <div className="flex-1 w-full">
-                        <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Compound Name</label>
-                        <input list="compounds-list" className="form-input w-full bg-[#09090b]" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search Database..." required />
-                      </div>
-                      
-                      {/* Mass/Unit Row: 50/50 Grid on Mobile, fixed widths on desktop */}
-                      <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:gap-2">
-                        <div className="w-full sm:w-24">
-                          <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Mass/Amount</label>
-                          <input className="form-input w-full bg-[#09090b]" type="number" step="any" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Amt" required />
+                <datalist id="compounds-list">
+                  {COMPOUND_DATABASE.map((comp) => <option key={comp} value={comp} />)}
+                </datalist>
+
+                <div className="sheet-section">
+                  <p className="sheet-section-label">Compounds</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
+                      <div key={idx} style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '0.875rem', padding: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#a1a1aa' }}>Compound {idx + 1}</span>
+                          {(editingVial ? editingVial.compounds : compounds).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                              style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
+                            >Remove</button>
+                          )}
                         </div>
-                        
-                        <div className="w-full sm:w-20">
-                          <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Unit</label>
-                          <select className="form-input w-full bg-[#09090b] px-2" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
+                        <input
+                          list="compounds-list"
+                          className="form-input"
+                          style={{ marginBottom: '0.625rem', background: '#09090b' }}
+                          value={c.name}
+                          onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                          placeholder="Compound name..."
+                          required
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '0.5rem' }}>
+                          <input
+                            className="form-input"
+                            style={{ background: '#09090b', textAlign: 'center', fontSize: '1rem', fontWeight: 700 }}
+                            type="number"
+                            step="any"
+                            inputMode="decimal"
+                            value={c.mass_mg || ''}
+                            onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                            placeholder="Amount"
+                            required
+                          />
+                          <select
+                            className="form-input"
+                            style={{ background: '#09090b', textAlign: 'center', fontWeight: 700 }}
+                            value={c.unit || 'mg'}
+                            onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                          >
                             <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
                           </select>
                         </div>
                       </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => { const n = [...(editingVial ? editingVial.compounds : compounds), { name: '', mass_mg: 0, unit: 'mg' as const }]; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                      style={{ border: '2px dashed #27272a', borderRadius: '0.875rem', padding: '0.875rem', color: '#a1a1aa', background: 'none', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    >
+                      <PlusCircle className="h-4 w-4" /> Add to Blend
+                    </button>
+                  </div>
+                </div>
 
-                      <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline border-[#27272a] hover:bg-destructive/10 hover:text-destructive hover:border-destructive w-full sm:w-10 sm:p-1 mt-1 sm:mt-0" disabled={(editingVial ? editingVial.compounds : compounds).length === 1}>
-                        <span className="sm:hidden font-bold text-xs flex items-center justify-center gap-2"><Trash2 className="h-4 w-4" /> Remove Compound</span>
-                        <X className="h-4 w-4 mx-auto hidden sm:block" />
+                <div className="sheet-section">
+                  <p className="sheet-section-label">Form / State</p>
+                  <div className="seg-control" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                    {['powder', 'mixed', 'pill'].map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`seg-btn ${(editingVial ? editingVial.status : status) === s ? 'active' : ''}`}
+                        onClick={() => editingVial ? setEditingVial({...editingVial, status: s as any}) : setStatus(s as any)}
+                      >
+                        {s === 'powder' ? '🧪 Powder' : s === 'mixed' ? '💉 Liquid' : '💊 Pill'}
                       </button>
-                    </div>
-                  ))}
-                  <button type="button" onClick={() => { const n = [...(editingVial ? editingVial.compounds : compounds), { name: "", mass_mg: 0, unit: 'mg' as const }]; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline w-full sm:w-auto border-dashed hover:border-primary text-xs py-1 mt-2">
-                    <PlusCircle className="h-3 w-3 mr-2" /> Add Blend
-                  </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border">
-                  <div className="form-group"><label className="form-label">State</label><select className="form-input" value={editingVial ? editingVial.status : status} onChange={e => { const s = e.target.value as any; editingVial ? setEditingVial({...editingVial, status: s}) : setStatus(s); }}><option value="powder">Powder (Dry)</option><option value="mixed">Mixed (Liquid)</option><option value="pill">Pill (Oral)</option></select></div>
-                  {!editingVial && <div className="form-group"><label className="form-label">Quantity</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>}
-                </div>
                 {(editingVial ? editingVial.status : status) !== 'powder' && (
-                  <div className="form-group"><label className="form-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Total Vol (mL)'}</label>
-                    <input className="form-input" type="number" step="0.1" value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume} onChange={e => editingVial ? (editingVial.status === 'pill' ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)}) : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)})) : setVolume(e.target.value)} />
+                  <div className="sheet-section">
+                    <p className="sheet-section-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Volume (mL)'}</p>
+                    <input
+                      className="big-input"
+                      type="number"
+                      step="0.1"
+                      inputMode="decimal"
+                      value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume}
+                      onChange={e => editingVial
+                        ? (editingVial.status === 'pill'
+                          ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)})
+                          : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)}))
+                        : setVolume(e.target.value)}
+                    />
                   </div>
                 )}
-                <button type="submit" className="btn btn-primary w-full mt-4">{editingVial ? 'Apply Changes' : 'Save Item'}</button>
+
+                {!editingVial && (
+                  <div className="sheet-section">
+                    <p className="sheet-section-label">Quantity to Add</p>
+                    <input className="big-input" type="number" inputMode="numeric" value={count} onChange={e => setCount(e.target.value)} />
+                  </div>
+                )}
+
+                <button type="submit" className="sheet-cta">
+                  {editingVial ? 'Save Changes' : 'Add to Inventory'}
+                </button>
               </form>
             )}
-            </div>
           </div>
         </div>
       )}
@@ -364,77 +461,108 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
         </div>
       </div>
 
-      {/* PROTOCOL SCHEDULING TAKEOVER */}
+      {/* ── PROTOCOL SCHEDULING SHEET ── */}
       {schedulingVial && (
-        <div className="fixed inset-0 z-[100] bg-background overflow-y-auto w-full h-full">
-          <div className="max-w-2xl mx-auto p-4 lg:p-8">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
-              <button onClick={() => setSchedulingVial(null)} className="btn btn-outline border-transparent hover:bg-muted/30 p-2 -ml-2"><ArrowLeft className="h-6 w-6" /></button>
-              <h2 className="text-xl font-bold text-success">
-                Schedule: {schedulingVial.name}
-              </h2>
+        <div className="sheet-overlay">
+          <div className="sheet-inner">
+            <div className="sheet-header">
+              <button className="sheet-back-btn" onClick={() => setSchedulingVial(null)}>
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <span className="sheet-title">Schedule — {schedulingVial.name}</span>
             </div>
-            
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-group"><label className="form-label">Amount</label><input className="form-input bg-[#09090b] border-border py-3" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
-                <div className="form-group">
-                  <label className="form-label">Frequency</label>
-                  <select 
-                    className="form-input bg-[#09090b] border-border py-3 h-full" 
-                    value={frequencyType} 
-                    onChange={e => {
-                      const val = e.target.value;
-                      setFrequencyType(val);
-                      if (val === 'daily') setFrequency("24");
-                      else if (val === 'weekly') setFrequency("168");
+
+            <div className="sheet-section">
+              <p className="sheet-section-label">Dose Amount</p>
+              <input
+                className="big-input"
+                type="number"
+                inputMode="decimal"
+                value={doseAmount}
+                onChange={e => setDoseAmount(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="sheet-section">
+              <p className="sheet-section-label">Frequency</p>
+              <div className="seg-control" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                {(['daily', 'weekly', 'custom'] as const).map(f => (
+                  <button
+                    key={f}
+                    type="button"
+                    className={`seg-btn ${frequencyType === f ? 'active' : ''}`}
+                    onClick={() => {
+                      setFrequencyType(f);
+                      if (f === 'daily') setFrequency('24');
+                      else if (f === 'weekly') setFrequency('168');
                     }}
                   >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="custom">Custom Hours</option>
-                  </select>
-                </div>
+                    {f === 'daily' ? '⚡ Daily' : f === 'weekly' ? '📆 Weekly' : '⚙️ Custom'}
+                  </button>
+                ))}
               </div>
-
               {frequencyType === 'custom' && (
-                <div className="form-group">
-                  <label className="form-label">Custom Frequency (Hours)</label>
-                  <input className="form-input bg-[#09090b] border-border py-3" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} />
+                <div style={{ marginTop: '0.75rem' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#a1a1aa', marginBottom: '0.375rem' }}>Hours Between Doses</p>
+                  <input className="big-input" type="number" inputMode="numeric" value={frequency} onChange={e => setFrequency(e.target.value)} />
                 </div>
               )}
-
-              <div className="space-y-3">
-                <label className="form-label block border-b border-border pb-2">Schedule Pattern</label>
-                <div className="flex items-center gap-4 p-4 bg-[#09090b] border border-border rounded-lg">
-                  <input type="checkbox" checked={skipWeekends} onChange={e => setSkipWeekends(e.target.checked)} className="h-6 w-6 rounded border-border bg-background accent-primary flex-shrink-0" />
-                  <span className="text-base font-semibold">Skip Weekends (Mon-Fri)</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="form-label block border-b border-border pb-2">Time Slots</label>
-                <div className="flex gap-3">
-                  {['morning', 'afternoon', 'night'].map((b: any) => (
-                    <button 
-                      key={b} 
-                      type="button"
-                      onClick={() => toggleBucket(b)}
-                      className={`flex-[1_1_0%] uppercase font-bold py-4 rounded-lg border-2 transition-colors ${timeBuckets.includes(b) ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'bg-[#09090b] text-muted-foreground border-border hover:border-primary/50'}`}
-                    >
-                      {b}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 pt-2">
-                <div className="form-group"><label className="form-label">Start Time</label><input className="form-input bg-[#09090b] border-border py-3 px-1 text-center" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
-                <div className="form-group"><label className="form-label">Days ON</label><input className="form-input bg-[#09090b] border-border py-3 text-center" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
-                <div className="form-group"><label className="form-label">Days OFF</label><input className="form-input bg-[#09090b] border-border py-3 text-center" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
-              </div>
-              <button onClick={() => handleSaveProtocol(schedulingVial.id)} className="btn btn-primary w-full bg-success text-base py-4 mt-6 font-bold shadow-lg shadow-success/20">Save Cycle Settings</button>
             </div>
+
+            <div className="sheet-section">
+              <p className="sheet-section-label">Pin Times</p>
+              <div className="pill-row">
+                {(['morning', 'afternoon', 'night'] as const).map(b => (
+                  <button
+                    key={b}
+                    type="button"
+                    className={`pill-toggle ${timeBuckets.includes(b) ? 'active' : ''}`}
+                    onClick={() => toggleBucket(b)}
+                  >
+                    {b === 'morning' ? '🌅 AM' : b === 'afternoon' ? '☀️ PM' : '🌙 Night'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="sheet-section">
+              <p className="sheet-section-label">Schedule Rules</p>
+              <button
+                type="button"
+                className={`check-row ${skipWeekends ? 'active' : ''}`}
+                onClick={() => setSkipWeekends(!skipWeekends)}
+              >
+                <div className="check-row-icon">
+                  {skipWeekends && <Check className="h-3 w-3" style={{ color: 'white' }} />}
+                </div>
+                <div>
+                  <p style={{ fontWeight: 700, fontSize: '0.95rem' }}>Skip Weekends</p>
+                  <p style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Pin Mon – Fri only</p>
+                </div>
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              {[{ label: 'Start Time', type: 'time', val: preferredStartTime, set: setPreferredStartTime },
+                { label: 'Days ON', type: 'number', val: daysOn, set: setDaysOn },
+                { label: 'Days OFF', type: 'number', val: daysOff, set: setDaysOff }].map(({ label, type, val, set }) => (
+                <div key={label}>
+                  <p style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#a1a1aa', marginBottom: '0.375rem' }}>{label}</p>
+                  <input
+                    className="form-input"
+                    style={{ background: '#18181b', textAlign: 'center', fontWeight: 700, fontSize: '1rem', border: '2px solid #27272a', borderRadius: '0.75rem' }}
+                    type={type}
+                    value={val}
+                    onChange={e => set(e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button className="sheet-cta success" onClick={() => handleSaveProtocol(schedulingVial.id)}>
+              Save Cycle Settings
+            </button>
           </div>
         </div>
       )}

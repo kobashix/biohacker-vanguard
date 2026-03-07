@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { Package, Plus, Minus, Trash2 } from "lucide-react";
+import { Package, Plus, Minus, Trash2, ArrowLeft } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Supply } from "@/replicache";
 
@@ -20,76 +20,112 @@ export function SupplyTracker({ userId }: { userId: string }) {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rep) return;
-    await rep.mutate.updateSupply({
-      id: crypto.randomUUID(),
-      name,
-      count: parseInt(count),
-      unit
-    });
-    setName(""); setIsAdding(false);
+    await rep.mutate.updateSupply({ id: crypto.randomUUID(), name, count: parseInt(count), unit });
+    setName(""); setCount("100"); setUnit("pcs"); setIsAdding(false);
   };
 
   const adjustCount = async (supply: Supply, delta: number) => {
     if (!rep) return;
-    await rep.mutate.updateSupply({
-      ...supply,
-      count: Math.max(0, supply.count + delta)
-    });
+    await rep.mutate.updateSupply({ ...supply, count: Math.max(0, supply.count + delta) });
   };
 
   return (
-    <div className="card">
-      <div className="card-header flex justify-between items-center">
-        <div>
-          <h3 className="card-title"><Package className="h-5 w-5 text-primary" /> Ancillary Supplies</h3>
-          <p className="card-description">Track needles, alcohol wipes, and bacteriostatic water.</p>
-        </div>
-        <button onClick={() => setIsAdding(!isAdding)} className="btn btn-outline p-2">
-          {isAdding ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        </button>
-      </div>
-      <div className="card-content">
-        {isAdding && (
-          <form onSubmit={handleAdd} className="mb-6 p-4 bg-muted/10 rounded-lg border border-border space-y-4">
-            <div className="form-group">
-              <label className="form-label">Supply Name</label>
-              <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. 31G Insulin Syringes" required />
+    <>
+      {isAdding && (
+        <div className="sheet-overlay">
+          <div className="sheet-inner">
+            <div className="sheet-header">
+              <button className="sheet-back-btn" onClick={() => setIsAdding(false)}>
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <span className="sheet-title">Add to Gear Stash</span>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="form-group">
-                <label className="form-label">Initial Count</label>
-                <input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Unit</label>
-                <input className="form-input" value={unit} onChange={e => setUnit(e.target.value)} placeholder="pcs, mL, etc." required />
-              </div>
-            </div>
-            <button type="submit" className="btn btn-primary w-full">Add Supply</button>
-          </form>
-        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {supplies.map(s => (
-            <div key={s.id} className="p-4 bg-background rounded-lg border border-border flex justify-between items-center">
-              <div>
-                <p className="font-bold text-sm">{s.name}</p>
-                <p className="text-xl font-mono text-primary">{s.count} <span className="text-xs text-muted-foreground uppercase">{s.unit}</span></p>
+            <form onSubmit={handleAdd}>
+              <div className="sheet-section">
+                <p className="sheet-section-label">Item Name</p>
+                <input
+                  className="form-input"
+                  style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="e.g. 31G Insulin Syringes"
+                  autoFocus
+                  required
+                />
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => adjustCount(s, -1)} className="btn btn-outline p-1"><Minus className="h-4 w-4" /></button>
-                <button onClick={() => adjustCount(s, 1)} className="btn btn-outline p-1"><Plus className="h-4 w-4" /></button>
+
+              <div className="sheet-section">
+                <p className="sheet-section-label">Starting Count</p>
+                <input className="big-input" type="number" inputMode="numeric" value={count} onChange={e => setCount(e.target.value)} required />
               </div>
+
+              <div className="sheet-section">
+                <p className="sheet-section-label">Unit</p>
+                <div className="seg-control" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+                  {['pcs', 'mL', 'vials', 'boxes'].map(u => (
+                    <button key={u} type="button" className={`seg-btn ${unit === u ? 'active' : ''}`} onClick={() => setUnit(u)}>{u}</button>
+                  ))}
+                </div>
+                <input
+                  className="form-input"
+                  style={{ marginTop: '0.5rem', background: '#18181b', border: '2px solid #27272a', borderRadius: '0.75rem', padding: '0.75rem' }}
+                  value={unit}
+                  onChange={e => setUnit(e.target.value)}
+                  placeholder="Or type a custom unit"
+                />
+              </div>
+
+              <button type="submit" className="sheet-cta">Add to Stash</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <div className="card">
+        <div className="card-header flex justify-between items-center">
+          <div>
+            <h3 className="card-title"><Package className="h-5 w-5 text-primary" /> Gear Stash</h3>
+            <p className="card-description">Needles, wipes, bac water &amp; more.</p>
+          </div>
+          <button onClick={() => setIsAdding(true)} className="btn btn-outline p-2">
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="card-content">
+          {supplies.length === 0 ? (
+            <button
+              onClick={() => setIsAdding(true)}
+              style={{ width: '100%', padding: '2rem 1rem', border: '2px dashed #27272a', borderRadius: '0.875rem', color: '#a1a1aa', background: 'none', cursor: 'pointer', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}
+            >
+              <Package className="h-8 w-8" style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
+              <p>No gear tracked yet</p>
+              <p style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>Tap to add syringes, wipes, bac water</p>
+            </button>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {supplies.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#18181b', border: '1px solid #27272a', borderRadius: '0.875rem', padding: '0.875rem 1rem' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: s.count < 10 ? '#ef4444' : '#2563eb', lineHeight: 1.2 }}>
+                      {s.count} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a1a1aa', textTransform: 'uppercase' }}>{s.unit}</span>
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
+                    <button onClick={() => adjustCount(s, -1)} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus className="h-4 w-4" /></button>
+                    <button onClick={() => adjustCount(s, 1)} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus className="h-4 w-4" /></button>
+                    <button onClick={() => { if(confirm(`Remove ${s.name}?`)) rep?.mutate.updateSupply({...s, count: -999}); }} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => setIsAdding(true)} style={{ border: '2px dashed #27272a', borderRadius: '0.875rem', padding: '0.75rem', color: '#a1a1aa', background: 'none', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                <Plus className="h-4 w-4" /> Add Item
+              </button>
             </div>
-          ))}
-          {supplies.length === 0 && !isAdding && (
-            <p className="col-span-full text-center py-6 text-muted-foreground text-sm italic">No supplies tracked yet.</p>
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
-
-import { X } from "lucide-react";
-
