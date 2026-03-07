@@ -204,29 +204,32 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   </datalist>
 
                   {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
-                    <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:items-center p-3 sm:p-0 bg-muted/10 sm:bg-transparent rounded-lg border sm:border-none border-border relative">
+                    <div key={idx} className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-center p-4 sm:p-0 bg-[#18181b]/50 sm:bg-transparent rounded-lg border border-[#27272a] sm:border-none relative">
                       
-                      <div className="flex-1 w-full relative">
-                        <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Name</span>
-                        <input list="compounds-list" className="form-input w-full" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search Database..." required />
+                      {/* Name Row: Full width on mobile, flex-1 on desktop */}
+                      <div className="flex-1 w-full">
+                        <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Compound Name</label>
+                        <input list="compounds-list" className="form-input w-full bg-[#09090b]" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search Database..." required />
                       </div>
                       
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <div className="flex-1 sm:w-24 relative">
-                          <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Mass</span>
-                          <input className="form-input w-full" type="number" step="any" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Amt" required />
+                      {/* Mass/Unit Row: 50/50 Grid on Mobile, fixed widths on desktop */}
+                      <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:gap-2">
+                        <div className="w-full sm:w-24">
+                          <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Mass/Amount</label>
+                          <input className="form-input w-full bg-[#09090b]" type="number" step="any" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Amt" required />
                         </div>
                         
-                        <div className="w-20 relative">
-                          <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Unit</span>
-                          <select className="form-input w-full px-1" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
+                        <div className="w-full sm:w-20">
+                          <label className="text-[10px] text-muted-foreground uppercase font-bold mb-1 block sm:hidden">Unit</label>
+                          <select className="form-input w-full bg-[#09090b] px-2" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
                             <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
                           </select>
                         </div>
                       </div>
 
-                      <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline border-transparent hover:bg-destructive/10 hover:text-destructive w-full sm:w-10 sm:p-1 mt-2 sm:mt-0" disabled={(editingVial ? editingVial.compounds : compounds).length === 1}>
-                        <X className="h-4 w-4 mx-auto" />
+                      <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline border-[#27272a] hover:bg-destructive/10 hover:text-destructive hover:border-destructive w-full sm:w-10 sm:p-1 mt-1 sm:mt-0" disabled={(editingVial ? editingVial.compounds : compounds).length === 1}>
+                        <span className="sm:hidden font-bold text-xs flex items-center justify-center gap-2"><Trash2 className="h-4 w-4" /> Remove Compound</span>
+                        <X className="h-4 w-4 mx-auto hidden sm:block" />
                       </button>
                     </div>
                   ))}

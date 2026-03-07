@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Calendar, Plus, Trash2, X } from "lucide-react";
@@ -64,7 +64,7 @@ export function CycleManager({ userId }: { userId: string }) {
               <label className="form-label">Phase Name</label>
               <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Mass Gaining Phase 1" required />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
                 <label className="form-label">Start Date</label>
                 <input className="form-input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
