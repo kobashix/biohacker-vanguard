@@ -16,19 +16,30 @@ export async function DELETE(request: NextRequest) {
   if (!user) return new Response('Unauthorized', { status: 401 });
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.error('[purge] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing');
+  }
+  
   const adminDb = serviceKey ? createClient(supabaseUrl, serviceKey) : supabase;
 
   const errors: string[] = [];
 
-  // Step 1: Delete child records first (FK order matters)
+  console.log(`[purge] Starting exhaustive purge for user ${user.id}`);
+
+  // Step 1: Delete deep child records first (FK order matters)
   const step1 = await Promise.all([
     adminDb.from('dose_logs').delete().eq('user_id', user.id),
     adminDb.from('subjective_logs').delete().eq('user_id', user.id),
     adminDb.from('supplies').delete().eq('user_id', user.id),
     adminDb.from('cycles').delete().eq('user_id', user.id),
+    adminDb.from('bio_markers').delete().eq('user_id', user.id),
   ]);
+  
   step1.forEach((r, i) => {
-    if (r.error) errors.push(`step1[${i}]: ${r.error.message}`);
+    if (r.error) {
+      const table = ['dose_logs', 'subjective_logs', 'supplies', 'cycles', 'bio_markers'][i];
+      errors.push(`${table}: ${r.error.message}`);
+    }
   });
 
   // Step 2: Delete protocols (FK: protocols -> vials)
@@ -39,14 +50,20 @@ export async function DELETE(request: NextRequest) {
   const step3 = await adminDb.from('vials').delete().eq('user_id', user.id);
   if (step3.error) errors.push(`vials: ${step3.error.message}`);
 
-  // Step 4: Clear Replicache client tracking (no user_id col, use client_group_id)
+  // Step 4: Clear Replicache client tracking
+  // Note: replicache_clients.client_group_id maps to user.id
   const step4 = await adminDb.from('replicache_clients').delete().eq('client_group_id', user.id);
+  if (step4.error) errors.push(`replicache_clients: ${step4.error.message}`);
 
   if (errors.length > 0) {
-    console.error('[purge] Errors:', errors);
-    return NextResponse.json({ success: false, errors }, { status: 500 });
+    console.error('[purge] Errors encountered:', errors);
+    return NextResponse.json({ 
+      success: false, 
+      errors,
+      message: "Some data could not be cleared due to database constraints."
+    }, { status: 500 });
   }
 
-  console.log(`[purge] All data deleted for user ${user.id}`);
+  console.log(`[purge] COMPLETE: All data deleted for user ${user.id}`);
   return NextResponse.json({ success: true });
 }
