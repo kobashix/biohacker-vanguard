@@ -64,6 +64,7 @@ export type Cycle = {
   name: string;
   start_date: string;
   end_date?: string;
+  vial_ids?: string[];
   notes?: string;
 };
 
@@ -111,6 +112,9 @@ const mutators = {
   },
   createCycle: async (tx: WriteTransaction, cycle: Cycle) => {
     await tx.set(`cycle/${cycle.id}`, cycle);
+  },
+  deleteCycle: async (tx: WriteTransaction, id: string) => {
+    await tx.del(`cycle/${id}`);
   },
   seedDemoData: async (tx: WriteTransaction, { vials, protocols, logs }: { vials: Vial[], protocols: Protocol[], logs: DoseLog[] }) => {
     for (const v of vials) await tx.set(`vial/${v.id}`, v);
