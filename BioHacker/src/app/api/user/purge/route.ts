@@ -27,33 +27,43 @@ export async function DELETE(request: NextRequest) {
   console.log(`[purge] Starting exhaustive purge for user ${user.id}`);
 
   // Step 1: Delete deep child records first (FK order matters)
-  const step1 = await Promise.all([
-    adminDb.from('dose_logs').delete().eq('user_id', user.id),
-    adminDb.from('subjective_logs').delete().eq('user_id', user.id),
-    adminDb.from('supplies').delete().eq('user_id', user.id),
-    adminDb.from('cycles').delete().eq('user_id', user.id),
-    adminDb.from('bio_markers').delete().eq('user_id', user.id),
-  ]);
+  const tablesToPurge = ['dose_logs', 'subjective_logs', 'supplies', 'cycles', 'bio_markers'];
   
-  step1.forEach((r, i) => {
-    if (r.error) {
-      const table = ['dose_logs', 'subjective_logs', 'supplies', 'cycles', 'bio_markers'][i];
-      errors.push(`${table}: ${r.error.message}`);
+  for (const table of tablesToPurge) {
+    const { error: deleteError } = await adminDb.from(table).delete().eq('user_id', user.id);
+    if (deleteError) {
+      // Ignore "Could not find the table" errors - if it's missing, it's effectively purged.
+      if (deleteError.message.includes('Could not find the table') || deleteError.code === 'PGRST116' || deleteError.code === '42P01') {
+        console.warn(`[purge] Table ${table} not found in schema, skipping.`);
+      } else {
+        errors.push(`${table}: ${deleteError.message}`);
+      }
     }
-  });
+  }
 
   // Step 2: Delete protocols (FK: protocols -> vials)
   const step2 = await adminDb.from('protocols').delete().eq('user_id', user.id);
-  if (step2.error) errors.push(`protocols: ${step2.error.message}`);
+  if (step2.error) {
+    if (!step2.error.message.includes('Could not find the table')) {
+      errors.push(`protocols: ${step2.error.message}`);
+    }
+  }
 
   // Step 3: Delete vials (parent record, after all children)
   const step3 = await adminDb.from('vials').delete().eq('user_id', user.id);
-  if (step3.error) errors.push(`vials: ${step3.error.message}`);
+  if (step3.error) {
+    if (!step3.error.message.includes('Could not find the table')) {
+      errors.push(`vials: ${step3.error.message}`);
+    }
+  }
 
   // Step 4: Clear Replicache client tracking
-  // Note: replicache_clients.client_group_id maps to user.id
   const step4 = await adminDb.from('replicache_clients').delete().eq('client_group_id', user.id);
-  if (step4.error) errors.push(`replicache_clients: ${step4.error.message}`);
+  if (step4.error) {
+    if (!step4.error.message.includes('Could not find the table')) {
+      errors.push(`replicache_clients: ${step4.error.message}`);
+    }
+  }
 
   if (errors.length > 0) {
     console.error('[purge] Errors encountered:', errors);
