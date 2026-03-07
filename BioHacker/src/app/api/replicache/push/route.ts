@@ -11,8 +11,9 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response('Unauthorized', { status: 401 });
 
-  const { clientGroupID, clientID, mutations } = await request.json();
-  if (clientGroupID !== user.id) return new Response('Forbidden', { status: 403 });
+  const { clientID, mutations } = await request.json();
+  // Note: clientGroupID is a Replicache-internal UUID, NOT user.id.
+  // Auth is already secured via supabase.auth.getUser() above.
 
   let lastMutationID = 0;
   if (clientID) {
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     const maxMutationId = Math.max(...mutations.map((m: { id: number }) => m.id));
     await supabase.from('replicache_clients').upsert({
       id: clientID,
-      client_group_id: clientGroupID,
+      client_group_id: user.id,
       last_mutation_id: maxMutationId,
       updated_at: new Date().toISOString(),
     });

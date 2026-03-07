@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
   if (!user) return new Response('Unauthorized', { status: 401 });
 
   const pullRequest = await request.json();
-  const { clientGroupID, clientID } = pullRequest;
-
-  if (clientGroupID !== user.id) return new Response('Forbidden', { status: 403 });
+  const { clientID } = pullRequest;
+  // Note: clientGroupID is a Replicache-internal UUID, NOT user.id.
+  // Auth is already secured via supabase.auth.getUser() above.
 
   // Supabase is the source of truth — always do a full pull of all user data
   const [vialsRes, logsRes, protocolsRes, subjectiveRes, suppliesRes, cyclesRes] = await Promise.all([
