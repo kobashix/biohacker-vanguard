@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
-import { getReplicache, Vial, Protocol, DoseLog } from "@/replicache";
-import { Smartphone, Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2 } from "lucide-react";
+import { getReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
+import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud } from "lucide-react";
 import { nanoid } from "nanoid";
 
 export default function SettingsPage() {
@@ -32,15 +32,60 @@ export default function SettingsPage() {
   const protocols = useSubscribe(rep, async (tx) => {
     return await tx.scan({ prefix: "protocol/" }).values().toArray() as Protocol[];
   }, { default: [] });
+  const logs = useSubscribe(rep, async (tx) => {
+    return await tx.scan({ prefix: "log/" }).values().toArray() as DoseLog[];
+  }, { default: [] });
+  const subjectiveLogs = useSubscribe(rep, async (tx) => {
+    return await tx.scan({ prefix: "subjective/" }).values().toArray() as SubjectiveLog[];
+  }, { default: [] });
+  const supplies = useSubscribe(rep, async (tx) => {
+    return await tx.scan({ prefix: "supply/" }).values().toArray() as Supply[];
+  }, { default: [] });
+  const cycles = useSubscribe(rep, async (tx) => {
+    return await tx.scan({ prefix: "cycle/" }).values().toArray() as Cycle[];
+  }, { default: [] });
 
   const handleExportBackup = () => {
-    const backup = { timestamp: Date.now(), vials, protocols, user: user?.email };
+    const backup = { 
+      timestamp: Date.now(), 
+      user: user?.email,
+      vials, protocols, logs, subjectiveLogs, supplies, cycles 
+    };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `biohacker_backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
+  };
+
+  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !rep) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (!confirm(`Restore backup from ${new Date(json.timestamp).toLocaleDateString()}? This is irreversible.`)) return;
+        
+        await rep.mutate.restoreBackup({
+          vials: json.vials || [],
+          protocols: json.protocols || [],
+          logs: json.logs || [],
+          subjectiveLogs: json.subjectiveLogs || [],
+          supplies: json.supplies || [],
+          cycles: json.cycles || []
+        });
+
+        alert("Backup restored successfully. The changes will sync to the server momentarily.");
+      } catch (err) {
+        alert("Invalid backup file format.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
   };
 
   const handleSeedDemo = async () => {
@@ -107,7 +152,13 @@ export default function SettingsPage() {
                   {seeding ? "Seeding..." : <><Wand2 className="h-4 w-4" /> Seed Sample Data</>}
                 </button>
               </div>
-              <button onClick={handleExportBackup} className="btn btn-outline w-full flex gap-2 justify-center"><Download className="h-4 w-4" /> Download Backup File</button>
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={handleExportBackup} className="btn btn-outline flex gap-2 justify-center"><Download className="h-4 w-4" /> Download Backup</button>
+                <label className="btn btn-outline flex gap-2 justify-center cursor-pointer">
+                  <UploadCloud className="h-4 w-4" /> Restore Backup
+                  <input type="file" accept=".json" onChange={handleImportBackup} className="hidden" />
+                </label>
+              </div>
             </div>
           </div>
 

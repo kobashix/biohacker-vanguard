@@ -81,6 +81,29 @@ export async function POST(request: NextRequest) {
         }
       }
     }
+
+    if (name === 'restoreBackup') {
+      const { vials, protocols, logs, subjectiveLogs, supplies, cycles } = args;
+      
+      if (vials && vials.length > 0) {
+        await supabase.from('vials').upsert(vials.map((v: any) => ({ ...v, user_id: user.id })));
+      }
+      if (protocols && protocols.length > 0) {
+        await supabase.from('protocols').upsert(protocols.map((p: any) => ({ ...p, user_id: user.id })));
+      }
+      if (logs && logs.length > 0) {
+        await supabase.from('dose_logs').upsert(logs.map((l: any) => ({ ...l, user_id: user.id })));
+      }
+      if (subjectiveLogs && subjectiveLogs.length > 0) {
+        await supabase.from('subjective_logs').upsert(subjectiveLogs.map((s: any) => ({ ...s, user_id: user.id })));
+      }
+      if (supplies && supplies.length > 0) {
+        await supabase.from('supplies').upsert(supplies.map((sup: any) => ({ ...sup, user_id: user.id })));
+      }
+      if (cycles && cycles.length > 0) {
+        await supabase.from('cycles').upsert(cycles.map((c: any) => ({ ...c, user_id: user.id })));
+      }
+    }
   }
 
   return NextResponse.json({});

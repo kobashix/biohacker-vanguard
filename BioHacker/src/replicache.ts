@@ -117,6 +117,15 @@ const mutators = {
     for (const p of protocols) await tx.set(`protocol/${p.id}`, p);
     for (const l of logs) await tx.set(`log/${l.id}`, l);
   },
+  restoreBackup: async (tx: WriteTransaction, p: { vials: Vial[], protocols: Protocol[], logs: DoseLog[], subjectiveLogs: SubjectiveLog[], supplies: Supply[], cycles: Cycle[] }) => {
+    // Pure raw hydration to bypass triggers mathematically modifying other records
+    for (const v of p.vials || []) await tx.set(`vial/${v.id}`, v);
+    for (const pr of p.protocols || []) await tx.set(`protocol/${pr.id}`, pr);
+    for (const l of p.logs || []) await tx.set(`log/${l.id}`, l);
+    for (const s of p.subjectiveLogs || []) await tx.set(`subjective/${s.id}`, s);
+    for (const sup of p.supplies || []) await tx.set(`supply/${sup.id}`, sup);
+    for (const c of p.cycles || []) await tx.set(`cycle/${c.id}`, c);
+  },
 };
 
 export type M = typeof mutators;
