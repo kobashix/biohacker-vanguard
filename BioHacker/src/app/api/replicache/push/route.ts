@@ -11,10 +11,19 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response('Unauthorized', { status: 401 });
 
-  const { clientGroupID, mutations } = await request.json();
+  const { clientGroupID, clientID, mutations } = await request.json();
   if (clientGroupID !== user.id) return new Response('Forbidden', { status: 403 });
 
+  let lastMutationID = 0;
+  if (clientID) {
+    const { data } = await supabase.from('replicache_clients').select('last_mutation_id').eq('id', clientID).single();
+    lastMutationID = data?.last_mutation_id ?? 0;
+  }
+
   for (const m of mutations) {
+    // Skip already-processed mutations (idempotency)
+    if (m.id <= lastMutationID) continue;
+
     const { name, args } = m;
 
     if (name === 'createVial' || name === 'updateVial') {
@@ -104,6 +113,17 @@ export async function POST(request: NextRequest) {
         await supabase.from('cycles').upsert(cycles.map((c: any) => ({ ...c, user_id: user.id })));
       }
     }
+  }
+
+  // Update the last processed mutation ID for this client
+  if (clientID && mutations.length > 0) {
+    const maxMutationId = Math.max(...mutations.map((m: { id: number }) => m.id));
+    await supabase.from('replicache_clients').upsert({
+      id: clientID,
+      client_group_id: clientGroupID,
+      last_mutation_id: maxMutationId,
+      updated_at: new Date().toISOString(),
+    });
   }
 
   return NextResponse.json({});

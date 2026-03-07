@@ -131,12 +131,21 @@ const mutators = {
 export type M = typeof mutators;
 
 let replicache: Replicache<M> | null = null;
+let replicacheUserId: string | null = null;
 
 export function getReplicache(userId: string) {
   if (typeof window === 'undefined') return null;
+  if (!userId) return null;
+  // Recreate instance if user changed (e.g. after login/logout or fresh deploy)
+  if (replicache && replicacheUserId !== userId) {
+    replicache.close();
+    replicache = null;
+    replicacheUserId = null;
+  }
   if (!replicache) {
+    replicacheUserId = userId;
     replicache = new Replicache<M>({
-      name: userId,
+      name: `biohacker-${userId}`,
       licenseKey: 'l00000000000000000000000000000001',
       pushURL: '/api/replicache/push',
       pullURL: '/api/replicache/pull',
