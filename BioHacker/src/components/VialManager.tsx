@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin, Clock } from "lucide-react";
@@ -297,6 +297,17 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                     {group.protocol.time_buckets?.map(b => (
                       <div key={b} className="text-[10px] uppercase font-bold text-success bg-success/5 p-1 rounded">{b}</div>
                     ))}
+                    <button 
+                      onClick={async () => {
+                        if (confirm('Delete this protocol schedule?')) {
+                          await rep?.mutate.deleteProtocol(group.protocol!.id);
+                        }
+                      }}
+                      className="ml-auto p-1 text-destructive hover:bg-destructive/10 rounded transition-colors"
+                      title="Delete Protocol"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
                 )}
 

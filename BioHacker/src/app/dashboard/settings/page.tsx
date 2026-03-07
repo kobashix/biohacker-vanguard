@@ -65,7 +65,13 @@ export default function SettingsPage() {
         await dropReplicache(user.id);
       }
       
-      alert('All data purged. Your local store has been wiped.');
+      const counts = data?.counts || {};
+      const countMsg = Object.entries(counts)
+        .filter(([_, count]) => (count as number) > 0)
+        .map(([table, count]) => `${table}: ${count}`)
+        .join('\n');
+
+      alert(`Purge Complete!\n\nDeleted Records:\n${countMsg || 'No server records found.'}\n\nYour local store has also been wiped.`);
       window.location.href = '/dashboard';
     } catch (e: any) {
       console.error(e);
