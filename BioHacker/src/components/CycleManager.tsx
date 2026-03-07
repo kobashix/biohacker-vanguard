@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Plus, Trash2, X, Link as LinkIcon, Beaker } from "lucide-react";
+import { Calendar, Plus, Trash2, X, Link as LinkIcon, Beaker, ArrowLeft } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Cycle, Supply, Vial } from "@/replicache";
 import { format } from "date-fns";
@@ -92,49 +92,60 @@ export function CycleManager({ userId }: { userId: string }) {
       </div>
       <div className="card-content">
         {isAdding && (
-          <form onSubmit={handleAdd} className="mb-6 p-4 bg-muted/10 rounded-lg border border-border space-y-4">
-            <div className="form-group mb-2">
-              <label className="form-label">Linked Compounds (Optional)</label>
-              <p className="text-xs text-muted-foreground mb-2">Select the active vials to associate with this cycle. If Phase Name is empty, it will auto-generate based on these selections.</p>
-              {activeVials.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {activeVials.map(v => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => toggleVial(v.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border ${
-                        selectedVialIds.includes(v.id) 
-                          ? 'bg-primary/20 border-primary text-primary' 
-                          : 'bg-background border-border text-muted-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      <Beaker className="h-3 w-3" />
-                      {v.name}
-                    </button>
-                  ))}
+          <div className="fixed inset-0 z-[100] bg-background overflow-y-auto w-full h-full">
+            <div className="max-w-2xl mx-auto p-4 lg:p-8">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+                <button type="button" onClick={() => { setIsAdding(false); setSelectedVialIds([]); setName(""); }} className="btn btn-outline border-transparent hover:bg-muted/30 p-2 -ml-2"><ArrowLeft className="h-6 w-6" /></button>
+                <h2 className="text-xl font-bold text-primary">
+                  Define Cycle Phase
+                </h2>
+              </div>
+              <form onSubmit={handleAdd} className="space-y-6">
+                <div className="form-group mb-2">
+                  <label className="form-label">Linked Compounds (Optional)</label>
+                  <p className="text-sm text-muted-foreground mb-3">Select the active vials to associate with this cycle. If Phase Name is empty, it will auto-generate based on these selections.</p>
+                  {activeVials.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {activeVials.map(v => (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => toggleVial(v.id)}
+                          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-colors border-2 ${
+                            selectedVialIds.includes(v.id) 
+                              ? 'bg-primary/20 border-primary text-primary shadow-[0_0_10px_rgba(37,99,235,0.2)]' 
+                              : 'bg-[#09090b] border-border text-muted-foreground hover:border-primary/50'
+                          }`}
+                        >
+                          <Beaker className="h-4 w-4" />
+                          {v.name}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm italic text-muted-foreground bg-background p-4 rounded-lg border border-border">No active vials in open inventory to link.</div>
+                  )}
                 </div>
-              ) : (
-                <div className="text-xs italic text-muted-foreground bg-background p-2 rounded border border-border">No active vials in inventory to link.</div>
-              )}
-            </div>
 
-            <div className="form-group border-t border-border pt-4">
-              <label className="form-label">Phase Name (Optional)</label>
-              <input className="form-input text-lg font-bold" value={name} onChange={e => setName(e.target.value)} placeholder={selectedVialIds.length > 0 ? "Leave blank to auto-generate..." : "e.g. Mass Gaining Phase 1"} />
+                <div className="form-group border-t border-border pt-6">
+                  <label className="form-label">Phase Name (Optional)</label>
+                  <input className="form-input text-lg font-bold bg-[#09090b] py-3" value={name} onChange={e => setName(e.target.value)} placeholder={selectedVialIds.length > 0 ? "Leave blank to auto-generate..." : "e.g. Mass Gaining Phase 1"} />
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="form-group">
+                    <label className="form-label">Start Date</label>
+                    <input className="form-input bg-[#09090b] py-3" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">End Date (Optional)</label>
+                    <input className="form-input bg-[#09090b] py-3" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary w-full shadow-xl shadow-primary/20 mt-4 py-4 text-base font-bold">Save Cycle Definition</button>
+              </form>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="form-group">
-                <label className="form-label">Start Date</label>
-                <input className="form-input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">End Date (Optional)</label>
-                <input className="form-input" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
-              </div>
-            </div>
-            <button type="submit" className="btn btn-primary w-full shadow-md">Define Cycle</button>
-          </form>
+          </div>
         )}
 
         <div className="space-y-3">

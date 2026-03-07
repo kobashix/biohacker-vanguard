@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Smile, Zap, Moon, Activity, Save, Check } from "lucide-react";
@@ -49,19 +49,19 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
   return (
     <div className="card">
       <div className="card-header">
-        <h3 className="card-title"><Activity className="h-5 w-5 text-primary" /> Daily Wellbeing</h3>
-        <p className="card-description">Track subjective response to your protocol</p>
+        <h3 className="card-title"><Activity className="h-5 w-5 text-primary" /> Pump & Recovery</h3>
+        <p className="card-description">Track physical response to your cycle</p>
       </div>
       <div className="card-content space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Slider label="Mood" icon={Smile} value={mood} onChange={setMood} color="#10b981" />
           <Slider label="Energy" icon={Zap} value={energy} onChange={setEnergy} color="#f59e0b" />
           <Slider label="Sleep Quality" icon={Moon} value={sleep} onChange={setSleep} color="#6366f1" />
-          <Slider label="Physical Soreness" icon={Activity} value={soreness} onChange={setSoreness} color="#ef4444" />
+          <Slider label="Soreness (PIP)" icon={Activity} value={soreness} onChange={setSoreness} color="#ef4444" />
         </div>
         
         <div className="form-group">
-          <label className="form-label text-xs">Daily Notes (Symptoms, side effects, recovery status)</label>
+          <label className="form-label text-xs">Daily Notes (Pump, PIP, side effects)</label>
           <textarea 
             className="form-input min-h-[80px] text-sm" 
             placeholder="e.g. Injection site slight redness, increased focus..."

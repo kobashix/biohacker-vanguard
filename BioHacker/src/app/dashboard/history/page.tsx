@@ -51,7 +51,7 @@ export default function HistoryPage() {
         return [format(l.timestamp, 'yyyy-MM-dd HH:mm'), "Dose", l.substance, `${l.dose_amount} ${l.unit}`, l.injection_site || "N/A", ""];
       } else {
         const s = item as any;
-        return [format(s.timestamp, 'yyyy-MM-dd HH:mm'), "Health", `Mood: ${s.mood}`, `Energy: ${s.energy}`, `Sleep: ${s.sleep_quality}`, s.notes || ""];
+        return [format(s.timestamp, 'yyyy-MM-dd HH:mm'), "Recovery", `Mood: ${s.mood}`, `Energy: ${s.energy}`, `Sleep: ${s.sleep_quality}`, s.notes || ""];
       }
     });
 
@@ -73,8 +73,8 @@ export default function HistoryPage() {
     <div className="space-y-8">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Clinical History</h1>
-          <p className="text-muted-foreground">Comprehensive log of all administrations and health metrics.</p>
+          <h1 className="text-3xl font-bold">Cycle History</h1>
+          <p className="text-muted-foreground">Comprehensive log of all pins, doses, and recovery metrics.</p>
         </div>
         <button onClick={exportToCSV} className="btn btn-primary flex gap-2">
           <Download className="h-4 w-4" /> Export CSV
@@ -102,12 +102,12 @@ export default function HistoryPage() {
                   <td className="text-xs font-mono">{format(item.timestamp, 'MMM d, h:mm a')}</td>
                   <td>
                     {item.type === 'dose' ? 
-                      <span className="flex items-center gap-1 text-primary text-xs font-bold uppercase"><Syringe className="h-3 w-3" /> Dose</span> :
-                      <span className="flex items-center gap-1 text-success text-xs font-bold uppercase"><Heart className="h-3 w-3" /> Health</span>
+                      <span className="flex items-center gap-1 text-primary text-xs font-bold uppercase"><Syringe className="h-3 w-3" /> Pin</span> :
+                      <span className="flex items-center gap-1 text-success text-xs font-bold uppercase"><Heart className="h-3 w-3" /> Recovery</span>
                     }
                   </td>
                   <td className="font-semibold text-sm">
-                    {item.type === 'dose' ? item.substance : `Wellbeing Log`}
+                    {item.type === 'dose' ? item.substance : `Pump & Recovery Log`}
                   </td>
                   <td className="text-xs">
                     {item.type === 'dose' ? 

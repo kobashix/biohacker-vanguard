@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin, Clock } from "lucide-react";
+import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin, Clock, ArrowLeft } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial, Compound, Protocol } from "@/replicache";
 import { calculateRequiredUnits } from "@/math";
@@ -167,16 +167,17 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
 
   return (
     <div className="flex flex-col gap-8">
-      {/* FORM HUB */}
+      {/* FORM HUB TAKEOVER */}
       {(isAdding || editingVial || loggingVial) && (
-        <div className="card border-primary bg-primary/5">
-          <div className="card-header flex justify-between items-center pb-4">
-            <h3 className="card-title text-primary font-bold">
-              {editingVial ? `Edit ${editingVial.name}` : loggingVial ? `Log Dose: ${loggingVial.name}` : 'New Inventory Item'}
-            </h3>
-            <button onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if(onLoggingComplete) onLoggingComplete(); }} className="btn btn-outline border-transparent hover:bg-muted/30 p-2"><X className="h-5 w-5" /></button>
-          </div>
-          <div className="card-content space-y-4">
+        <div className="fixed inset-0 z-[100] bg-background overflow-y-auto w-full h-full">
+          <div className="max-w-2xl mx-auto p-4 lg:p-8">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+              <button onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if(onLoggingComplete) onLoggingComplete(); }} className="btn btn-outline border-transparent hover:bg-muted/30 p-2 -ml-2"><ArrowLeft className="h-6 w-6" /></button>
+              <h2 className="text-xl font-bold text-primary">
+                {editingVial ? `Edit ${editingVial.name}` : loggingVial ? `Log Dose: ${loggingVial.name}` : 'New Compound'}
+              </h2>
+            </div>
+            <div className="space-y-4">
             {loggingVial ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -285,6 +286,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                 <button type="submit" className="btn btn-primary w-full mt-4">{editingVial ? 'Apply Changes' : 'Save Item'}</button>
               </form>
             )}
+            </div>
           </div>
         </div>
       )}
@@ -356,79 +358,86 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                     </button>
                   </div>
                 )}
-
-                {schedulingVial?.id === group.vial.id && (
-                  <div className="mt-2 p-3 bg-success/5 rounded border border-success space-y-3">
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs font-bold uppercase text-success">Protocol Settings</p>
-                      <button onClick={() => setSchedulingVial(null)}><X className="h-3 w-3 text-muted-foreground"/></button>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="form-group"><label className="form-label text-[10px]">Amount</label><input className="form-input text-xs bg-[#09090b] border-border" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
-                      <div className="form-group">
-                        <label className="form-label text-[10px]">Frequency</label>
-                        <select 
-                          className="form-input text-xs bg-[#09090b] border-border py-2 h-full" 
-                          value={frequencyType} 
-                          onChange={e => {
-                            const val = e.target.value;
-                            setFrequencyType(val);
-                            if (val === 'daily') setFrequency("24");
-                            else if (val === 'weekly') setFrequency("168");
-                          }}
-                        >
-                          <option value="daily">Daily</option>
-                          <option value="weekly">Weekly</option>
-                          <option value="custom">Custom Hours</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {frequencyType === 'custom' && (
-                      <div className="form-group mt-2">
-                        <label className="form-label text-[10px]">Custom Frequency (Hours)</label>
-                        <input className="form-input text-xs bg-[#09090b] border-border" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} />
-                      </div>
-                    )}
-
-                    <div className="space-y-2 pt-2">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Schedule Pattern</label>
-                      <div className="flex items-center gap-3 p-3 bg-[#09090b] border border-border rounded-md">
-                        <input type="checkbox" checked={skipWeekends} onChange={e => setSkipWeekends(e.target.checked)} className="h-5 w-5 rounded border-border bg-background accent-primary flex-shrink-0" />
-                        <span className="text-sm font-semibold">Skip Weekends (Mon-Fri)</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Time Slots (Select multiple)</label>
-                      <div className="flex gap-2">
-                        {['morning', 'afternoon', 'night'].map((b: any) => (
-                          <button 
-                            key={b} 
-                            type="button"
-                            onClick={() => toggleBucket(b)}
-                            className={`flex-[1_1_0%] text-[10px] uppercase font-bold py-3 rounded-md border-2 transition-colors ${timeBuckets.includes(b) ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_10px_rgba(37,99,235,0.3)]' : 'bg-[#09090b] text-muted-foreground border-border hover:border-primary/50'}`}
-                          >
-                            {b}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 pt-2">
-                      <div className="form-group"><label className="form-label text-[10px]">Start Time</label><input className="form-input text-xs bg-[#09090b] border-border py-2 px-1 text-center" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label text-[10px]">Days ON</label><input className="form-input text-xs bg-[#09090b] border-border py-2 text-center" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
-                      <div className="form-group"><label className="form-label text-[10px]">Days OFF</label><input className="form-input text-xs bg-[#09090b] border-border py-2 text-center" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
-                    </div>
-                    <button onClick={() => handleSaveProtocol(group.vial.id)} className="btn btn-primary w-full bg-success text-sm py-3 mt-2 font-bold shadow-lg shadow-success/20">Save Clinical Protocol</button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* PROTOCOL SCHEDULING TAKEOVER */}
+      {schedulingVial && (
+        <div className="fixed inset-0 z-[100] bg-background overflow-y-auto w-full h-full">
+          <div className="max-w-2xl mx-auto p-4 lg:p-8">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+              <button onClick={() => setSchedulingVial(null)} className="btn btn-outline border-transparent hover:bg-muted/30 p-2 -ml-2"><ArrowLeft className="h-6 w-6" /></button>
+              <h2 className="text-xl font-bold text-success">
+                Schedule: {schedulingVial.name}
+              </h2>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-group"><label className="form-label">Amount</label><input className="form-input bg-[#09090b] border-border py-3" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
+                <div className="form-group">
+                  <label className="form-label">Frequency</label>
+                  <select 
+                    className="form-input bg-[#09090b] border-border py-3 h-full" 
+                    value={frequencyType} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      setFrequencyType(val);
+                      if (val === 'daily') setFrequency("24");
+                      else if (val === 'weekly') setFrequency("168");
+                    }}
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="custom">Custom Hours</option>
+                  </select>
+                </div>
+              </div>
+
+              {frequencyType === 'custom' && (
+                <div className="form-group">
+                  <label className="form-label">Custom Frequency (Hours)</label>
+                  <input className="form-input bg-[#09090b] border-border py-3" type="number" value={frequency} onChange={e => setFrequency(e.target.value)} />
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <label className="form-label block border-b border-border pb-2">Schedule Pattern</label>
+                <div className="flex items-center gap-4 p-4 bg-[#09090b] border border-border rounded-lg">
+                  <input type="checkbox" checked={skipWeekends} onChange={e => setSkipWeekends(e.target.checked)} className="h-6 w-6 rounded border-border bg-background accent-primary flex-shrink-0" />
+                  <span className="text-base font-semibold">Skip Weekends (Mon-Fri)</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="form-label block border-b border-border pb-2">Time Slots</label>
+                <div className="flex gap-3">
+                  {['morning', 'afternoon', 'night'].map((b: any) => (
+                    <button 
+                      key={b} 
+                      type="button"
+                      onClick={() => toggleBucket(b)}
+                      className={`flex-[1_1_0%] uppercase font-bold py-4 rounded-lg border-2 transition-colors ${timeBuckets.includes(b) ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'bg-[#09090b] text-muted-foreground border-border hover:border-primary/50'}`}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="form-group"><label className="form-label">Start Time</label><input className="form-input bg-[#09090b] border-border py-3 px-1 text-center" type="time" value={preferredStartTime} onChange={e => setPreferredStartTime(e.target.value)} /></div>
+                <div className="form-group"><label className="form-label">Days ON</label><input className="form-input bg-[#09090b] border-border py-3 text-center" type="number" value={daysOn} onChange={e => setDaysOn(e.target.value)} /></div>
+                <div className="form-group"><label className="form-label">Days OFF</label><input className="form-input bg-[#09090b] border-border py-3 text-center" type="number" value={daysOff} onChange={e => setDaysOff(e.target.value)} /></div>
+              </div>
+              <button onClick={() => handleSaveProtocol(schedulingVial.id)} className="btn btn-primary w-full bg-success text-base py-4 mt-6 font-bold shadow-lg shadow-success/20">Save Cycle Settings</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* STOCKPILE */}
       <div className="card border-dashed opacity-80">

@@ -55,9 +55,9 @@ export function PKChart({ userId }: { userId: string }) {
       <div className="card-header">
         <h3 className="card-title">
           <Activity className="h-5 w-5 text-primary" />
-          Serum Concentration Model
+          Blood Saturation Levels
         </h3>
-        <p className="card-description">Modeled blood levels based on injection history (72h past, 48h future)</p>
+        <p className="card-description">Modeled active compound levels based on pinning history (72h past, 48h future)</p>
       </div>
       <div className="card-content">
         <div className="h-[300px] w-full mt-4">

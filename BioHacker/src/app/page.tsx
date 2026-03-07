@@ -9,7 +9,7 @@ export default function LandingPage() {
           BIOHACKER <span style={{ color: 'var(--primary)' }}>PRO</span>
         </h1>
         <p style={{ fontSize: '1.25rem', color: 'var(--muted-foreground)', maxWidth: '600px', margin: '0 auto' }}>
-          The world's first clinical-grade, zero-knowledge bio-tracking platform. 
+          The world's first enterprise-grade, encrypted stack tracking platform. 
           Absolute precision, total privacy.
         </p>
       </header>
@@ -22,13 +22,13 @@ export default function LandingPage() {
         </div>
         <div className="card" style={{ padding: '2rem' }}>
           <Activity className="h-8 w-8 text-primary" style={{ marginBottom: '1rem' }} />
-          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Pharmacokinetic Modeling</h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Multi-compartment exponential decay models for complex pharmaceutical regimens.</p>
+          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Active Blood Levels</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Half-life exponential decay tracking for complex enhancement cycles.</p>
         </div>
         <div className="card" style={{ padding: '2rem' }}>
           <ShieldCheck className="h-8 w-8 text-primary" style={{ marginBottom: '1rem' }} />
-          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Zero-Knowledge E2EE</h3>
-          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Your data is encrypted on your device using WebCrypto. We can't see it, even if we wanted to.</p>
+          <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Encrypted Stack Data</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Your cycle data is encrypted on your device using WebCrypto. We can't see it, even if we wanted to.</p>
         </div>
       </div>
 

@@ -42,9 +42,9 @@ function DashboardContent() {
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">
           <span className="lg:hidden">{tab === 'vials' ? 'Inventory' : tab === 'plan' ? 'Schedule & Plan' : 'Overview'}</span>
-          <span className="hidden lg:inline">Clinical Overview</span>
+          <span className="hidden lg:inline">Cycle Command Center</span>
         </h1>
-        <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium hidden lg:block">Real-time status of your active protocols and systemic response metrics.</p>
+        <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium hidden lg:block">Real-time status of your active stacks and compound blood saturation levels.</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-10 mt-2 lg:mt-8">
@@ -75,8 +75,8 @@ function DashboardContent() {
           </div>
           
           <section id="inventory" className={`flex-col gap-6 lg:gap-10 scroll-mt-8 ${tab === 'vials' ? 'flex' : 'hidden lg:flex'}`}>
-            <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
             <SupplyTracker userId={user.id} />
+            <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
           </section>
 
           <div className={`${tab === 'plan' ? 'block' : 'hidden lg:block'}`}>
