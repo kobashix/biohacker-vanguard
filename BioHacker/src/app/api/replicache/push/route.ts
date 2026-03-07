@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (name === 'restoreBackup') {
+    if (name === 'seedDemoData' || name === 'restoreBackup') {
       const { vials, protocols, logs, subjectiveLogs, supplies, cycles } = args;
       
       if (vials && vials.length > 0) {

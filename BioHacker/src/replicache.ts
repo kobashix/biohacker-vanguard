@@ -157,10 +157,22 @@ export function getReplicache(userId: string) {
 
 export async function dropReplicache(userId: string) {
   if (typeof window === 'undefined' || !userId) return;
+  const dbName = `biohacker-${userId}`;
+  
   if (replicache && replicacheUserId === userId) {
+    console.log(`[replicache] Closing active instance for ${userId} before drop`);
     await replicache.close();
     replicache = null;
     replicacheUserId = null;
   }
-  await dropDatabase(`biohacker-${userId}`);
+  
+  console.log(`[replicache] Dropping database ${dbName}`);
+  try {
+    await dropDatabase(dbName);
+    // Nuclear fallback: delete the indexedDB database directly if Replicache helper fails
+    window.indexedDB.deleteDatabase(`replicache:${dbName}`);
+  } catch (e) {
+    console.warn(`[replicache] dropDatabase failed for ${dbName}, trying fallback`, e);
+    window.indexedDB.deleteDatabase(`replicache:${dbName}`);
+  }
 }
