@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [purging, setPurging] = useState(false);
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
@@ -43,6 +44,26 @@ export default function SettingsPage() {
   const cycles = useSubscribe(rep, async (tx) => {
     return await tx.scan({ prefix: "cycle/" }).values().toArray() as Cycle[];
   }, { default: [] });
+
+  const handlePurgeAll = async () => {
+    if (!confirm('⚠️ This will permanently delete ALL your vials, protocols, logs, and supplies. This cannot be undone. Type DELETE in the next prompt to confirm.')) return;
+    const typed = prompt('Type DELETE to confirm permanent data purge:');
+    if (typed !== 'DELETE') return;
+
+    setPurging(true);
+    try {
+      const res = await fetch('/api/user/purge', { method: 'DELETE' });
+      if (!res.ok) throw new Error('Server error');
+      // Clear local Replicache store
+      if (rep) await rep.close();
+      alert('All data purged. You will be redirected.');
+      window.location.href = '/dashboard';
+    } catch (e) {
+      alert('Purge failed. Please try again.');
+    } finally {
+      setPurging(false);
+    }
+  };
 
   const handleExportBackup = () => {
     const backup = { 
@@ -164,7 +185,9 @@ export default function SettingsPage() {
           <div className="card">
             <div className="card-header"><h3 className="card-title text-destructive"><AlertTriangle className="h-5 w-5" /> Danger Zone</h3></div>
             <div className="card-content">
-              <button className="btn btn-outline border-destructive/20 text-destructive hover:bg-destructive/10 w-full text-xs">Purge All Account Data</button>
+              <button onClick={handlePurgeAll} disabled={purging} className="btn btn-outline border-destructive/20 text-destructive hover:bg-destructive/10 w-full text-xs disabled:opacity-50">
+                {purging ? 'Purging...' : 'Purge All Account Data'}
+              </button>
             </div>
           </div>
         </div>
