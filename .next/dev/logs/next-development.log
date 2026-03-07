@@ -1,0 +1,6 @@
+[00:35:59.951] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'E:\Websites\8 - minmaxmuscle2\src\app'
+[00:35:59.954] Server  ERROR   ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir 'E:\Websites\8 - minmaxmuscle2\src\app'
+[00:35:59.957] Server  ERROR   ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir 'E:\Websites\8 - minmaxmuscle2\src\app'
+[00:35:59.986] Server  LOG     ✓ Compiled in 76ms
+[02:33:02.949] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'E:\Websites\8 - minmaxmuscle2\src\app'
+[02:33:02.951] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'E:\Websites\8 - minmaxmuscle2\src\app'
