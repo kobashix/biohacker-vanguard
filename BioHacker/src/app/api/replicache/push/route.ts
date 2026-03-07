@@ -114,6 +114,14 @@ export async function POST(request: NextRequest) {
         await supabase.from('cycles').upsert(cycles.map((c: any) => ({ ...c, user_id: user.id })));
       }
     }
+
+    if (name === 'purgeAllData') {
+      // Must delete in order due to foreign key constraints, or just delete tables that depend on user_id
+      const tables = ['dose_logs', 'subjective_logs', 'supplies', 'cycles', 'bio_markers', 'protocols', 'vials'];
+      for (const table of tables) {
+        await supabase.from(table).delete().eq('user_id', user.id);
+      }
+    }
   }
 
   // Update the last processed mutation ID for this client

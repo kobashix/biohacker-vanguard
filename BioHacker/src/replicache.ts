@@ -126,6 +126,15 @@ const mutators = {
     for (const sup of p.supplies || []) await tx.set(`supply/${sup.id}`, sup);
     for (const c of p.cycles || []) await tx.set(`cycle/${c.id}`, c);
   },
+  purgeAllData: async (tx: WriteTransaction) => {
+    const prefixes = ['vial/', 'protocol/', 'log/', 'subjective/', 'supply/', 'cycle/'];
+    for (const prefix of prefixes) {
+      const keys = await tx.scan({ prefix }).keys().toArray();
+      for (const key of keys) {
+        await tx.del(key);
+      }
+    }
+  },
 };
 
 export type M = typeof mutators;

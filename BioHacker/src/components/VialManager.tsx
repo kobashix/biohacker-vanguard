@@ -285,6 +285,14 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                     <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline p-2 border-border" title="Edit">
                       <Edit3 className="h-4 w-4 text-muted-foreground" />
                     </button>
+                    <button onClick={async () => {
+                      if (confirm(`Permanently delete ${group.vial.name}?`)) {
+                        if (group.protocol) await rep?.mutate.deleteProtocol(group.protocol.id);
+                        await rep?.mutate.deleteVial(group.vial.id);
+                      }
+                    }} className="btn btn-outline p-2 border-border text-destructive hover:bg-destructive/10" title="Delete">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
                 
@@ -375,7 +383,14 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   <div className="font-bold text-sm">{group.vial.name} <span className="text-primary">x{group.count}</span></div>
                   <div className="text-[10px] text-muted-foreground uppercase">{(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}</div>
                 </div>
-                <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1"><Edit3 className="h-3 w-3" /></button>
+                <div className="flex gap-1">
+                  <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1 text-muted-foreground hover:text-foreground"><Edit3 className="h-3 w-3" /></button>
+                  <button onClick={async () => {
+                    if (confirm(`Permanently delete all ${group.count} ${group.vial.name} items?`)) {
+                      for (const id of group.ids) await rep?.mutate.deleteVial(id);
+                    }
+                  }} className="btn btn-outline border-none p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Delete All"><Trash2 className="h-3 w-3" /></button>
+                </div>
               </div>
             ))}
           </div>
