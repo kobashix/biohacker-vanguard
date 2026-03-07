@@ -23,6 +23,7 @@ export async function DELETE(request: NextRequest) {
   const adminDb = serviceKey ? createClient(supabaseUrl, serviceKey) : supabase;
 
   const errors: string[] = [];
+  const counts: Record<string, number> = {};
 
   console.log(`[purge] Starting exhaustive purge for user ${user.id}`);
 
@@ -30,39 +31,46 @@ export async function DELETE(request: NextRequest) {
   const tablesToPurge = ['dose_logs', 'subjective_logs', 'supplies', 'cycles', 'bio_markers'];
   
   for (const table of tablesToPurge) {
-    const { error: deleteError } = await adminDb.from(table).delete().eq('user_id', user.id);
+    const { count, error: deleteError } = await adminDb.from(table).delete({ count: 'exact' }).eq('user_id', user.id);
     if (deleteError) {
-      // Ignore "Could not find the table" errors - if it's missing, it's effectively purged.
       if (deleteError.message.includes('Could not find the table') || deleteError.code === 'PGRST116' || deleteError.code === '42P01') {
         console.warn(`[purge] Table ${table} not found in schema, skipping.`);
       } else {
         errors.push(`${table}: ${deleteError.message}`);
       }
+    } else {
+      counts[table] = count || 0;
     }
   }
 
   // Step 2: Delete protocols (FK: protocols -> vials)
-  const step2 = await adminDb.from('protocols').delete().eq('user_id', user.id);
-  if (step2.error) {
-    if (!step2.error.message.includes('Could not find the table')) {
-      errors.push(`protocols: ${step2.error.message}`);
+  const { count: protocolCount, error: protocolError } = await adminDb.from('protocols').delete({ count: 'exact' }).eq('user_id', user.id);
+  if (protocolError) {
+    if (!protocolError.message.includes('Could not find the table')) {
+      errors.push(`protocols: ${protocolError.message}`);
     }
+  } else {
+    counts['protocols'] = protocolCount || 0;
   }
 
   // Step 3: Delete vials (parent record, after all children)
-  const step3 = await adminDb.from('vials').delete().eq('user_id', user.id);
-  if (step3.error) {
-    if (!step3.error.message.includes('Could not find the table')) {
-      errors.push(`vials: ${step3.error.message}`);
+  const { count: vialCount, error: vialError } = await adminDb.from('vials').delete({ count: 'exact' }).eq('user_id', user.id);
+  if (vialError) {
+    if (!vialError.message.includes('Could not find the table')) {
+      errors.push(`vials: ${vialError.message}`);
     }
+  } else {
+    counts['vials'] = vialCount || 0;
   }
 
   // Step 4: Clear Replicache client tracking
-  const step4 = await adminDb.from('replicache_clients').delete().eq('client_group_id', user.id);
-  if (step4.error) {
-    if (!step4.error.message.includes('Could not find the table')) {
-      errors.push(`replicache_clients: ${step4.error.message}`);
+  const { count: clientCount, error: clientError } = await adminDb.from('replicache_clients').delete({ count: 'exact' }).eq('client_group_id', user.id);
+  if (clientError) {
+    if (!clientError.message.includes('Could not find the table')) {
+      errors.push(`replicache_clients: ${clientError.message}`);
     }
+  } else {
+    counts['replicache_clients'] = clientCount || 0;
   }
 
   if (errors.length > 0) {
@@ -70,10 +78,11 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ 
       success: false, 
       errors,
+      counts,
       message: "Some data could not be cleared due to database constraints."
     }, { status: 500 });
   }
 
-  console.log(`[purge] COMPLETE: All data deleted for user ${user.id}`);
-  return NextResponse.json({ success: true });
+  console.log(`[purge] COMPLETE: All data deleted for user ${user.id}`, counts);
+  return NextResponse.json({ success: true, counts });
 }

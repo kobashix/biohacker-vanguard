@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
-import { getReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
+import { getReplicache, dropReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
 import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud } from "lucide-react";
 
 export default function SettingsPage() {
@@ -46,21 +46,26 @@ export default function SettingsPage() {
   }, { default: [] });
 
   const handlePurgeAll = async () => {
-    if (!confirm('⚠️ This will permanently delete ALL your vials, protocols, logs, and supplies. This cannot be undone. Type DELETE in the next prompt to confirm.')) return;
+    if (!confirm('âš狢 This will permanently delete ALL your vials, protocols, logs, and supplies. This cannot be undone. Type DELETE in the next prompt to confirm.')) return;
     const typed = prompt('Type DELETE to confirm permanent data purge:');
     if (typed !== 'DELETE') return;
 
     setPurging(true);
     try {
       const res = await fetch('/api/user/purge', { method: 'DELETE' });
+      const data = await res.json().catch(() => null);
+      
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
         const backendError = data?.errors?.join(', ') || 'Unknown server error';
         throw new Error(backendError);
       }
-      // Clear local Replicache store
-      if (rep) await rep.close();
-      alert('All data purged. You will be redirected.');
+      
+      // Clear local Replicache store (Exhaustive Drop)
+      if (user?.id) {
+        await dropReplicache(user.id);
+      }
+      
+      alert('All data purged. Your local store has been wiped.');
       window.location.href = '/dashboard';
     } catch (e: any) {
       console.error(e);

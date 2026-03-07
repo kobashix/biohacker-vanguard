@@ -154,3 +154,14 @@ export function getReplicache(userId: string) {
   }
   return replicache;
 }
+
+export async function dropReplicache(userId: string) {
+  if (typeof window === 'undefined' || !userId) return;
+  if (replicache && replicacheUserId === userId) {
+    await replicache.close();
+    replicache = null;
+    replicacheUserId = null;
+  }
+  // @ts-ignore
+  await Replicache.drop(`biohacker-${userId}`);
+}
