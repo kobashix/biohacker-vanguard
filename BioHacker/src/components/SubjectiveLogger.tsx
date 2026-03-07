@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Smile, Zap, Moon, Activity, Save, Check } from "lucide-react";
 import { getReplicache } from "@/replicache";
-import { nanoid } from "nanoid";
 
 export function SubjectiveLogger({ userId }: { userId: string }) {
   const [mood, setMood] = useState(7);
@@ -18,7 +17,7 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
   const handleSave = async () => {
     if (!rep) return;
     await rep.mutate.logSubjective({
-      id: nanoid(),
+      id: crypto.randomUUID(),
       timestamp: Date.now(),
       mood,
       energy,
@@ -82,3 +81,4 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
     </div>
   );
 }
+

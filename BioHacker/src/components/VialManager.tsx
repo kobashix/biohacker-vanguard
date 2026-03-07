@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { Plus, Trash2, Beaker, Droplets, Layers, Package, Edit3, Check, X, Syringe, Save, PlusCircle, CircleDot, Archive, Activity, Calendar, MapPin, Clock } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial, Compound, Protocol } from "@/replicache";
-import { nanoid } from "nanoid";
 import { calculateRequiredUnits } from "@/math";
 import Decimal from "decimal.js";
 import { format } from "date-fns";
@@ -100,7 +99,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
     const finalName = vialName || compounds.map(c => c.name).join(' / ');
     for (let i = 0; i < (parseInt(count) || 1); i++) {
       await rep.mutate.createVial({
-        id: nanoid(), name: finalName, compounds, volume_ml: status === 'mixed' ? val : 0,
+        id: crypto.randomUUID(), name: finalName, compounds, volume_ml: status === 'mixed' ? val : 0,
         remaining_volume_ml: status === 'mixed' ? val : 0, status,
         pill_count: status === 'pill' ? Math.floor(val) : undefined,
       });
@@ -124,7 +123,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
     start.setHours(hours, minutes, 0, 0);
 
     await rep.mutate.createProtocol({
-      id: nanoid(), vial_id: vialId, dose_amount: parseFloat(doseAmount),
+      id: crypto.randomUUID(), vial_id: vialId, dose_amount: parseFloat(doseAmount),
       frequency_hours: parseFloat(frequency), 
       days_on: parseInt(daysOn),
       days_off: parseInt(daysOff),
@@ -143,7 +142,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
       units_iu = calculateRequiredUnits(compound.mass_mg, vial.volume_ml, amount, compound.unit).toNumber();
     }
     await rep.mutate.logDose({
-      id: nanoid(), vial_id: vial.id, substance: `${vial.name} (${compound.name})`,
+      id: crypto.randomUUID(), vial_id: vial.id, substance: `${vial.name} (${compound.name})`,
       dose_amount: amount, unit: getDoseUnitLabel(vial, compoundIdx), units_iu, timestamp: Date.now(),
       injection_site: vial.status === 'mixed' ? injectionSite : undefined
     });
@@ -374,3 +373,4 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
     </div>
   );
 }
+

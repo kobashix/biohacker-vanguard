@@ -1,11 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
 import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud } from "lucide-react";
-import { nanoid } from "nanoid";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
@@ -93,19 +92,19 @@ export default function SettingsPage() {
     setSeeding(true);
 
     const demoVials: Vial[] = [
-      { id: nanoid(), name: 'BPC-157 (Recovery)', compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.85, status: 'mixed' },
-      { id: nanoid(), name: 'HGH (Performance)', compounds: [{name: 'Somatropin', mass_mg: 36, unit: 'IU'}], volume_ml: 5, remaining_volume_ml: 4.5, status: 'mixed' },
-      { id: nanoid(), name: 'Anavar (Oral)', compounds: [{name: 'Oxandrolone', mass_mg: 10, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'pill', pill_count: 48 },
-      { id: nanoid(), name: 'TB-500 (Stockpile)', compounds: [{name: 'TB-500', mass_mg: 5, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'powder' }
+      { id: crypto.randomUUID(), name: 'BPC-157 (Recovery)', compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.85, status: 'mixed' },
+      { id: crypto.randomUUID(), name: 'HGH (Performance)', compounds: [{name: 'Somatropin', mass_mg: 36, unit: 'IU'}], volume_ml: 5, remaining_volume_ml: 4.5, status: 'mixed' },
+      { id: crypto.randomUUID(), name: 'Anavar (Oral)', compounds: [{name: 'Oxandrolone', mass_mg: 10, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'pill', pill_count: 48 },
+      { id: crypto.randomUUID(), name: 'TB-500 (Stockpile)', compounds: [{name: 'TB-500', mass_mg: 5, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'powder' }
     ];
 
     const demoProtocols: Protocol[] = [
-      { id: nanoid(), vial_id: demoVials[0].id, dose_amount: 250, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() },
-      { id: nanoid(), vial_id: demoVials[2].id, dose_amount: 2, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() }
+      { id: crypto.randomUUID(), vial_id: demoVials[0].id, dose_amount: 250, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() },
+      { id: crypto.randomUUID(), vial_id: demoVials[2].id, dose_amount: 2, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() }
     ];
 
     const demoLogs: DoseLog[] = [
-      { id: nanoid(), vial_id: demoVials[0].id, substance: demoVials[0].name, dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: Date.now() - 86400000 }
+      { id: crypto.randomUUID(), vial_id: demoVials[0].id, substance: demoVials[0].name, dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: Date.now() - 86400000 }
     ];
 
     await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs });
@@ -135,7 +134,7 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase text-muted-foreground">iPhone Sync Instructions:</h4>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar. Paste the URL above.</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">Settings â†’ Calendar â†’ Accounts â†’ Add Account â†’ Other â†’ Add Subscribed Calendar. Paste the URL above.</p>
             </div>
           </div>
         </div>
@@ -173,3 +172,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Calendar, Plus, Trash2, X } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Cycle, Supply } from "@/replicache";
-import { nanoid } from "nanoid";
 import { format } from "date-fns";
 
 export function CycleManager({ userId }: { userId: string }) {
@@ -23,7 +22,7 @@ export function CycleManager({ userId }: { userId: string }) {
     e.preventDefault();
     if (!rep) return;
     await rep.mutate.createCycle({
-      id: nanoid(),
+      id: crypto.randomUUID(),
       name,
       start_date: startDate,
       end_date: endDate || undefined,
@@ -86,7 +85,7 @@ export function CycleManager({ userId }: { userId: string }) {
                 <p className="font-bold text-sm">{c.name}</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">
                   {format(new Date(c.start_date), 'MMM d, yyyy')} 
-                  {c.end_date ? ` — ${format(new Date(c.end_date), 'MMM d, yyyy')}` : ' — PRESENT'}
+                  {c.end_date ? ` â€” ${format(new Date(c.end_date), 'MMM d, yyyy')}` : ' â€” PRESENT'}
                 </p>
               </div>
               <button className="btn btn-outline border-none p-1 opacity-20 hover:opacity-100"><Trash2 className="h-4 w-4 text-destructive" /></button>
@@ -100,3 +99,4 @@ export function CycleManager({ userId }: { userId: string }) {
     </div>
   );
 }
+

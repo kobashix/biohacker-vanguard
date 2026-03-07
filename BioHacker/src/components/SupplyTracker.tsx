@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Package, Plus, Minus, Trash2 } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Supply } from "@/replicache";
-import { nanoid } from "nanoid";
 
 export function SupplyTracker({ userId }: { userId: string }) {
   const [name, setName] = useState("");
@@ -22,7 +21,7 @@ export function SupplyTracker({ userId }: { userId: string }) {
     e.preventDefault();
     if (!rep) return;
     await rep.mutate.updateSupply({
-      id: nanoid(),
+      id: crypto.randomUUID(),
       name,
       count: parseInt(count),
       unit
@@ -93,3 +92,4 @@ export function SupplyTracker({ userId }: { userId: string }) {
 }
 
 import { X } from "lucide-react";
+
