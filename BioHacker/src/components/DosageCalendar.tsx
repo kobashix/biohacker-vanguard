@@ -129,7 +129,7 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
                   <div 
                     key={idx} 
                     onClick={() => onSelectVial(dose.vialId)}
-                    className={`p-2 rounded border cursor-pointer transition-all ${dose.completed ? 'bg-success/10 border-success' : 'bg-card border-border hover:border-primary shadow-sm'}`}
+                    className={`p-2 rounded border cursor-pointer transition-all ${dose.completed ? 'bg-success/10 border-success' : 'bg-[#18181b] border-border hover:border-primary shadow-sm'}`}
                   >
                     <div className="font-bold text-[9px] flex justify-between items-center mb-1">
                       <span className="truncate">{dose.name}</span>

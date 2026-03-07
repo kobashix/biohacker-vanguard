@@ -18,7 +18,7 @@ export function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center p-1 pb-safe-bottom shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.3)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[#09090b]/95 backdrop-blur-md border-t border-[#27272a] flex justify-around items-center p-1 pb-safe-bottom shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.5)]">
       {navItems.map((item) => {
         const Icon = item.icon;
         
