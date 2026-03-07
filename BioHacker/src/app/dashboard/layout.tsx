@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, ReactNode, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="max-w-[1400px] mx-auto w-full">
             {children}
             
-            <footer className="mt-24 py-12 border-t border-[#27272a] text-[10px] text-[#a1a1aa] space-y-4">
+            <footer className="mt-24 py-12 border-t border-[#27272a] text-[10px] text-[#a1a1aa] space-y-4 hidden lg:block">
               <div className="flex items-center gap-2 text-[#2563eb] font-bold uppercase tracking-widest">
                 <ShieldCheck className="h-3 w-3" />
                 HIPAA & SOC-2 Compliance Statement
@@ -77,7 +77,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile Bottom Nav */}
       <div className="lg:hidden">
-        <MobileNav />
+        <Suspense fallback={null}>
+          <MobileNav />
+        </Suspense>
       </div>
     </div>
   );
