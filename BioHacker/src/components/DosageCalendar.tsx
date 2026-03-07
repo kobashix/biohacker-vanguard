@@ -116,10 +116,10 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
           <button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronRight className="h-4 w-4"/></button>
         </div>
       </div>
-      <div className="card-content p-0 overflow-x-auto">
+      <div className="card-content p-0 overflow-x-auto snap-x snap-mandatory hide-scrollbar">
         <div className="grid grid-cols-7 min-w-[800px] border-t border-border">
           {days.map((day, i) => (
-            <div key={i} className={`min-h-[140px] border-border ${i < 6 ? 'border-r' : ''} ${isWeekend(day) ? 'bg-muted/5' : ''}`}>
+            <div key={i} className={`min-h-[140px] border-border snap-start snap-always ${i < 6 ? 'border-r' : ''} ${isWeekend(day) ? 'bg-muted/5' : ''}`}>
               <div className={`p-2 text-center border-b border-border ${isSameDay(day, new Date()) ? 'bg-primary/10' : 'bg-muted/10'}`}>
                 <div className="text-[10px] text-muted-foreground uppercase font-bold">{format(day, 'EEE')}</div>
                 <div className="font-bold text-sm">{format(day, 'd')}</div>

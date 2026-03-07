@@ -159,20 +159,20 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="flex flex-col gap-8">
       {/* FORM HUB */}
       {(isAdding || editingVial || loggingVial) && (
-        <div className="card" style={{ border: '1px solid var(--primary)', background: 'rgba(37, 99, 235, 0.02)' }}>
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="card-title">
+        <div className="card border-primary bg-primary/5">
+          <div className="card-header flex justify-between items-center pb-4">
+            <h3 className="card-title text-primary font-bold">
               {editingVial ? `Edit ${editingVial.name}` : loggingVial ? `Log Dose: ${loggingVial.name}` : 'New Inventory Item'}
             </h3>
-            <button onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if(onLoggingComplete) onLoggingComplete(); }} className="btn btn-outline" style={{ border: 'none' }}><X className="h-5 w-5" /></button>
+            <button onClick={() => { setIsAdding(false); setEditingVial(null); setLoggingVial(null); if(onLoggingComplete) onLoggingComplete(); }} className="btn btn-outline border-transparent hover:bg-muted/30 p-2"><X className="h-5 w-5" /></button>
           </div>
-          <div className="card-content">
+          <div className="card-content space-y-4">
             {loggingVial ? (
               <div className="space-y-4">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="form-group"><label className="form-label">Dose ({getDoseUnitLabel(loggingVial, targetCompoundIndex)})</label><input className="form-input" type="number" value={doseAmount} onChange={e => setDoseAmount(e.target.value)} /></div>
                   <div className="form-group"><label className="form-label">Compound</label>
                     <select className="form-input" value={targetCompoundIndex} onChange={e => setTargetCompoundIndex(parseInt(e.target.value))}>
@@ -191,10 +191,11 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                 <button onClick={() => handleLogDose(loggingVial, parseFloat(doseAmount), targetCompoundIndex)} className="btn btn-primary w-full">Record Administration</button>
               </div>
             ) : (
-              <form onSubmit={editingVial ? (e) => { e.preventDefault(); handleUpdateVial(e); } : handleAddVial}>
-                <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={editingVial ? editingVial.name : vialName} onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} /></div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label className="form-label">Compounds</label>
+              <form onSubmit={editingVial ? (e) => { e.preventDefault(); handleUpdateVial(e); } : handleAddVial} className="space-y-5">
+                <div className="form-group"><label className="form-label">Label</label><input className="form-input" value={editingVial ? editingVial.name : vialName} onChange={e => editingVial ? setEditingVial({...editingVial, name: e.target.value}) : setVialName(e.target.value)} placeholder="e.g. Mass Protocol Phase 1" /></div>
+                
+                <div className="space-y-3">
+                  <label className="form-label block border-b border-border pb-2">Compounds</label>
                   
                   {/* Native Autocomplete Datalist */}
                   <datalist id="compounds-list">
@@ -204,18 +205,38 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
                   </datalist>
 
                   {(editingVial ? editingVial.compounds : compounds).map((c, idx) => (
-                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 70px 60px 30px', gap: '0.4rem', marginBottom: '0.5rem' }}>
-                      <input list="compounds-list" className="form-input" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search..." required />
-                      <input className="form-input" type="number" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} required />
-                      <select className="form-input" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
-                        <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
-                      </select>
-                      <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline" style={{ border: 'none' }} disabled={(editingVial ? editingVial.compounds : compounds).length === 1}><X className="h-4 w-4 text-destructive" /></button>
+                    <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:items-center p-3 sm:p-0 bg-muted/10 sm:bg-transparent rounded-lg border sm:border-none border-border relative">
+                      
+                      <div className="flex-1 w-full relative">
+                        <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Name</span>
+                        <input list="compounds-list" className="form-input w-full" value={c.name} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Search Database..." required />
+                      </div>
+                      
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex-1 sm:w-24 relative">
+                          <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Mass</span>
+                          <input className="form-input w-full" type="number" step="any" value={c.mass_mg || ""} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].mass_mg = parseFloat(e.target.value); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} placeholder="Amt" required />
+                        </div>
+                        
+                        <div className="w-20 relative">
+                          <span className="text-[10px] text-muted-foreground uppercase absolute -top-2 left-2 bg-background px-1 sm:hidden">Unit</span>
+                          <select className="form-input w-full px-1" value={c.unit || 'mg'} onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].unit = e.target.value as any; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}>
+                            <option value="mg">mg</option><option value="g">g</option><option value="IU">IU</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button type="button" onClick={() => { const n = (editingVial ? editingVial.compounds : compounds).filter((_, i) => i !== idx); editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline border-transparent hover:bg-destructive/10 hover:text-destructive w-full sm:w-10 sm:p-1 mt-2 sm:mt-0" disabled={(editingVial ? editingVial.compounds : compounds).length === 1}>
+                        <X className="h-4 w-4 mx-auto" />
+                      </button>
                     </div>
                   ))}
-                  <button type="button" onClick={() => { const n = [...(editingVial ? editingVial.compounds : compounds), { name: "", mass_mg: 0, unit: 'mg' as const }]; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline" style={{ width: '100%', fontSize: '0.7rem' }}><PlusCircle className="h-3 w-3 mr-2" /> Add Blend</button>
+                  <button type="button" onClick={() => { const n = [...(editingVial ? editingVial.compounds : compounds), { name: "", mass_mg: 0, unit: 'mg' as const }]; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }} className="btn btn-outline w-full sm:w-auto border-dashed hover:border-primary text-xs py-1 mt-2">
+                    <PlusCircle className="h-3 w-3 mr-2" /> Add Blend
+                  </button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border">
                   <div className="form-group"><label className="form-label">State</label><select className="form-input" value={editingVial ? editingVial.status : status} onChange={e => { const s = e.target.value as any; editingVial ? setEditingVial({...editingVial, status: s}) : setStatus(s); }}><option value="powder">Powder (Dry)</option><option value="mixed">Mixed (Liquid)</option><option value="pill">Pill (Oral)</option></select></div>
                   {!editingVial && <div className="form-group"><label className="form-label">Quantity</label><input className="form-input" type="number" value={count} onChange={e => setCount(e.target.value)} /></div>}
                 </div>
@@ -240,19 +261,31 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
         <div className="card-content">
           <div className="flex flex-col gap-3">
             {inventory.active.map(group => (
-              <div key={group.vial.id} className="p-3 bg-background rounded-lg border border-border flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center">
-                    <div className="p-2 rounded-full" style={{ background: group.vial.status === 'mixed' ? 'rgba(37, 99, 235, 0.1)' : group.vial.status === 'pill' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(161, 161, 170, 0.1)' }}>{group.vial.status === 'mixed' ? <Droplets className="h-4 w-4 text-primary" /> : group.vial.status === 'pill' ? <CircleDot className="h-4 w-4 text-success" /> : <Beaker className="h-4 w-4 text-muted-foreground" />}</div>
-                    <div>
-                      <div className="font-bold">{group.vial.name}</div>
-                      <div className="text-xs text-muted-foreground">{(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}</div>
+              <div key={group.vial.id} className="p-4 bg-background rounded-xl border border-border flex flex-col gap-3 shadow-sm hover:border-primary/30 transition-colors">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                  <div className="flex gap-3 items-start sm:items-center">
+                    <div className="p-2 sm:p-3 rounded-xl flex-shrink-0" style={{ background: group.vial.status === 'mixed' ? 'rgba(37, 99, 235, 0.1)' : group.vial.status === 'pill' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(161, 161, 170, 0.1)' }}>
+                      {group.vial.status === 'mixed' ? <Droplets className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /> : group.vial.status === 'pill' ? <CircleDot className="h-4 w-4 sm:h-5 sm:w-5 text-success" /> : <Beaker className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />}
+                    </div>
+                    <div className="min-w-0 pr-2">
+                      <div className="font-bold text-base sm:text-lg truncate">{group.vial.name}</div>
+                      <div className="text-xs text-muted-foreground truncate leading-relaxed">
+                        {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1" title="Log Dose"><Syringe className="h-4 w-4 text-primary" /></button>
-                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="btn btn-outline border-none p-1" title="Set Protocol"><Calendar className="h-4 w-4 text-success" /></button>
-                    <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline border-none p-1" title="Edit"><Edit3 className="h-4 w-4" /></button>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                    <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 sm:flex-none btn btn-outline bg-primary/5 hover:bg-primary/10 border-primary/20 p-2" title="Log Dose">
+                      <Syringe className="h-4 w-4 text-primary mx-auto" />
+                    </button>
+                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="flex-1 sm:flex-none btn btn-outline bg-success/5 hover:bg-success/10 border-success/20 p-2" title="Set Protocol">
+                      <Calendar className="h-4 w-4 text-success mx-auto" />
+                    </button>
+                    <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline p-2 border-border" title="Edit">
+                      <Edit3 className="h-4 w-4 text-muted-foreground" />
+                    </button>
                   </div>
                 </div>
                 
