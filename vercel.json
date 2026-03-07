@@ -1,1 +1,4 @@
-﻿{ "version": 2, "builds": [{ "src": "BioHacker/package.json", "use": "@vercel/next" }] }
+{
+  "version": 2,
+  "rootDirectory": "BioHacker"
+}
