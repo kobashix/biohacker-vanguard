@@ -1,0 +1,8 @@
+{
+  "name": "biohacker-root",
+  "private": true,
+  "scripts": {
+    "build": "cd BioHacker && npm run build",
+    "vercel-build": "cd BioHacker && npm run build"
+  }
+}
