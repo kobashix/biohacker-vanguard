@@ -1,4 +1,4 @@
-import { Replicache } from 'replicache';
+import { Replicache, dropDatabase } from 'replicache';
 import type { WriteTransaction } from 'replicache';
 import { NEEDLE_DEAD_SPACE_ML } from './math';
 
@@ -162,6 +162,5 @@ export async function dropReplicache(userId: string) {
     replicache = null;
     replicacheUserId = null;
   }
-  // @ts-ignore
-  await Replicache.drop(`biohacker-${userId}`);
+  await dropDatabase(`biohacker-${userId}`);
 }
