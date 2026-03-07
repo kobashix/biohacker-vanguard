@@ -70,7 +70,7 @@ body {
 }
 
 .form-input {
-  @apply w-full p-2.5 bg-[#09090b] border border-[#27272a] rounded-md text-sm text-[#fafafa] transition-colors focus:outline-none focus:border-[#2563eb];
+  @apply w-full p-2.5 bg-[#09090b] border border-[#27272a] rounded-md text-base text-[#fafafa] transition-colors focus:outline-none focus:border-[#2563eb] appearance-none;
 }
 
 /* Button styles */

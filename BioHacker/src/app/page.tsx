@@ -36,7 +36,7 @@ export default function LandingPage() {
         <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
           Log In
         </Link>
-        <Link href="/login" className="btn btn-outline" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
+        <Link href="/login?view=sign_up" className="btn btn-outline" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
           Create Account
         </Link>
       </div>

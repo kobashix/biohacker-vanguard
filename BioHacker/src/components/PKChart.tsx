@@ -22,8 +22,6 @@ export function PKChart({ userId }: { userId: string }) {
   }, { default: [] });
 
   const chartData = useMemo(() => {
-    if (logs.length === 0) return [];
-
     const data = [];
     const now = Date.now();
     const startTime = now - (72 * 3600000); // 3 days ago

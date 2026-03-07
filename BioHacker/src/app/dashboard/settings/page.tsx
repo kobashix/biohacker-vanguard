@@ -113,25 +113,39 @@ export default function SettingsPage() {
     if (!rep || !confirm("This will add sample vials and protocols to your account. Continue?")) return;
     setSeeding(true);
 
+    const bpcId = crypto.randomUUID();
+    const hghId = crypto.randomUUID();
+    const anavarId = crypto.randomUUID();
+
     const demoVials: Vial[] = [
-      { id: crypto.randomUUID(), name: 'BPC-157 (Recovery)', compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.85, status: 'mixed' },
-      { id: crypto.randomUUID(), name: 'HGH (Performance)', compounds: [{name: 'Somatropin', mass_mg: 36, unit: 'IU'}], volume_ml: 5, remaining_volume_ml: 4.5, status: 'mixed' },
-      { id: crypto.randomUUID(), name: 'Anavar (Oral)', compounds: [{name: 'Oxandrolone', mass_mg: 10, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'pill', pill_count: 48 },
-      { id: crypto.randomUUID(), name: 'TB-500 (Stockpile)', compounds: [{name: 'TB-500', mass_mg: 5, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'powder' }
+      { id: bpcId, name: 'BPC-157 (Recovery)', compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.85, status: 'mixed' },
+      { id: hghId, name: 'HGH (Performance)', compounds: [{name: 'Somatropin', mass_mg: 36, unit: 'IU'}], volume_ml: 5, remaining_volume_ml: 4.5, status: 'mixed' },
+      { id: anavarId, name: 'Anavar (Oral)', compounds: [{name: 'Oxandrolone', mass_mg: 10, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'pill', pill_count: 48 },
     ];
 
     const demoProtocols: Protocol[] = [
-      { id: crypto.randomUUID(), vial_id: demoVials[0].id, dose_amount: 250, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() },
-      { id: crypto.randomUUID(), vial_id: demoVials[2].id, dose_amount: 2, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() }
+      { id: crypto.randomUUID(), vial_id: bpcId, dose_amount: 250, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() },
+      { id: crypto.randomUUID(), vial_id: anavarId, dose_amount: 2, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() }
     ];
 
-    const demoLogs: DoseLog[] = [
-      { id: crypto.randomUUID(), vial_id: demoVials[0].id, substance: demoVials[0].name, dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: Date.now() - 86400000 }
-    ];
+    // Generate 30 days of historical logs
+    const demoLogs: DoseLog[] = [];
+    const now = Date.now();
+    const msPerDay = 86400000;
+
+    for (let i = 30; i >= 0; i--) {
+      const timestamp = now - (i * msPerDay);
+      // BPC every day
+      demoLogs.push({ id: crypto.randomUUID(), vial_id: bpcId, substance: demoVials[0].name, dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: timestamp - Math.random() * 3600000 });
+      // HGH every other day
+      if (i % 2 === 0) {
+        demoLogs.push({ id: crypto.randomUUID(), vial_id: hghId, substance: demoVials[1].name, dose_amount: 2, unit: 'IU', units_iu: 20, timestamp: timestamp + Math.random() * 3600000 });
+      }
+    }
 
     await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs });
     setSeeding(false);
-    alert("Demo Data Seeded Successfully!");
+    alert("Demo Data Added Successfully!");
   };
 
   const calendarUrl = user ? `https://biohacker.minmaxmuscle.com/api/calendar/${user.id}` : "";
@@ -170,7 +184,7 @@ export default function SettingsPage() {
                 <p className="text-sm font-semibold mb-1">One-Click Demo Seeder</p>
                 <p className="text-xs text-muted-foreground mb-4">Instantly populate your account with sample vials (BPC, HGH, Anavar) and protocols to see how the app works.</p>
                 <button onClick={handleSeedDemo} disabled={seeding} className="btn btn-primary w-full flex gap-2 justify-center bg-success hover:bg-success/90 border-none">
-                  {seeding ? "Seeding..." : <><Wand2 className="h-4 w-4" /> Seed Sample Data</>}
+                  {seeding ? "Adding Data..." : <><Wand2 className="h-4 w-4" /> Add Demo Data</>}
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-3">
