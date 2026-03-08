@@ -146,7 +146,7 @@ function SnapSection({
 }
 
 /* ─── Mobile Snap Scroll Dashboard ──────────────────────────────────── */
-function MobileSnapDash({ userId, onSelectVial }: { userId: string; onSelectVial: (id: string) => void }) {
+function MobileSnapDash({ userId, onSelectVial, onEditVial }: { userId: string; onSelectVial: (id: string) => void; onEditVial: (id: string) => void }) {
   const [activeSection, setActiveSection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -176,7 +176,7 @@ function MobileSnapDash({ userId, onSelectVial }: { userId: string; onSelectVial
         }}
       >
         <SnapSection emoji="📅" label="Pin Schedule" index={0} total={TOTAL} nextLabel="Mood Journal">
-          <DosageCalendar userId={userId} onSelectVial={onSelectVial} />
+          <DosageCalendar userId={userId} onSelectVial={onSelectVial} onEditVial={onEditVial} />
         </SnapSection>
 
         <SnapSection emoji="💓" label="Mood Journal" index={1} total={TOTAL} nextLabel="Active Monitoring">
@@ -195,6 +195,7 @@ function MobileSnapDash({ userId, onSelectVial }: { userId: string; onSelectVial
 function DashboardContent() {
   const [user, setUser] = useState<any>(null);
   const [activeLoggingVialId, setActiveLoggingVialId] = useState<string | null>(null);
+  const [activeEditingVialId, setActiveEditingVialId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || 'dash';
   const action = searchParams.get('action') || '';
@@ -224,7 +225,7 @@ function DashboardContent() {
             {/* Main column */}
             <div className="col-span-8 flex flex-col gap-10">
               <CycleManager userId={user.id} />
-              <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
+              <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
               <div className="grid grid-cols-2 gap-10">
                 <SubjectiveLogger userId={user.id} />
                 <HelpGuides />
@@ -235,7 +236,12 @@ function DashboardContent() {
             <div className="col-span-4 flex flex-col gap-10">
               <InventoryAlerts userId={user.id} />
               <SupplyTracker userId={user.id} />
-              <VialManager userId={user.id} externalLoggingVialId={activeLoggingVialId} onLoggingComplete={() => setActiveLoggingVialId(null)} />
+              <VialManager 
+                userId={user.id} 
+                externalLoggingVialId={activeLoggingVialId} 
+                externalEditingVialId={activeEditingVialId}
+                onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }} 
+              />
               <ReconstitutionEngine />
             </div>
           </div>
@@ -247,7 +253,11 @@ function DashboardContent() {
         <GlobalQuickTip />
         
         {tab === 'dash' && (
-          <MobileSnapDash userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
+          <MobileSnapDash 
+            userId={user.id} 
+            onSelectVial={(id) => { setActiveLoggingVialId(id); window.history.pushState(null, '', '?tab=inventory'); }}
+            onEditVial={(id) => { setActiveEditingVialId(id); window.history.pushState(null, '', '?tab=inventory'); }} 
+          />
         )}
 
         {tab === 'inventory' && (
@@ -278,7 +288,8 @@ function DashboardContent() {
                 <VialManager
                   userId={user.id}
                   externalLoggingVialId={activeLoggingVialId === 'add' ? null : activeLoggingVialId}
-                  onLoggingComplete={() => setActiveLoggingVialId(null)}
+                  externalEditingVialId={activeEditingVialId}
+                  onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }}
                   initialAction={activeLoggingVialId === 'add' ? 'add' : ''}
                 />
               </>

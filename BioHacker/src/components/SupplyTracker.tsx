@@ -117,9 +117,35 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
-                    <button onClick={() => adjustCount(s, -1)} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus className="h-4 w-4" /></button>
-                    <button onClick={() => adjustCount(s, 1)} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus className="h-4 w-4" /></button>
-                    <button onClick={() => { if(confirm(`Remove ${s.name}?`)) rep?.mutate.updateSupply({...s, count: -999}); }} style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 className="h-4 w-4" /></button>
+                    <button 
+                      onClick={() => {
+                        const newVal = prompt(`Inventory Check — Enter exact new count for ${s.name} (Current: ${s.count}):`, s.count.toString());
+                        if (newVal !== null) {
+                          const num = parseInt(newVal);
+                          if (!isNaN(num) && num >= 0) {
+                            adjustCount(s, num - s.count);
+                          } else {
+                            alert("Invalid number. Count not updated.");
+                          }
+                        }
+                      }} 
+                      style={{ padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}
+                    >
+                      Audit
+                    </button>
+                    <button 
+                      onClick={() => { 
+                        if(confirm(`WARNING: Remove ${s.name} from the Strategic Stockpile completely?`)) {
+                          if(confirm(`Are you absolutely certain? This will delete the item record to prevent accidental cache loss.`)) {
+                            rep?.mutate.updateSupply({...s, count: -999}); 
+                          }
+                        }
+                      }} 
+                      style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Delete Item"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive transition-colors" />
+                    </button>
                   </div>
                 </div>
               ))}

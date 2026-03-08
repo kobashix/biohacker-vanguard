@@ -40,11 +40,12 @@ const PRESET_CATEGORIES = [...new Set(STACK_PRESETS.map(p => p.category))];
 interface VialManagerProps {
   userId: string;
   externalLoggingVialId?: string | null;
+  externalEditingVialId?: string | null;
   onLoggingComplete?: () => void;
   initialAction?: string;
 }
 
-export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, initialAction }: VialManagerProps) {
+export function VialManager({ userId, externalLoggingVialId, externalEditingVialId, onLoggingComplete, initialAction }: VialManagerProps) {
   const [vialName, setVialName] = useState("");
   const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
   const [volume, setVolume] = useState("2");
@@ -53,6 +54,9 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
   const [isAdding, setIsAdding] = useState(false);
   const [activePreset, setActivePreset] = useState('custom');
   
+  const [bacWaterMl, setBacWaterMl] = useState("0");
+  const [remainingPercent, setRemainingPercent] = useState("100");
+
   // Auto-open the add form if deep-linked via ?action=add
   useEffect(() => {
     if (initialAction === 'add') setIsAdding(true);
@@ -94,6 +98,7 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
 
   useEffect(() => {
     if (externalLoggingVialId) {
+      if (externalLoggingVialId === 'add') return; // Handled by initialAction fallback in DashboardPage
       const vial = rawVials.find(v => v.id === externalLoggingVialId);
       if (vial) {
         setLoggingVial(vial); setEditingVial(null); setIsAdding(false);
@@ -103,6 +108,16 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
       }
     }
   }, [externalLoggingVialId, rawVials, protocols]);
+
+  useEffect(() => {
+    if (externalEditingVialId) {
+      const vial = rawVials.find(v => v.id === externalEditingVialId);
+      if (vial) {
+        setEditingVial(vial); setLoggingVial(null); setIsAdding(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [externalEditingVialId, rawVials]);
 
   const inventory = useMemo(() => {
     const active: { vial: Vial; count: number; ids: string[]; protocol?: Protocol }[] = [];
@@ -139,14 +154,19 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
     else if (activePreset === 'shred') finalName = "Shredding Stack";
     else finalName = compounds.map(c => c.name).filter(Boolean).join(' / ') || 'Unknown Compound';
 
-    for (let i = 0; i < (parseInt(count) || 1); i++) {
+    for (let i = 0; i < (status === 'pill' ? 1 : (parseInt(count) || 1)); i++) {
       await rep.mutate.createVial({
-        id: crypto.randomUUID(), name: finalName, compounds, volume_ml: status === 'mixed' ? val : 0,
-        remaining_volume_ml: status === 'mixed' ? val : 0, status,
+        id: crypto.randomUUID(), name: finalName, compounds, 
+        volume_ml: status === 'mixed' ? val : 0,
+        remaining_volume_ml: status === 'mixed' ? val : 0, 
+        bac_water_ml: status === 'mixed' ? parseFloat(bacWaterMl) || 0 : undefined,
+        remaining_percent_est: status === 'mixed' ? 100 : undefined,
+        status,
         pill_count: status === 'pill' ? Math.floor(val) : undefined,
       });
     }
     setIsAdding(false); setActivePreset('custom'); setVialName(""); setCompounds([{ name: "", mass_mg: 0, unit: 'mg' }]);
+    setBacWaterMl("0"); setRemainingPercent("100");
   };
 
   const handleUpdateVial = async (e: React.FormEvent) => {
@@ -333,21 +353,18 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
                             >Remove</button>
                           )}
                         </div>
-                        {/* Compound name — full select dropdown */}
-                        <select
-                          className="form-input"
-                          style={{ marginBottom: '0.625rem', background: '#09090b', fontWeight: 600 }}
-                          value={c.name}
-                          onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
-                          required
-                        >
-                          <option value="">— Select Compound —</option>
-                          {Object.entries(COMPOUND_GROUPS).map(([grp, items]) => (
-                            <optgroup key={grp} label={grp}>
-                              {items.map(comp => <option key={comp} value={comp}>{comp}</option>)}
-                            </optgroup>
-                          ))}
-                        </select>
+                        {/* Compound name — Auto-complete text input */}
+                        <div style={{ position: 'relative', marginBottom: '0.625rem' }}>
+                          <input
+                            className="form-input"
+                            style={{ background: '#09090b', fontWeight: 600, width: '100%' }}
+                            value={c.name}
+                            onChange={e => { const n = [...(editingVial ? editingVial.compounds : compounds)]; n[idx].name = e.target.value; editingVial ? setEditingVial({...editingVial, compounds: n}) : setCompounds(n); }}
+                            placeholder="Type or select compound..."
+                            list="compounds-list"
+                            required
+                          />
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '0.5rem' }}>
                           <input
                             className="form-input"
@@ -398,24 +415,60 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
                 </div>
 
                 {(editingVial ? editingVial.status : status) !== 'powder' && (
+                  <div className="sheet-section" style={{ display: 'grid', gridTemplateColumns: (editingVial ? editingVial.status : status) === 'mixed' ? '1fr 1fr' : '1fr', gap: '0.75rem' }}>
+                    <div>
+                      <p className="sheet-section-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Total Pill Count' : 'Total Volume (mL)'}</p>
+                      <input
+                        className="big-input"
+                        type="number"
+                        step="0.1"
+                        inputMode="decimal"
+                        value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume}
+                        onChange={e => editingVial
+                          ? (editingVial.status === 'pill'
+                            ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)})
+                            : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)}))
+                          : setVolume(e.target.value)}
+                      />
+                    </div>
+                    {(editingVial ? editingVial.status : status) === 'mixed' && (
+                      <div>
+                        <p className="sheet-section-label">BAC Water (mL)</p>
+                        <input
+                          className="big-input"
+                          type="number"
+                          step="0.1"
+                          inputMode="decimal"
+                          value={editingVial ? (editingVial.bac_water_ml || 0) : bacWaterMl}
+                          onChange={e => editingVial
+                            ? setEditingVial({...editingVial, bac_water_ml: parseFloat(e.target.value)})
+                            : setBacWaterMl(e.target.value)}
+                          placeholder="Diluent added"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {editingVial && editingVial.status === 'mixed' && (
                   <div className="sheet-section">
-                    <p className="sheet-section-label">{(editingVial ? editingVial.status : status) === 'pill' ? 'Pill Count' : 'Volume (mL)'}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p className="sheet-section-label">Remaining Est. (%)</p>
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: '#2563eb' }}>{editingVial.remaining_percent_est ?? 100}%</span>
+                    </div>
                     <input
-                      className="big-input"
-                      type="number"
-                      step="0.1"
-                      inputMode="decimal"
-                      value={editingVial ? (editingVial.status === 'pill' ? editingVial.pill_count : editingVial.volume_ml) : volume}
-                      onChange={e => editingVial
-                        ? (editingVial.status === 'pill'
-                          ? setEditingVial({...editingVial, pill_count: parseInt(e.target.value)})
-                          : setEditingVial({...editingVial, volume_ml: parseFloat(e.target.value), remaining_volume_ml: parseFloat(e.target.value)}))
-                        : setVolume(e.target.value)}
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={editingVial.remaining_percent_est ?? 100}
+                      onChange={e => setEditingVial({...editingVial, remaining_percent_est: parseInt(e.target.value)})}
+                      style={{ width: '100%', accentColor: '#2563eb', marginTop: '0.5rem' }}
                     />
                   </div>
                 )}
 
-                {!editingVial && (
+                {!editingVial && status !== 'pill' && (
                   <div className="sheet-section">
                     <p className="sheet-section-label">Quantity to Add</p>
                     <input className="big-input" type="number" inputMode="numeric" value={count} onChange={e => setCount(e.target.value)} />
@@ -451,6 +504,12 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, 
                       <div className="text-xs text-muted-foreground truncate leading-relaxed">
                         {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
                       </div>
+                      {group.vial.status === 'mixed' && (
+                        <div className="text-[10px] text-muted-foreground mt-1 flex gap-2 font-medium">
+                          {group.vial.bac_water_ml ? <span className="bg-muted px-1.5 py-0.5 rounded text-blue-400">💧 {group.vial.bac_water_ml}mL BAC</span> : null}
+                          <span className="bg-muted px-1.5 py-0.5 rounded text-primary border border-primary/20">{group.vial.remaining_percent_est ?? 100}% Remaining</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

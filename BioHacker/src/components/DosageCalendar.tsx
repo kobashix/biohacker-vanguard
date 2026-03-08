@@ -9,9 +9,10 @@ import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, difference
 interface DosageCalendarProps {
   userId: string;
   onSelectVial: (vialId: string) => void;
+  onEditVial?: (vialId: string) => void;
 }
 
-export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
+export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalendarProps) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay()); // 0=Sun default to today
   const rep = getReplicache(userId);
@@ -204,6 +205,15 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
                   </p>
                 </div>
                 {dose.completed && <CheckCircle2 style={{ width: '1.1rem', height: '1.1rem', color: '#10b981', flexShrink: 0 }} />}
+                {!dose.completed && onEditVial && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }} 
+                    style={{ padding: '0.25rem', background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    title="Edit Compound"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                )}
               </div>
             ))}
           </div>

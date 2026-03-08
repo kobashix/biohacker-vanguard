@@ -14,6 +14,8 @@ export type Vial = {
   compounds: Compound[];
   volume_ml: number;
   remaining_volume_ml: number;
+  bac_water_ml?: number;
+  remaining_percent_est?: number;
   status: 'powder' | 'mixed' | 'pill';
   pill_count?: number; 
 };
