@@ -25,8 +25,9 @@ const GUIDES: Guide[] = [
       "3. Swirl gently. Never shake. Shaking denatures peptides.",
       "4. Let it sit 2–5 minutes until fully dissolved. Lyophilized peptides dissolve quickly.",
       "5. Example: 5mg vial + 2mL BAC = 2500mcg/mL. Draw 0.1mL (10 units on a U-100) = 250mcg per dose.",
-      "6. Store reconstituted peptides in the fridge (2–8°C). Most are stable 4–6 weeks refrigerated.",
-      "💡 Use the Reconstitution Engine in the Cycle tab to calculate your exact draw volumes automatically.",
+      "6. Use the 'Mixed Liquid' form in the app to track exactly how much BAC Water you added.",
+      "7. Store reconstituted peptides in the fridge (2–8°C). Most are stable 4–6 weeks refrigerated.",
+      "💡 Track your vial's Remaining Estimates (%) directly inside its properties pane as you use it.",
     ],
   },
   {
@@ -42,7 +43,7 @@ const GUIDES: Guide[] = [
       "Skip Weekends: Useful for lifestyle convenience with daily peptides that aren't time-critical.",
       "Time of day matters: GH peptides (Ipamorelin, CJC-1295) are most effective fasted — first thing in the morning or before bed.",
       "BPC-157 & TB-500 can be pinned subcutaneously near the injury site for localized effects.",
-      "💡 Set up a Protocol (Schedule) per vial under the Stash tab. The app will calculate future pins automatically.",
+      "💡 See a dose on your Pin Schedule that needs tweaking? Tap the Edit icon directly on the calendar to jump straight to the compound settings.",
     ],
   },
   {
@@ -84,13 +85,13 @@ const GUIDES: Guide[] = [
     summary: "Get up and running in 5 minutes.",
     tip: "Go to More → Settings and tap 'Add Demo Data' to instantly populate the app with 30 days of realistic sample data.",
     content: [
-      "Step 1: Go to Stash → Add Compound. Select a preset stack or build custom vials.",
-      "Step 2: For each vial, hit the Schedule (calendar) icon to set up your dosing protocol (frequency, dose, time of day).",
-      "Step 3: Check the Home tab — Active Stacks shows what you're running. Pin Schedule shows your next pin.",
-      "Step 4: After each pin, tap the vial and hit 'Log Pin'. Select your dose, site, and confirm.",
-      "Step 5: Each morning, swipe to the Pump & Recovery section and log your daily check-in (mood, energy, sleep, soreness).",
-      "Step 6: View your history anytime via Journal → Dose Pins or Wellbeing Journal.",
-      "Step 7: The Reconstitution Engine under Cycle helps you calculate exactly how much BAC water to add to each vial.",
+      "Step 1: Go to Inventory → Add Compound. You can simply type a custom name, or let the auto-complete suggest one.",
+      "Step 2: Note the unit. BioTracker strictly supports mg, mcg, g, IU, and pills across the completely rewritten U100 Math Engine.",
+      "Step 3: Hit the Schedule (calendar) icon to set up your protocol and preferred dose unit.",
+      "Step 4: Once pinned, tap the vial icon OR the calendar dose directly, hit 'Log Pin', and save.",
+      "Step 5: For liquids, you can adjust the Remaining Est (%) slider to visually track how deep into the vial you are.",
+      "Step 6: Each morning, swipe to the Pump & Recovery section and log your daily check-in (mood, energy, sleep).",
+      "Step 7: Keep your Gear Stash perfectly accurate. Tapping 'Audit' allows you to do full precision counts of your physical stock.",
     ],
   },
   {
@@ -105,19 +106,19 @@ const GUIDES: Guide[] = [
       "Oil-based steroids: Room temperature away from light is fine. Do NOT refrigerate — oil thickens and becomes hard to draw.",
       "Use sterile technique: Wipe vial tops and injection sites with an alcohol swab each time.",
       "Change needles: Never reuse a needle. Use one to draw, replace with a fresh one to inject.",
-      "GLP-1s (Semaglutide etc.): Refrigerate at all times. Discard pens/vials after 28 days once opened.",
+      "Data Safety: The Strategic Stockpile requires double-confirmation to delete items, preventing you from losing cash-equivalent counts to a stray tap.",
       "⚠️ If you notice cloudiness, particulate matter, or crystallization in a solution — discard it immediately.",
     ],
   },
 ];
 
 const QUICK_TIPS = [
-  "You can log a dose directly from the Pin Schedule by tapping an upcoming slot — it pre-fills your protocol dose.",
-  "Set up your Gear Stash with needle counts so the app warns you when you're running low.",
+  "Tap the edit icon next to any upcoming dose on your Pin Schedule to jump straight to fixing that compound's protocol.",
+  "Run an Audit on your Gear Stash items instead of rapidly adding/subtracting them to ensure pharmacy-level accuracy.",
+  "When adding compounds, you don't need to scroll. Just start typing, and the auto-complete engine will find it—or let you save a completely custom name.",
+  "You can now set exactly how much BAC Water you used for a liquid vial so you never forget your concentration ratio.",
+  "Don't worry about mental math. The strict BioTracker math engine will flawlessly convert mcg, mg, and g dosages to IU on a standard 1mL syringe.",
   "The Wellbeing Journal tracks mood, energy, sleep, and soreness — great for spotting when a compound is actually working.",
-  "Rotate your injection sites and track them in the Log Pin form to prevent scar tissue.",
-  "GH peptides work best when injected fasted — first thing in the morning or right before sleep.",
-  "Add Demo Data in Settings to see how the full app looks with filled charts and logs.",
 ];
 
 export function HelpGuides() {

@@ -4,14 +4,13 @@ import { useState, useEffect } from "react";
 import { Zap } from "lucide-react";
 
 const QUICK_TIPS = [
-  "You can log a dose directly from the Pin Schedule by tapping an upcoming slot.",
-  "Set up your Gear in Inventory so the app warns you when you're running low.",
-  "The Wellbeing Journal tracks mood, energy, sleep, and soreness to spot working compounds.",
-  "Rotate your injection sites and track them to prevent scar tissue.",
-  "GH peptides work best when injected fasted — AM or before sleep.",
-  "Use the 'Perform Inventory' tool once a month to true-up your physical counts.",
+  "Tap the edit icon next to any upcoming dose on your Pin Schedule to jump straight to fixing that compound's protocol.",
+  "Run an Audit on your Gear Stash items instead of rapidly adding/subtracting them to ensure pharmacy-level accuracy.",
+  "When adding compounds, you don't need to scroll. Just start typing, and the auto-complete engine will find it—or let you save a completely custom name.",
+  "You can now set exactly how much BAC Water you used for a liquid vial so you never forget your concentration ratio.",
+  "Don't worry about mental math. The strict BioTracker math engine will flawlessly convert mcg, mg, and g dosages to IU on a standard 1mL syringe.",
+  "The Wellbeing Journal tracks mood, energy, sleep, and soreness to spot explicitly working compounds.",
   "To skip weekends for a protocol, tap the calendar icon on a vial and toggle it active.",
-  "The Reconstitution Engine calculates exact draw volumes based on your syringe size.",
 ];
 
 export function GlobalQuickTip() {
