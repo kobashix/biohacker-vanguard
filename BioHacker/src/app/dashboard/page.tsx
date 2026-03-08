@@ -192,6 +192,7 @@ function DashboardContent() {
   const [activeLoggingVialId, setActiveLoggingVialId] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || 'dash';
+  const action = searchParams.get('action') || '';
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
@@ -242,20 +243,21 @@ function DashboardContent() {
         )}
 
         {tab === 'vials' && (
-          <div className="flex flex-col gap-4">
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Stash</h1>
-            <SupplyTracker userId={user.id} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '80px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, paddingTop: '0.25rem' }}>Stash</h1>
+            <SupplyTracker userId={user.id} initialAction={action === 'supply' ? 'add' : ''} />
             <VialManager
               userId={user.id}
               externalLoggingVialId={activeLoggingVialId}
               onLoggingComplete={() => setActiveLoggingVialId(null)}
+              initialAction={action === 'add' ? 'add' : ''}
             />
           </div>
         )}
 
         {tab === 'plan' && (
-          <div className="flex flex-col gap-4">
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Cycle Plan</h1>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '80px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, paddingTop: '0.25rem' }}>Cycle Plan</h1>
             <CycleManager userId={user.id} />
             <PKChart userId={user.id} />
             <ReconstitutionEngine />

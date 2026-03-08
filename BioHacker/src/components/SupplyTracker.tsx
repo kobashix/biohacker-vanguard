@@ -1,15 +1,19 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Package, Plus, Minus, Trash2, ArrowLeft } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Supply } from "@/replicache";
 
-export function SupplyTracker({ userId }: { userId: string }) {
+export function SupplyTracker({ userId, initialAction }: { userId: string; initialAction?: string }) {
   const [name, setName] = useState("");
   const [count, setCount] = useState("100");
   const [unit, setUnit] = useState("pcs");
   const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    if (initialAction === 'add') setIsAdding(true);
+  }, [initialAction]);
 
   const rep = getReplicache(userId);
   const supplies = useSubscribe(rep, async (tx) => {

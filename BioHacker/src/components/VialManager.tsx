@@ -41,9 +41,10 @@ interface VialManagerProps {
   userId: string;
   externalLoggingVialId?: string | null;
   onLoggingComplete?: () => void;
+  initialAction?: string;
 }
 
-export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }: VialManagerProps) {
+export function VialManager({ userId, externalLoggingVialId, onLoggingComplete, initialAction }: VialManagerProps) {
   const [vialName, setVialName] = useState("");
   const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
   const [volume, setVolume] = useState("2");
@@ -52,6 +53,11 @@ export function VialManager({ userId, externalLoggingVialId, onLoggingComplete }
   const [isAdding, setIsAdding] = useState(false);
   const [activePreset, setActivePreset] = useState('custom');
   
+  // Auto-open the add form if deep-linked via ?action=add
+  useEffect(() => {
+    if (initialAction === 'add') setIsAdding(true);
+  }, [initialAction]);
+
   const [editingVial, setEditingVial] = useState<Vial | null>(null);
   const [loggingVial, setLoggingVial] = useState<Vial | null>(null);
   const [schedulingVial, setSchedulingVial] = useState<Vial | null>(null);
