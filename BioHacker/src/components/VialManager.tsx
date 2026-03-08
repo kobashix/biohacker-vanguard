@@ -97,28 +97,38 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
     return list as Protocol[];
   }, { default: [] });
 
+  // Handle deep-linked actions (Logging/Editing) from Dashboard/Schedule
   useEffect(() => {
-    if (externalLoggingVialId) {
-      if (externalLoggingVialId === 'add') return; // Handled by initialAction fallback in DashboardPage
-      const vial = rawVials.find(v => v.id === externalLoggingVialId);
-      if (vial) {
-        setLoggingVial(vial); setEditingVial(null); setIsAdding(false);
-        const protocol = protocols.find(p => p.vial_id === vial.id);
-        if (protocol) setDoseAmount(protocol.dose_amount.toString());
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!externalLoggingVialId || externalLoggingVialId === 'add' || rawVials.length === 0) return;
+    
+    const vial = rawVials.find(v => v.id === externalLoggingVialId);
+    if (vial) {
+      setLoggingVial(vial);
+      setEditingVial(null);
+      setIsAdding(false);
+      setSchedulingVial(null);
+      
+      const protocol = protocols.find(p => p.vial_id === vial.id);
+      if (protocol) {
+        setDoseAmount(protocol.dose_amount.toString());
+        setDoseUnit(protocol.dose_unit || getDoseUnitLabel(vial, 0));
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [externalLoggingVialId, rawVials, protocols]);
+  }, [externalLoggingVialId, rawVials.length, protocols.length]); // Use lengths to trigger even if ref is same
 
   useEffect(() => {
-    if (externalEditingVialId) {
-      const vial = rawVials.find(v => v.id === externalEditingVialId);
-      if (vial) {
-        setEditingVial(vial); setLoggingVial(null); setIsAdding(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+    if (!externalEditingVialId || rawVials.length === 0) return;
+    
+    const vial = rawVials.find(v => v.id === externalEditingVialId);
+    if (vial) {
+      setEditingVial(vial);
+      setLoggingVial(null);
+      setIsAdding(false);
+      setSchedulingVial(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [externalEditingVialId, rawVials]);
+  }, [externalEditingVialId, rawVials.length]);
 
   const inventory = useMemo(() => {
     const active: { vial: Vial; count: number; ids: string[]; protocol?: Protocol }[] = [];

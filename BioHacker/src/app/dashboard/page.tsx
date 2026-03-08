@@ -303,8 +303,15 @@ function DashboardContent() {
           ) : (
             <MobileSnapDash 
               userId={user.id} 
-              onSelectVial={(id) => { setActiveLoggingVialId(id); router.push('?tab=inventory'); }}
-              onEditVial={(id) => { setActiveEditingVialId(id); router.push('?tab=inventory'); }} 
+              onSelectVial={(id) => { 
+                console.log('Mobile logging vial:', id);
+                setActiveLoggingVialId(id); 
+                router.push('?tab=inventory'); 
+              }}
+              onEditVial={(id) => { 
+                setActiveEditingVialId(id); 
+                router.push('?tab=inventory'); 
+              }} 
             />
           )
         )}
