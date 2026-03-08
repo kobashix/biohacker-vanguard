@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
 :root {
+  /* Default Dark Theme Tokens */
   --background: #09090b;
   --foreground: #fafafa;
   --primary: #2563eb;
+  --primary-muted: rgba(37, 99, 235, 0.1);
   --primary-foreground: #ffffff;
   --card: #18181b;
   --card-foreground: #fafafa;
   --border: #27272a;
+  --input-bg: #09090b;
   --destructive: #ef4444;
-  --destructive-foreground: #fafafa;
   --success: #10b981;
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
   
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+[data-theme='light'] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #2563eb;
+  --primary-muted: rgba(37, 99, 235, 0.1);
+  --primary-foreground: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --input-bg: #f1f5f9;
+  --destructive: #dc2626;
+  --success: #16a34a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 }
 
 /* Base resets */
@@ -35,7 +53,7 @@ body {
 
 /* Professional Card Styling */
 .card {
-  @apply bg-[#18181b] rounded-lg overflow-hidden flex flex-col md:border md:border-[#27272a];
+  @apply bg-[var(--card)] rounded-lg overflow-hidden flex flex-col md:border md:border-[var(--border)];
 }
 
 @media (max-width: 768px) {
@@ -53,7 +71,7 @@ body {
 }
 
 .card-description {
-  @apply text-sm text-[#a1a1aa];
+  @apply text-sm text-[var(--muted-foreground)];
 }
 
 .card-content {
@@ -66,11 +84,11 @@ body {
 }
 
 .form-label {
-  @apply text-[11px] font-bold text-[#a1a1aa] uppercase tracking-wider;
+  @apply text-[11px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider;
 }
 
 .form-input {
-  @apply w-full p-2.5 bg-[#09090b] border border-[#27272a] rounded-md text-base text-[#fafafa] transition-colors focus:outline-none focus:border-[#2563eb] appearance-none;
+  @apply w-full p-2.5 bg-[var(--input-bg)] border border-[var(--border)] rounded-md text-base text-[var(--foreground)] transition-colors focus:outline-none focus:border-[var(--primary)] appearance-none;
 }
 
 /* Button styles */
@@ -79,11 +97,11 @@ body {
 }
 
 .btn-primary {
-  @apply bg-[#2563eb] text-white hover:bg-[#1d4ed8] hover:-translate-y-0.5 active:translate-y-0 transition-all;
+  @apply bg-[var(--primary)] text-[var(--primary-foreground)] hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all;
 }
 
 .btn-outline {
-  @apply bg-transparent border border-[#27272a] text-[#fafafa] hover:bg-[#27272a] hover:-translate-y-0.5 active:translate-y-0 transition-all;
+  @apply bg-transparent border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] hover:-translate-y-0.5 active:translate-y-0 transition-all;
 }
 
 .landing-card {
@@ -141,11 +159,11 @@ table {
 }
 
 th, td {
-  @apply p-3 text-left border-b border-[#27272a] text-sm;
+  @apply p-3 text-left border-b border-[var(--border)] text-sm;
 }
 
 th {
-  @apply text-[#a1a1aa] font-medium uppercase text-[10px] tracking-widest;
+  @apply text-[var(--muted-foreground)] font-medium uppercase text-[10px] tracking-widest;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -164,7 +182,7 @@ th {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background-color: #09090b;
+  background-color: var(--background);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -184,18 +202,18 @@ th {
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 0 1rem 0;
-  border-bottom: 1px solid #27272a;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 1.5rem;
   position: sticky;
   top: 0;
-  background-color: #09090b;
+  background-color: var(--background);
   z-index: 10;
 }
 
 .sheet-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #fafafa;
+  color: var(--foreground);
   flex: 1;
 }
 
@@ -205,15 +223,15 @@ th {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 0.5rem;
-  background: #18181b;
-  border: 1px solid #27272a;
-  color: #fafafa;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s;
 }
-.sheet-back-btn:active { background: #27272a; }
+.sheet-back-btn:active { background: var(--border); }
 
 /* Section divider inside a sheet */
 .sheet-section {
@@ -225,19 +243,19 @@ th {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #a1a1aa;
+  color: var(--muted-foreground);
   margin-bottom: 0.5rem;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid #1e1e20;
+  border-bottom: 1px solid var(--border);
 }
 
 /* Big number input for dose — like Hevy rep counter */
 .big-input {
   width: 100%;
-  background: #18181b;
-  border: 2px solid #27272a;
-  border-radius: 0.75rem;
-  color: #fafafa;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
   font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
@@ -247,7 +265,7 @@ th {
 }
 .big-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--primary);
 }
 
 /* Pill toggle row — e.g. Morning / Afternoon / Night */
@@ -263,25 +281,25 @@ th {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border: 2px solid #27272a;
-  background: #18181b;
-  color: #a1a1aa;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
   cursor: pointer;
   transition: all 0.15s;
 }
 .pill-toggle.active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
   box-shadow: 0 0 20px rgba(37, 99, 235, 0.35);
 }
 
 /* Segmented control (State selector) */
 .seg-control {
   display: grid;
-  background: #18181b;
-  border: 1px solid #27272a;
-  border-radius: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.25rem;
   gap: 0.25rem;
 }
@@ -293,13 +311,13 @@ th {
   text-align: center;
   border: none;
   background: transparent;
-  color: #a1a1aa;
+  color: var(--muted-foreground);
   cursor: pointer;
   transition: all 0.15s;
 }
 .seg-btn.active {
-  background: #27272a;
-  color: #fafafa;
+  background: var(--border);
+  color: var(--foreground);
 }
 
 /* Check row — big tappable toggle row */
@@ -307,20 +325,20 @@ th {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #18181b;
-  border: 2px solid #27272a;
-  border-radius: 0.75rem;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
   padding: 1rem 1.25rem;
   cursor: pointer;
   transition: border-color 0.15s;
 }
-.check-row.active { border-color: #2563eb; }
+.check-row.active { border-color: var(--primary); }
 .check-row-icon {
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 0.375rem;
-  border: 2px solid #27272a;
-  background: #09090b;
+  border: 2px solid var(--border);
+  background: var(--background);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,8 +346,8 @@ th {
   transition: all 0.15s;
 }
 .check-row.active .check-row-icon {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--primary);
+  border-color: var(--primary);
 }
 
 /* Sheet confirm button */

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { LayoutDashboard, Beaker, Calendar, BookOpen, MoreHorizontal, Plus, Eye, Package, Syringe, Heart, X } from "lucide-react";
-import { useState } from "react";
+import { LayoutDashboard, Beaker, Calendar, BookOpen, MoreHorizontal, Plus, Eye, Package, Syringe, Heart, X, LogOut, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 
 type SubItem = { label: string; href: string; icon: any };
 
@@ -56,6 +57,8 @@ const NAV_ITEMS = [
     subs: [
       { label: "Settings & Setup", href: "/dashboard/settings", icon: MoreHorizontal },
       { label: "Knowledge Base", href: "/dashboard?tab=kb", icon: BookOpen },
+      { label: "Theme", href: "#theme", icon: Sun },
+      { label: "Logout", href: "#logout", icon: LogOut },
     ] as SubItem[],
   },
 ];
@@ -66,6 +69,32 @@ export function MobileNav() {
   const router = useRouter();
   const currentTab = searchParams.get("tab") || "dash";
   const [openSub, setOpenSub] = useState<string | null>(null);
+
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    const saved = localStorage.getItem('biotracker-theme') as 'light' | 'dark' | null;
+    if (saved) {
+      setTheme(saved);
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('biotracker-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
+  };
 
   const isActive = (item: typeof NAV_ITEMS[0]) => {
     if (item.tabMatch) {
@@ -84,6 +113,19 @@ export function MobileNav() {
     }
   };
 
+  const handleSubClick = (sub: SubItem, e: React.MouseEvent) => {
+    if (sub.href === '#logout') {
+      e.preventDefault();
+      handleLogout();
+      setOpenSub(null);
+    } else if (sub.href === '#theme') {
+      e.preventDefault();
+      toggleTheme();
+    } else {
+      setOpenSub(null);
+    }
+  };
+
   return (
     <>
       {/* Sub-menu tray */}
@@ -97,26 +139,27 @@ export function MobileNav() {
           {/* Tray */}
           <div
             className="fixed bottom-[65px] left-0 right-0 z-[99] mx-3 mb-2 rounded-2xl overflow-hidden"
-            style={{ background: '#18181b', border: '1px solid #27272a', boxShadow: '0 -8px 32px rgba(0,0,0,0.4)' }}
+            style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 -8px 32px rgba(0,0,0,0.4)' }}
           >
             {/* Tray header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem 0.5rem', borderBottom: '1px solid #27272a' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#a1a1aa' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem 0.5rem', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>
                 {NAV_ITEMS.find(i => i.id === openSub)?.name}
               </span>
-              <button onClick={() => setOpenSub(null)} style={{ background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0.25rem' }}>
+              <button onClick={() => setOpenSub(null)} style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer', padding: '0.25rem' }}>
                 <X className="h-4 w-4" />
               </button>
             </div>
             {/* Sub items */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', padding: '0.75rem' }}>
               {NAV_ITEMS.find(i => i.id === openSub)?.subs.map(sub => {
-                const Icon = sub.icon;
+                const Icon = sub.href === '#theme' ? (theme === 'dark' ? Moon : Sun) : sub.icon;
+                const isSelected = sub.href === '#theme' ? false : pathname === sub.href;
                 return (
                   <Link
-                    key={sub.href}
+                    key={sub.label}
                     href={sub.href}
-                    onClick={() => setOpenSub(null)}
+                    onClick={(e) => handleSubClick(sub, e)}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -124,17 +167,17 @@ export function MobileNav() {
                       gap: '0.5rem',
                       padding: '0.875rem 0.5rem',
                       borderRadius: '0.875rem',
-                      background: '#09090b',
-                      border: '1px solid #27272a',
-                      color: '#fafafa',
+                      background: 'var(--input-bg)',
+                      border: '1px solid var(--border)',
+                      color: isSelected ? 'var(--primary)' : 'var(--foreground)',
                       textDecoration: 'none',
                       fontSize: '0.7rem',
                       fontWeight: 700,
                       textAlign: 'center',
                     }}
                   >
-                    <Icon style={{ width: '1.25rem', height: '1.25rem', color: '#2563eb' }} />
-                    {sub.label}
+                    <Icon style={{ width: '1.25rem', height: '1.25rem', color: sub.href === '#logout' ? 'var(--destructive)' : 'var(--primary)' }} />
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{sub.label}</span>
                   </Link>
                 );
               })}

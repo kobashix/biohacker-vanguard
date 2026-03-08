@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useRef, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, Package, Loader2, Sparkles, LayoutDashboard } from "lucide-react";
+import { Plus, Package, Loader2, Sparkles, LayoutDashboard, Sun, Moon, LogOut } from "lucide-react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, Vial } from "@/replicache";
 import { generateDemoData } from "@/lib/demoData";
@@ -210,9 +210,33 @@ function DashboardContent() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_PImzukJvV70WqN1GwWUtuQ_ewZGSmoe'
   );
 
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
   useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+
+    // Theme initialization
+    const savedTheme = localStorage.getItem('biotracker-theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
   }, [supabase]);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('biotracker-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
+  };
 
   const rep = getReplicache(user?.id);
   const coreVials = useSubscribe(rep, async (tx) => {
@@ -250,14 +274,35 @@ function DashboardContent() {
         <GlobalQuickTip />
         <div className="flex flex-col gap-10 mt-6 px-6 lg:px-10">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-               <div style={{ background: 'var(--primary-muted)', padding: '0.5rem', borderRadius: '0.5rem' }}>
-                 <LayoutDashboard style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)' }} />
-               </div>
-               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>BIOHACKER V1.0</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                   <div style={{ background: 'var(--primary-muted)', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                     <LayoutDashboard style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)' }} />
+                   </div>
+                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>BIOHACKER V1.0</span>
+                </div>
+                <h1 className="text-4xl font-extrabold tracking-tight text-[var(--foreground)] mb-2">Cycle Command Center</h1>
+                <p className="text-[var(--muted-foreground)] text-lg max-w-2xl font-medium">Real-time status of your active stacks and blood saturation levels.</p>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button 
+                  onClick={toggleTheme}
+                  className="btn btn-outline"
+                  style={{ borderRadius: '99px', width: '44px', height: '44px', padding: 0 }}
+                >
+                  {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="btn btn-outline"
+                  style={{ borderRadius: '99px', gap: '8px', padding: '0 1.25rem' }}
+                >
+                  <LogOut className="h-4 w-4" /> Logout
+                </button>
+              </div>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">Cycle Command Center</h1>
-            <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium">Real-time status of your active stacks and blood saturation levels.</p>
           </div>
 
           {isEmpty ? (
