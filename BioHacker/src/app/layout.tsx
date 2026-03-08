@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "BioHacker",
   },
+  icons: {
+    apple: "/icons/icon-192x192.png",
+  },
 };
 
 export const viewport: Viewport = {

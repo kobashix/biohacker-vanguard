@@ -1,21 +1,44 @@
 {
-  "name": "BioHacker by MMM",
+  "name": "BioHacker",
   "short_name": "BioHacker",
-  "description": "Clinical-grade, zero-knowledge bio-tracking platform.",
-  "start_url": "/dashboard",
+  "description": "Cycle Command Center — Track, manage, and analyze your performance cycles.",
+  "start_url": "/dashboard?tab=dash",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#2563eb",
+  "background_color": "#000000",
+  "theme_color": "#09090b",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "/window.svg",
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "/globe.svg",
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pin Schedule",
+      "short_name": "Pins",
+      "description": "View today's doses",
+      "url": "/dashboard?tab=plan",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Log Journal",
+      "short_name": "Journal",
+      "description": "Log mood and wellbeing",
+      "url": "/dashboard/history",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

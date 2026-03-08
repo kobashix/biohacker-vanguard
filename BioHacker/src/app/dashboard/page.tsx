@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useRef, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams } from "next/navigation";
+import { Plus, Package } from "lucide-react";
 import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
 import { PKChart } from "@/components/PKChart";
 import { InventoryAlerts } from "@/components/InventoryAlerts";
@@ -256,12 +257,29 @@ function DashboardContent() {
               <PerformInventory userId={user.id} />
             ) : (
               <>
+                {/* ── Add Action Buttons ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  <button 
+                    onClick={() => setActiveLoggingVialId('add')}
+                    style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '0.75rem', borderRadius: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  >
+                    <Plus style={{ width: '1rem', height: '1rem' }} /> Add Compound
+                  </button>
+                  <button
+                    onClick={() => window.history.pushState(null, '', '?tab=inventory&action=supply')}
+                    style={{ background: '#3f3f46', color: '#fff', border: 'none', padding: '0.75rem', borderRadius: '0.75rem', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  >
+                    <Package style={{ width: '1rem', height: '1rem' }} /> Add Gear
+                  </button>
+                </div>
+
+                {/* ── Inventory Trackers ── */}
                 <SupplyTracker userId={user.id} initialAction={action === 'supply' ? 'add' : ''} />
                 <VialManager
                   userId={user.id}
-                  externalLoggingVialId={activeLoggingVialId}
+                  externalLoggingVialId={activeLoggingVialId === 'add' ? null : activeLoggingVialId}
                   onLoggingComplete={() => setActiveLoggingVialId(null)}
-                  initialAction={action === 'add' ? 'add' : ''}
+                  initialAction={activeLoggingVialId === 'add' ? 'add' : ''}
                 />
               </>
             )}
