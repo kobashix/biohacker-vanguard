@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function LoginContent() {
   const searchParams = useSearchParams();
+  const isDemoMode = searchParams.get('demo') === 'true';
   const initialMode = searchParams.get('view') === 'sign_up' ? 'signup' : 'login';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(isDemoMode);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   
@@ -20,6 +21,26 @@ function LoginContent() {
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_PImzukJvV70WqN1GwWUtuQ_ewZGSmoe'
   );
+
+  // Handle instant demo mode authentication
+  useEffect(() => {
+    if (isDemoMode) {
+      const startDemo = async () => {
+        try {
+          const { error: authError } = await supabase.auth.signInAnonymously();
+          if (authError) throw authError;
+          
+          window.localStorage.setItem('biohacker_demo_mode', 'true');
+          router.push("/dashboard");
+          router.refresh();
+        } catch (err: any) {
+          setError(err.message || "Failed to initialize Live Demo.");
+          setLoading(false);
+        }
+      };
+      startDemo();
+    }
+  }, [isDemoMode, router, supabase.auth]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +83,7 @@ function LoginContent() {
             <ShieldCheck className="h-10 w-10 text-primary" />
           </div>
           <h1 className="card-title" style={{ fontSize: '1.5rem' }}>
-            {mode === "login" ? "Welcome Back" : "Create Account"}
+            {isDemoMode ? "Booting Live Demo" : mode === "login" ? "Welcome Back" : "Create Account"}
           </h1>
           <p className="card-description">
             BioTracker (by MMM) Zero-Knowledge Portal
@@ -70,9 +91,15 @@ function LoginContent() {
         </div>
         
         <div className="card-content">
-          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
+          {isDemoMode ? (
+            <div style={{ padding: '2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p style={{ color: 'var(--muted-foreground)' }}>Provisioning sterile secure environment...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
               <input 
                 className="form-input" 
                 type="email" 
@@ -114,16 +141,19 @@ function LoginContent() {
               )}
             </button>
           </form>
+          )}
 
-          <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
-            <button 
-              onClick={() => setMode(mode === "login" ? "signup" : "login")}
-              className="btn-outline"
-              style={{ border: 'none', background: 'none', color: 'var(--primary)', cursor: 'pointer' }}
-            >
-              {mode === "login" ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
-            </button>
-          </div>
+          {!isDemoMode && (
+            <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
+              <button 
+                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                className="btn-outline"
+                style={{ border: 'none', background: 'none', color: 'var(--primary)', cursor: 'pointer' }}
+              >
+                {mode === "login" ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

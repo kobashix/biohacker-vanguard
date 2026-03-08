@@ -11,4 +11,5 @@ export default withPWA({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 })(nextConfig as any);

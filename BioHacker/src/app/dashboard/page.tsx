@@ -5,7 +5,11 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState, useRef, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, Package } from "lucide-react";
+import { Plus, Package, Loader2, Sparkles, LayoutDashboard } from "lucide-react";
+import { useSubscribe } from "replicache-react";
+import { getReplicache, Vial } from "@/replicache";
+import { generateDemoData } from "@/lib/demoData";
+import { EmptyStateQA } from "@/components/EmptyStateQA";
 import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
 import { PKChart } from "@/components/PKChart";
 import { InventoryAlerts } from "@/components/InventoryAlerts";
@@ -210,19 +214,56 @@ function DashboardContent() {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
   }, [supabase]);
 
+  const rep = getReplicache(user?.id);
+  const coreVials = useSubscribe(rep, async (tx) => {
+    return await tx.scan({ prefix: "vial/" }).values().toArray() as Vial[];
+  }, { default: [], dependencies: [user?.id] });
+
+  // Handle auto-seeding for Live Demo users
+  useEffect(() => {
+    if (user && typeof window !== 'undefined' && window.localStorage.getItem('biohacker_demo_mode') === 'true') {
+      const seedAndClean = async () => {
+        if (!rep) return;
+        const data = generateDemoData();
+        await rep.mutate.seedDemoData({ 
+          vials: data.demoVials, 
+          protocols: data.demoProtocols, 
+          logs: data.demoLogs, 
+          subjectiveLogs: data.subjectiveLogs, 
+          supplies: data.demoSupplies, 
+          cycles: data.demoCycles 
+        });
+        window.localStorage.removeItem('biohacker_demo_mode');
+      };
+      seedAndClean();
+    }
+  }, [user, rep]);
+
   if (!user) return null;
+
+  const isEmpty = coreVials.length === 0;
 
   return (
     <div>
       {/* ── DESKTOP LAYOUT ── */}
       <div className="hidden lg:block">
         <GlobalQuickTip />
-        <div className="flex flex-col gap-10 mt-6">
+        <div className="flex flex-col gap-10 mt-6 px-6 lg:px-10">
           <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+               <div style={{ background: 'var(--primary-muted)', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                 <LayoutDashboard style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)' }} />
+               </div>
+               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>BIOHACKER V1.0</span>
+            </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">Cycle Command Center</h1>
             <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium">Real-time status of your active stacks and blood saturation levels.</p>
           </div>
-          <div className="grid grid-cols-12 gap-10">
+
+          {isEmpty ? (
+            <EmptyStateQA userId={user.id} />
+          ) : (
+            <div className="grid grid-cols-12 gap-10">
             {/* Main column */}
             <div className="col-span-8 flex flex-col gap-10">
               <CycleManager userId={user.id} />
@@ -246,6 +287,7 @@ function DashboardContent() {
               <ReconstitutionEngine />
             </div>
           </div>
+        )}
         </div>
       </div>
 
@@ -254,11 +296,17 @@ function DashboardContent() {
         <GlobalQuickTip />
         
         {tab === 'dash' && (
-          <MobileSnapDash 
-            userId={user.id} 
-            onSelectVial={(id) => { setActiveLoggingVialId(id); router.push('?tab=inventory'); }}
-            onEditVial={(id) => { setActiveEditingVialId(id); router.push('?tab=inventory'); }} 
-          />
+          isEmpty ? (
+            <div style={{ padding: '1rem' }}>
+              <EmptyStateQA userId={user.id} />
+            </div>
+          ) : (
+            <MobileSnapDash 
+              userId={user.id} 
+              onSelectVial={(id) => { setActiveLoggingVialId(id); router.push('?tab=inventory'); }}
+              onEditVial={(id) => { setActiveEditingVialId(id); router.push('?tab=inventory'); }} 
+            />
+          )
         )}
 
         {tab === 'inventory' && (
