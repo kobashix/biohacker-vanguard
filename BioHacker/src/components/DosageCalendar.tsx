@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
-import { Calendar as CalendarIcon, CheckCircle2, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay, isWeekend, getHours } from "date-fns";
+import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay, isWeekend } from "date-fns";
 
 interface DosageCalendarProps {
   userId: string;
@@ -13,21 +13,19 @@ interface DosageCalendarProps {
 
 export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [selectedDayIndex, setSelectedDayIndex] = useState(new Date().getDay()); // 0=Sun default to today
   const rep = getReplicache(userId);
 
   const logs = useSubscribe(rep, async (tx) => {
-    const list = await tx.scan({ prefix: "log/" }).values().toArray();
-    return list as DoseLog[];
+    return (await tx.scan({ prefix: "log/" }).values().toArray()) as DoseLog[];
   }, { default: [] });
 
   const protocols = useSubscribe(rep, async (tx) => {
-    const list = await tx.scan({ prefix: "protocol/" }).values().toArray();
-    return list as Protocol[];
+    return (await tx.scan({ prefix: "protocol/" }).values().toArray()) as Protocol[];
   }, { default: [] });
 
   const vials = useSubscribe(rep, async (tx) => {
-    const list = await tx.scan({ prefix: "vial/" }).values().toArray();
-    return list as Vial[];
+    return (await tx.scan({ prefix: "vial/" }).values().toArray()) as Vial[];
   }, { default: [] });
 
   const days = useMemo(() => {
@@ -39,29 +37,23 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
     const dailyDoses: any[] = [];
     const dayStart = startOfDay(day).getTime();
     const dayEnd = endOfDay(day).getTime();
-    
+
     protocols.forEach(protocol => {
       const vial = vials.find(v => v.id === protocol.vial_id);
       if (!vial) return;
-
-      // 1. Skip Weekends Check
       if (protocol.skip_weekends && isWeekend(day)) return;
 
-      // 2. Days On/Off Cycle Check
       const daysOn = protocol.days_on || 7;
       const daysOff = protocol.days_off || 0;
       const cycleLength = daysOn + daysOff;
       const protocolStart = new Date(protocol.start_time);
       const diffDays = differenceInDays(day, startOfDay(protocolStart));
-      const isDayOn = (diffDays >= 0) && (diffDays % cycleLength) < daysOn;
-      if (!isDayOn) return;
+      if (!(diffDays >= 0 && (diffDays % cycleLength) < daysOn)) return;
 
-      // 3. Time Bucket occurrences OR Frequency occurrences
       const occurrences: number[] = [];
       const frequencyMs = protocol.frequency_hours * 3600000;
 
       if (protocol.time_buckets && protocol.time_buckets.length > 0) {
-        // Use discrete time buckets (Morning: 8am, Afternoon: 2pm, Night: 8pm)
         protocol.time_buckets.forEach(bucket => {
           const occ = new Date(day);
           if (bucket === 'morning') occ.setHours(8, 0, 0, 0);
@@ -70,7 +62,6 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
           occurrences.push(occ.getTime());
         });
       } else {
-        // Use raw frequency
         let occurrenceTime = protocolStart.getTime();
         while (occurrenceTime < dayStart) occurrenceTime += frequencyMs;
         while (occurrenceTime <= dayEnd) {
@@ -80,11 +71,9 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
       }
 
       occurrences.forEach(occTime => {
-        const isCompleted = logs.some(l => 
-          l.vial_id === vial.id && 
-          Math.abs(l.timestamp - occTime) < 7200000 // 2 hour grace period
+        const isCompleted = logs.some(l =>
+          l.vial_id === vial.id && Math.abs(l.timestamp - occTime) < 7200000
         );
-
         let unit = 'mcg';
         if (vial.status === 'pill') unit = 'pills';
         else if (vial.compounds[0]?.unit === 'g') unit = 'mg';
@@ -96,7 +85,7 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
           amount: `${protocol.dose_amount} ${unit}`,
           completed: isCompleted,
           time: format(new Date(occTime), 'h:mm a'),
-          rawTime: occTime
+          rawTime: occTime,
         });
       });
     });
@@ -104,44 +93,121 @@ export function DosageCalendar({ userId, onSelectVial }: DosageCalendarProps) {
     return dailyDoses.sort((a, b) => a.rawTime - b.rawTime);
   };
 
+  const selectedDay = days[selectedDayIndex] || days[0];
+  const selectedDoses = getDosesForDay(selectedDay);
+
   return (
     <div className="card">
-      <div className="card-header flex justify-between items-center">
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h3 className="card-title"><CalendarIcon className="h-5 w-5 text-primary" /> Weekly Protocol</h3>
-          <p className="card-description">Interactive schedule with advanced cycle logic</p>
+          <h3 className="card-title"><CalendarIcon className="h-5 w-5 text-primary" /> Pin Schedule</h3>
+          <p className="card-description">{format(days[0], 'MMM d')} – {format(days[6], 'MMM d, yyyy')}</p>
         </div>
-        <div className="flex gap-1">
-          <button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronLeft className="h-4 w-4"/></button>
-          <button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronRight className="h-4 w-4"/></button>
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
+          <button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronLeft className="h-4 w-4" /></button>
+          <button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronRight className="h-4 w-4" /></button>
         </div>
       </div>
-      <div className="card-content p-0 overflow-x-auto snap-x snap-mandatory hide-scrollbar">
-        <div className="grid grid-cols-7 min-w-[800px] border-t border-border">
-          {days.map((day, i) => (
-            <div key={i} className={`min-h-[140px] border-border snap-start snap-always ${i < 6 ? 'border-r' : ''} ${isWeekend(day) ? 'bg-muted/5' : ''}`}>
-              <div className={`p-2 text-center border-b border-border ${isSameDay(day, new Date()) ? 'bg-primary/10' : 'bg-muted/10'}`}>
-                <div className="text-[10px] text-muted-foreground uppercase font-bold">{format(day, 'EEE')}</div>
-                <div className="font-bold text-sm">{format(day, 'd')}</div>
-              </div>
-              <div className="p-2 space-y-2">
-                {getDosesForDay(day).map((dose, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => onSelectVial(dose.vialId)}
-                    className={`p-2 rounded border cursor-pointer transition-all ${dose.completed ? 'bg-success/10 border-success' : 'bg-[#18181b] border-border hover:border-primary shadow-sm'}`}
-                  >
-                    <div className="font-bold text-[9px] flex justify-between items-center mb-1">
-                      <span className="truncate">{dose.name}</span>
-                      {dose.completed && <CheckCircle2 className="h-2.5 w-2.5 text-success flex-shrink-0" />}
-                    </div>
-                    <div className="text-[8px] text-muted-foreground font-mono">{dose.time} • {dose.amount}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+
+      {/* ── Day pill selector (both mobile and desktop) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem', padding: '0 0 0.75rem' }}>
+        {days.map((day, i) => {
+          const isToday = isSameDay(day, new Date());
+          const isSelected = i === selectedDayIndex;
+          const doses = getDosesForDay(day);
+          const doneCount = doses.filter(d => d.completed).length;
+          const hasPin = doses.length > 0;
+
+          return (
+            <button
+              key={i}
+              onClick={() => setSelectedDayIndex(i)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.2rem',
+                padding: '0.5rem 0.25rem',
+                borderRadius: '0.75rem',
+                border: isSelected ? '1.5px solid #2563eb' : '1.5px solid transparent',
+                background: isSelected ? 'rgba(37,99,235,0.12)' : isToday ? 'rgba(37,99,235,0.05)' : 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', color: isSelected ? '#2563eb' : '#71717a' }}>
+                {format(day, 'EEE')}
+              </span>
+              <span style={{ fontSize: '0.95rem', fontWeight: isToday || isSelected ? 800 : 500, color: isSelected ? '#2563eb' : isToday ? '#fafafa' : '#a1a1aa', lineHeight: 1 }}>
+                {format(day, 'd')}
+              </span>
+              {/* Dot indicator */}
+              {hasPin && (
+                <div style={{
+                  width: '5px', height: '5px', borderRadius: '50%',
+                  background: doneCount === doses.length ? '#10b981' : '#2563eb',
+                }} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Selected day detail ── */}
+      <div style={{ borderTop: '1px solid #27272a', paddingTop: '0.875rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.875rem', fontWeight: 800 }}>
+            {format(selectedDay, 'EEEE, MMMM d')}
+            {isSameDay(selectedDay, new Date()) && (
+              <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: '#2563eb', color: '#fff', borderRadius: '99px', padding: '0.1rem 0.5rem', fontWeight: 700 }}>TODAY</span>
+            )}
+          </span>
+          <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
+            {selectedDoses.length > 0 ? `${selectedDoses.filter(d => d.completed).length}/${selectedDoses.length} done` : 'Rest day'}
+          </span>
         </div>
+
+        {selectedDoses.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '1.5rem', color: '#3f3f46', fontSize: '0.85rem' }}>
+            🛌 No pins scheduled — rest day
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {selectedDoses.map((dose, idx) => (
+              <div
+                key={idx}
+                onClick={() => onSelectVial(dose.vialId)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.875rem',
+                  padding: '0.75rem 0.875rem',
+                  borderRadius: '0.75rem',
+                  border: `1px solid ${dose.completed ? '#10b981' : '#27272a'}`,
+                  background: dose.completed ? 'rgba(16,185,129,0.07)' : '#18181b',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {/* Status dot */}
+                <div style={{
+                  width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
+                  background: dose.completed ? '#10b981' : '#27272a',
+                  border: dose.completed ? 'none' : '2px solid #3f3f46',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {dose.name}
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '0.1rem' }}>
+                    {dose.time} · {dose.amount}
+                  </p>
+                </div>
+                {dose.completed && <CheckCircle2 style={{ width: '1.1rem', height: '1.1rem', color: '#10b981', flexShrink: 0 }} />}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

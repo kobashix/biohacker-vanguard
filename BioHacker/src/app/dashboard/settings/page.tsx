@@ -180,7 +180,38 @@ export default function SettingsPage() {
       { id: crypto.randomUUID(), name: 'Sterile Saline 0.9% 10mL',            count: 6,   unit: 'vials' },
     ];
 
-    await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs, subjectiveLogs, supplies: demoSupplies });
+    // Demo cycle phases
+    const today = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    const daysAgo = (n: number) => { const d = new Date(today); d.setDate(d.getDate() - n); return d; };
+    const daysAhead = (n: number) => { const d = new Date(today); d.setDate(d.getDate() + n); return d; };
+
+    const demoCycles: Cycle[] = [
+      {
+        id: crypto.randomUUID(),
+        name: '🏋️ Mass Builder — Winter Blast',
+        start_date: fmt(daysAgo(120)),
+        end_date: fmt(daysAgo(30)),
+        vial_ids: [testCId, anavarId],
+        notes: '12-week bulk. Test Cyp 400mg/wk + Anavar kickstart (wks 1-4). Gained 14lbs, kept 10 after water drop.',
+      },
+      {
+        id: crypto.randomUUID(),
+        name: '🔄 TRT + Peptides Cruise',
+        start_date: fmt(daysAgo(31)),
+        vial_ids: [testCId, bpcId, hghId, tirzeId],
+        notes: 'Maintenance cruise. Test Cyp 150mg/wk TRT dose. Running BPC-157 for elbow repair + CJC/Ipamorelin for GH pulse + Tirzepatide 2.5mg/wk.',
+      },
+      {
+        id: crypto.randomUUID(),
+        name: '✂️ Summer Cut — Planned',
+        start_date: fmt(daysAhead(14)),
+        end_date: fmt(daysAhead(104)),
+        notes: 'Planned 12-wk cut starting after cruise. Test E 250mg + Anavar 50mg/day wks 7-12 + Tirzepatide titrate to 5mg/wk.',
+      },
+    ];
+
+    await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs, subjectiveLogs, supplies: demoSupplies, cycles: demoCycles });
     setSeeding(false);
     alert("Demo data added! Vials, pins, wellbeing logs, and gear stash are all populated.");
   };
