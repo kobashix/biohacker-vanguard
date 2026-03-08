@@ -35,6 +35,7 @@ export type Protocol = {
   id: string;
   vial_id: string;
   dose_amount: number;
+  dose_unit?: string;
   frequency_hours: number;
   days_on?: number;
   days_off?: number;

@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState, useRef, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Package } from "lucide-react";
 import { ReconstitutionEngine } from "@/components/ReconstitutionEngine";
 import { PKChart } from "@/components/PKChart";
@@ -197,6 +197,7 @@ function DashboardContent() {
   const [activeLoggingVialId, setActiveLoggingVialId] = useState<string | null>(null);
   const [activeEditingVialId, setActiveEditingVialId] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const tab = searchParams.get('tab') || 'dash';
   const action = searchParams.get('action') || '';
 
@@ -255,8 +256,8 @@ function DashboardContent() {
         {tab === 'dash' && (
           <MobileSnapDash 
             userId={user.id} 
-            onSelectVial={(id) => { setActiveLoggingVialId(id); window.history.pushState(null, '', '?tab=inventory'); }}
-            onEditVial={(id) => { setActiveEditingVialId(id); window.history.pushState(null, '', '?tab=inventory'); }} 
+            onSelectVial={(id) => { setActiveLoggingVialId(id); router.push('?tab=inventory'); }}
+            onEditVial={(id) => { setActiveEditingVialId(id); router.push('?tab=inventory'); }} 
           />
         )}
 

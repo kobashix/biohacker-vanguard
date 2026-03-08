@@ -68,6 +68,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
   
   // Protocol Form
   const [doseAmount, setDoseAmount] = useState("250");
+  const [doseUnit, setDoseUnit] = useState("mcg");
   const [frequency, setFrequency] = useState("24");
   const [frequencyType, setFrequencyType] = useState('daily');
   const [daysOn, setDaysOn] = useState("7");
@@ -186,6 +187,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
 
     await rep.mutate.createProtocol({
       id: crypto.randomUUID(), vial_id: vialId, dose_amount: parseFloat(doseAmount),
+      dose_unit: doseUnit,
       frequency_hours: parseFloat(frequency), 
       days_on: parseInt(daysOn),
       days_off: parseInt(daysOff),
@@ -198,14 +200,15 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
 
   const handleLogDose = async (vial: Vial, amount: number, compoundIdx: number) => {
     if (!rep) return;
+    const protocol = protocols.find(p => p.vial_id === vial.id);
     const compound = vial.compounds[compoundIdx];
     let units_iu = 0;
     if (vial.status === 'mixed') {
-      units_iu = calculateRequiredUnits(compound.mass_mg, vial.volume_ml, amount, compound.unit).toNumber();
+      units_iu = calculateRequiredUnits(compound.mass_mg, vial.volume_ml, amount, compound.unit, protocol?.dose_unit || getDoseUnitLabel(vial, compoundIdx)).toNumber();
     }
     await rep.mutate.logDose({
       id: crypto.randomUUID(), vial_id: vial.id, substance: `${vial.name} (${compound.name})`,
-      dose_amount: amount, unit: getDoseUnitLabel(vial, compoundIdx), units_iu, timestamp: Date.now(),
+      dose_amount: amount, unit: protocol?.dose_unit || getDoseUnitLabel(vial, compoundIdx), units_iu, timestamp: Date.now(),
       injection_site: vial.status === 'mixed' ? injectionSite : undefined
     });
     setLoggingVial(null); if (onLoggingComplete) onLoggingComplete();
@@ -256,7 +259,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                 )}
 
                 <div className="sheet-section">
-                  <p className="sheet-section-label">Dose ({getDoseUnitLabel(loggingVial, targetCompoundIndex)})</p>
+                  <p className="sheet-section-label">Dose ({protocols.find(p => p.vial_id === loggingVial.id)?.dose_unit || getDoseUnitLabel(loggingVial, targetCompoundIndex)})</p>
                   <input
                     className="big-input"
                     type="number"
@@ -518,7 +521,18 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                     <button onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="flex-1 sm:flex-none btn btn-outline bg-primary/5 hover:bg-primary/10 border-primary/20 p-2 sm:px-3" title="Log Dose">
                       <Syringe className="h-4 w-4 text-primary mx-auto" />
                     </button>
-                    <button onClick={() => { setSchedulingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); const f = group.protocol?.frequency_hours || 24; setFrequency(f.toString()); setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : 'custom'); setDaysOn(group.protocol?.days_on?.toString() || "7"); setDaysOff(group.protocol?.days_off?.toString() || "0"); setSkipWeekends(group.protocol?.skip_weekends || false); setTimeBuckets(group.protocol?.time_buckets || []); }} className="flex-1 sm:flex-none btn btn-outline bg-success/5 hover:bg-success/10 border-success/20 p-2 sm:px-3" title="Set Protocol">
+                    <button onClick={() => { 
+                      setSchedulingVial(group.vial); 
+                      setDoseAmount(group.protocol?.dose_amount.toString() || "250"); 
+                      const f = group.protocol?.frequency_hours || 24; 
+                      setFrequency(f.toString()); 
+                      setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : 'custom'); 
+                      setDaysOn(group.protocol?.days_on?.toString() || "7"); 
+                      setDaysOff(group.protocol?.days_off?.toString() || "0"); 
+                      setSkipWeekends(group.protocol?.skip_weekends || false); 
+                      setTimeBuckets(group.protocol?.time_buckets || []); 
+                      setDoseUnit(group.protocol?.dose_unit || getDoseUnitLabel(group.vial, 0));
+                    }} className="flex-1 sm:flex-none btn btn-outline bg-success/5 hover:bg-success/10 border-success/20 p-2 sm:px-3" title="Set Protocol">
                       <Calendar className="h-4 w-4 text-success mx-auto" />
                     </button>
                     <button onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="btn btn-outline p-2 border-border" title="Edit">
@@ -538,7 +552,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                 {group.protocol && (
                   <div className="flex flex-wrap gap-1">
                     <div className="text-[10px] uppercase font-bold text-primary bg-primary/5 p-1 rounded">
-                      {group.protocol.dose_amount}{getDoseUnitLabel(group.vial, 0)} every {group.protocol.frequency_hours}h
+                      {group.protocol.dose_amount}{group.protocol.dose_unit || getDoseUnitLabel(group.vial, 0)} every {group.protocol.frequency_hours}h
                     </div>
                     {group.protocol.skip_weekends && <div className="text-[10px] uppercase font-bold text-orange-500 bg-orange-500/5 p-1 rounded">No Weekends</div>}
                     {group.protocol.time_buckets?.map(b => (
@@ -576,14 +590,30 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
 
             <div className="sheet-section">
               <p className="sheet-section-label">Dose Amount</p>
-              <input
-                className="big-input"
-                type="number"
-                inputMode="decimal"
-                value={doseAmount}
-                onChange={e => setDoseAmount(e.target.value)}
-                autoFocus
-              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  className="big-input"
+                  style={{ flex: 1 }}
+                  type="number"
+                  inputMode="decimal"
+                  value={doseAmount}
+                  onChange={e => setDoseAmount(e.target.value)}
+                  autoFocus
+                />
+                <select 
+                  className="form-input" 
+                  style={{ width: '80px', background: '#09090b', fontWeight: 600 }}
+                  value={doseUnit}
+                  onChange={e => setDoseUnit(e.target.value)}
+                >
+                  <option value="mcg">mcg</option>
+                  <option value="mg">mg</option>
+                  <option value="g">g</option>
+                  <option value="IU">IU</option>
+                  <option value="units">units</option>
+                  <option value="pills">pills</option>
+                </select>
+              </div>
             </div>
 
             <div className="sheet-section">

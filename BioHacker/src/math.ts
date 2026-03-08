@@ -26,7 +26,8 @@ export function calculateRequiredUnits(
   total_mass: number | string | Decimal,
   volume_ml: number | string | Decimal,
   target_dose: number | string | Decimal,
-  unit: 'mg' | 'IU' | 'g' = 'mg'
+  compound_unit: 'mg' | 'IU' | 'g' = 'mg',
+  dose_unit?: string
 ): Decimal {
   const mass = new Decimal(total_mass || 0);
   const volume = new Decimal(volume_ml || 1);
@@ -34,19 +35,35 @@ export function calculateRequiredUnits(
 
   if (mass.isZero() || volume.isZero()) return new Decimal(0);
 
-  if (unit === 'mg') {
-    // 1. MG to MCG Math: (mg * 1000) / mL / 100 = mcg per unit
-    const mcg_per_unit = mass.times(1000).dividedBy(volume).dividedBy(100);
-    return dose.dividedBy(mcg_per_unit);
-  } else if (unit === 'g') {
-    // 2. Gram to MG Math: (g * 1000) / mL / 100 = mg per unit
-    const mg_per_unit = mass.times(1000).dividedBy(volume).dividedBy(100);
-    return dose.dividedBy(mg_per_unit);
-  } else {
-    // 3. IU to IU Math (e.g. HGH): (Total IU / Total mL) / 100 = IU per unit
+  const dUnit = dose_unit || (compound_unit === 'mg' ? 'mcg' : compound_unit === 'g' ? 'mg' : 'IU');
+
+  // IU specifically bypasses mg conversions
+  if (compound_unit === 'IU') {
     const iu_per_unit = mass.dividedBy(volume).dividedBy(100);
     return dose.dividedBy(iu_per_unit);
   }
+
+  // Find base mass in mg
+  let mass_in_mg = new Decimal(0);
+  if (compound_unit === 'mg') mass_in_mg = mass;
+  else if (compound_unit === 'g') mass_in_mg = mass.times(1000);
+
+  // Find concentration in mg/mL
+  const mg_per_ml = mass_in_mg.dividedBy(volume);
+  
+  // Find dose in mg
+  let dose_in_mg = new Decimal(0);
+  if (dUnit === 'mcg') dose_in_mg = dose.dividedBy(1000);
+  else if (dUnit === 'mg') dose_in_mg = dose;
+  else if (dUnit === 'g') dose_in_mg = dose.times(1000);
+  // Unrecognized unit? Fallback to assuming dose is mcg for mg vials
+  else dose_in_mg = dose.dividedBy(1000); 
+
+  // Volume in mL
+  const required_ml = dose_in_mg.dividedBy(mg_per_ml);
+
+  // Convert to U100 Insulin Units (1mL = 100 IU)
+  return required_ml.times(100);
 }
 
 /**
