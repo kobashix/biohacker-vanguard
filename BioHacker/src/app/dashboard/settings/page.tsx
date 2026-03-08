@@ -213,7 +213,7 @@ export default function SettingsPage() {
 
     await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs, subjectiveLogs, supplies: demoSupplies, cycles: demoCycles });
     setSeeding(false);
-    alert("Demo data added! Vials, pins, wellbeing logs, and gear stash are all populated.");
+    alert("Demo data added! Vials, pins, wellbeing journals, and inventory items are all populated.");
   };
 
   const calendarUrl = user ? `https://biohacker.minmaxmuscle.com/api/calendar/${user.id}` : "";

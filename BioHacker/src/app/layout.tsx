@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BioHacker (by MMM)",
+  title: "BioTracker (by MMM)",
   description: "Clinical-grade, zero-knowledge bio-tracking platform.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "BioHacker",
+    title: "BioTracker",
   },
   icons: {
     apple: "/icons/icon-192x192.png",

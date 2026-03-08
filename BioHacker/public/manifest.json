@@ -1,6 +1,6 @@
 {
-  "name": "BioHacker",
-  "short_name": "BioHacker",
+  "name": "BioTracker",
+  "short_name": "BioTracker",
   "description": "Cycle Command Center — Track, manage, and analyze your performance cycles.",
   "start_url": "/dashboard?tab=dash",
   "display": "standalone",

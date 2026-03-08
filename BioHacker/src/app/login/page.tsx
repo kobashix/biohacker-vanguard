@@ -65,7 +65,7 @@ function LoginContent() {
             {mode === "login" ? "Welcome Back" : "Create Account"}
           </h1>
           <p className="card-description">
-            BioHacker (by MMM) Zero-Knowledge Portal
+            BioTracker (by MMM) Zero-Knowledge Portal
           </p>
         </div>
         
