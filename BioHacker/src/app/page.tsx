@@ -99,13 +99,7 @@ export default function LandingPage() {
             BioTracker is an enterprise-grade, zero-knowledge platform built for high-performance health optimization. Encrypted, offline-first, and medically rigorous.
           </p>
 
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            gap: '1rem',
-            animation: 'fadeInUp 1.2s ease-out'
-          }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }} className="animate-fadeInUp">
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link href="/login?view=sign_up" className="btn btn-primary" style={{ 
                 padding: '1.25rem 3rem', 
@@ -116,7 +110,7 @@ export default function LandingPage() {
               }}>
                 Start Your Cycle →
               </Link>
-              <Link href="/login?demo=true" className="btn-outline" style={{ 
+              <Link href="/login?demo=true" className="btn btn-outline" style={{ 
                 padding: '1.25rem 3rem', 
                 fontSize: '1.1rem', 
                 borderRadius: '1rem',
@@ -141,17 +135,17 @@ export default function LandingPage() {
           gap: '2rem',
           marginBottom: '8rem'
         }}>
-          <div style={featureCardStyle}>
+          <div style={featureCardStyle} className="landing-card">
             <div style={iconBoxStyle('#3b82f6')}><Calculator /></div>
             <h3 style={featureTitleStyle}>U-100 Math Engine</h3>
             <p style={featureParaStyle}>Rigorous algebraic logic converting mcg, mg, and g to precise IU draw volumes. Zero mental math required.</p>
           </div>
-          <div style={featureCardStyle}>
+          <div style={featureCardStyle} className="landing-card">
             <div style={iconBoxStyle('#10b981')}><ClipboardCheck /></div>
             <h3 style={featureTitleStyle}>Stash Integrity Audit</h3>
             <p style={featureParaStyle}>Pharmacy-grade inventory management. Prevent item loss with explicit audit trails and secure stockpile double-confirmation.</p>
           </div>
-          <div style={featureCardStyle}>
+          <div style={featureCardStyle} className="landing-card">
             <div style={iconBoxStyle('#8b5cf6')}><TrendingUp /></div>
             <h3 style={featureTitleStyle}>Intuitive Optimization</h3>
             <p style={featureParaStyle}>"Her-level" predictive logic. Auto-complete compounds, estimate remaining volume, and modify schedules directly from your calendar.</p>
@@ -204,21 +198,6 @@ export default function LandingPage() {
         </div>
         © 2026 BioTracker (by MMM). The ultimate bio-hacking command center.
       </footer>
-
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .btn-primary:hover {
-          background: #3b82f6 !important;
-          transform: translateY(-2px);
-        }
-        .btn-outline:hover {
-          background: rgba(255,255,255,0.08) !important;
-          transform: translateY(-2px);
-        }
-      `}</style>
     </div>
   );
 }
@@ -228,7 +207,6 @@ const featureCardStyle: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.06)',
   padding: '2.5rem',
   borderRadius: '1.5rem',
-  transition: 'all 0.3s ease',
   position: 'relative',
   overflow: 'hidden'
 };

@@ -99,7 +99,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
   return (
     <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: '2rem auto', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
       {step === 1 && (
-        <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+        <div className="animate-fadeIn">
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Welcome to BioTracker</h2>
           <p style={{ color: 'var(--muted-foreground)', marginBottom: '2rem' }}>Let's personalize your clinical dashboard. What is your primary focus?</p>
           
@@ -108,10 +108,10 @@ export function EmptyStateQA({ userId }: { userId: string }) {
               <button 
                 key={g.id}
                 onClick={() => handleGoalSelect(g.id)}
-                className="btn-outline"
+                className="btn-outline landing-card"
                 style={{ 
                   display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderRadius: '1rem', 
-                  textAlign: 'left', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', position: 'relative', overflow: 'hidden',
+                  textAlign: 'left', position: 'relative', overflow: 'hidden',
                   background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)'
                 }}
               >
@@ -130,7 +130,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
       )}
 
       {step === 2 && (
-        <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+        <div className="animate-fadeIn">
           <div style={{ width: '64px', height: '64px', background: 'var(--primary-muted)', borderRadius: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: '0 0 20px rgba(37,99,235,0.2)' }}>
             {(() => {
               const Icon = GOALS.find(g => g.id === selectedGoal)?.icon;
@@ -150,7 +150,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
       )}
 
       {step === 3 && (
-        <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+        <div className="animate-fadeIn">
           <div style={{ width: '80px', height: '80px', background: 'rgba(16,185,129,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
             <CheckCircle2 style={{ width: '40px', height: '40px', color: '#10b981' }} />
           </div>
@@ -162,17 +162,6 @@ export function EmptyStateQA({ userId }: { userId: string }) {
           </button>
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        button:hover {
-          background: rgba(255,255,255,0.06) !important;
-          border-color: rgba(255,255,255,0.2) !important;
-        }
-      `}</style>
     </div>
   );
 }
