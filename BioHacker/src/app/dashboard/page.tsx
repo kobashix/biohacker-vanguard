@@ -14,6 +14,8 @@ import { SubjectiveLogger } from "@/components/SubjectiveLogger";
 import { HelpGuides } from "@/components/HelpGuides";
 import { CycleManager } from "@/components/CycleManager";
 import { SupplyTracker } from "@/components/SupplyTracker";
+import { GlobalQuickTip } from "@/components/GlobalQuickTip";
+import { PerformInventory } from "@/components/PerformInventory";
 
 /* ─── Dot Indicator ─────────────────────────────────────────────────── */
 function DotIndicator({ count, activeIndex }: { count: number; activeIndex: number }) {
@@ -44,9 +46,9 @@ function DotIndicator({ count, activeIndex }: { count: number; activeIndex: numb
 }
 
 const SNAP_SECTION_DEFS = [
-  { id: 'snap-home',      emoji: '📊', label: 'Active Stacks',    nextLabel: 'Pin Schedule' },
-  { id: 'snap-calendar',  emoji: '📅', label: 'Pin Schedule',      nextLabel: 'Pump & Recovery' },
-  { id: 'snap-wellbeing', emoji: '💓', label: 'Pump & Recovery',   nextLabel: null },
+  { id: 'snap-calendar',  emoji: '📅', label: 'Pin Schedule',      nextLabel: 'Mood Journal' },
+  { id: 'snap-wellbeing', emoji: '💓', label: 'Mood Journal',      nextLabel: 'Active Monitoring' },
+  { id: 'snap-home',      emoji: '📊', label: 'Active Monitoring', nextLabel: null },
 ];
 
 /* ─── Section Wrapper ────────────────────────────────────────────────── */
@@ -168,20 +170,20 @@ function MobileSnapDash({ userId, onSelectVial }: { userId: string; onSelectVial
         style={{
           overflowY: 'scroll',
           scrollSnapType: 'y mandatory',
-          height: 'calc(100dvh - 64px)',
+          height: 'calc(100dvh - 64px - 44px)', // Account for nav and QuickTip
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <SnapSection emoji="📊" label="Active Stacks" index={0} total={TOTAL} nextLabel="Pin Schedule">
-          <InventoryAlerts userId={userId} />
-        </SnapSection>
-
-        <SnapSection emoji="📅" label="Pin Schedule" index={1} total={TOTAL} nextLabel="Pump & Recovery">
+        <SnapSection emoji="📅" label="Pin Schedule" index={0} total={TOTAL} nextLabel="Mood Journal">
           <DosageCalendar userId={userId} onSelectVial={onSelectVial} />
         </SnapSection>
 
-        <SnapSection emoji="💓" label="Pump & Recovery" index={2} total={TOTAL} nextLabel={null}>
+        <SnapSection emoji="💓" label="Mood Journal" index={1} total={TOTAL} nextLabel="Active Monitoring">
           <SubjectiveLogger userId={userId} />
+        </SnapSection>
+
+        <SnapSection emoji="📊" label="Active Monitoring" index={2} total={TOTAL} nextLabel={null}>
+          <InventoryAlerts userId={userId} />
         </SnapSection>
       </div>
     </>
@@ -211,7 +213,8 @@ function DashboardContent() {
     <div>
       {/* ── DESKTOP LAYOUT ── */}
       <div className="hidden lg:block">
-        <div className="flex flex-col gap-10">
+        <GlobalQuickTip />
+        <div className="flex flex-col gap-10 mt-6">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">Cycle Command Center</h1>
             <p className="text-[#a1a1aa] text-lg max-w-2xl font-medium">Real-time status of your active stacks and blood saturation levels.</p>
@@ -240,29 +243,42 @@ function DashboardContent() {
 
       {/* ── MOBILE LAYOUT ── */}
       <div className="lg:hidden">
+        <GlobalQuickTip />
+        
         {tab === 'dash' && (
           <MobileSnapDash userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} />
         )}
 
-        {tab === 'vials' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '80px' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, paddingTop: '0.25rem' }}>Stash</h1>
-            <SupplyTracker userId={user.id} initialAction={action === 'supply' ? 'add' : ''} />
-            <VialManager
-              userId={user.id}
-              externalLoggingVialId={activeLoggingVialId}
-              onLoggingComplete={() => setActiveLoggingVialId(null)}
-              initialAction={action === 'add' ? 'add' : ''}
-            />
+        {tab === 'inventory' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', paddingBottom: '80px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Inventory</h1>
+            {action === 'perform' ? (
+              <PerformInventory userId={user.id} />
+            ) : (
+              <>
+                <SupplyTracker userId={user.id} initialAction={action === 'supply' ? 'add' : ''} />
+                <VialManager
+                  userId={user.id}
+                  externalLoggingVialId={activeLoggingVialId}
+                  onLoggingComplete={() => setActiveLoggingVialId(null)}
+                  initialAction={action === 'add' ? 'add' : ''}
+                />
+              </>
+            )}
           </div>
         )}
 
         {tab === 'plan' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '80px' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 900, paddingTop: '0.25rem' }}>Cycle Plan</h1>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', paddingBottom: '80px' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Cycle Plan</h1>
             <CycleManager userId={user.id} />
             <PKChart userId={user.id} />
             <ReconstitutionEngine />
+          </div>
+        )}
+
+        {tab === 'kb' && (
+          <div style={{ padding: '1rem', paddingBottom: '80px' }}>
             <HelpGuides />
           </div>
         )}

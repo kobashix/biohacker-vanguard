@@ -17,15 +17,15 @@ const NAV_ITEMS = [
     subs: [] as SubItem[],
   },
   {
-    id: "stash",
-    name: "Stash",
+    id: "inventory",
+    name: "Inventory",
     icon: Beaker,
-    href: "/dashboard?tab=vials",
-    tabMatch: "vials",
+    href: "/dashboard?tab=inventory",
+    tabMatch: "inventory",
     subs: [
-      { label: "View Inventory", href: "/dashboard?tab=vials", icon: Eye },
-      { label: "Add Compound", href: "/dashboard?tab=vials&action=add", icon: Plus },
-      { label: "Gear Stash", href: "/dashboard?tab=vials&action=supply", icon: Package },
+      { label: "View Inventory", href: "/dashboard?tab=inventory", icon: Eye },
+      { label: "Perform Inventory", href: "/dashboard?tab=inventory&action=perform", icon: Package },
+      { label: "Modify Inventory", href: "/dashboard?tab=inventory&action=add", icon: Plus },
     ] as SubItem[],
   },
   {
@@ -53,7 +53,10 @@ const NAV_ITEMS = [
     icon: MoreHorizontal,
     href: "/dashboard/settings",
     tabMatch: null,
-    subs: [] as SubItem[],
+    subs: [
+      { label: "Settings & Setup", href: "/dashboard/settings", icon: MoreHorizontal },
+      { label: "Knowledge Base", href: "/dashboard?tab=kb", icon: BookOpen },
+    ] as SubItem[],
   },
 ];
 
