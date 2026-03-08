@@ -8,6 +8,7 @@ interface Guide {
   icon: any;
   emoji: string;
   summary: string;
+  tip: string;
   content: string[];
 }
 
@@ -17,6 +18,7 @@ const GUIDES: Guide[] = [
     icon: Calculator,
     emoji: "🧪",
     summary: "How to mix peptide powder into a solution using BAC water.",
+    tip: "Use the Reconstitution Engine in the Cycle tab — enter your vial mg and desired concentration, it calculates BAC water volume automatically.",
     content: [
       "1. Draw up the amount of Bacteriostatic Water (BAC) you want into a syringe (e.g. 2mL for a 5mg vial).",
       "2. Inject the BAC slowly down the side of the vial — never directly onto the powder.",
@@ -32,6 +34,7 @@ const GUIDES: Guide[] = [
     icon: Calendar,
     emoji: "📅",
     summary: "Setting up daily, weekly, and 'X on / Y off' protocols.",
+    tip: "Set up a Protocol per vial in Stash → tap the calendar icon on any vial. The app calculates your next pin time automatically.",
     content: [
       "Daily: Pin the same amount every day at the same time. Best for peptides like BPC-157 and TB-500.",
       "Weekly: For long-ester steroids (Test E, Test C, Deca) — typically split into 2 injections per week (Mon/Thu) to keep blood levels stable.",
@@ -47,6 +50,7 @@ const GUIDES: Guide[] = [
     icon: Syringe,
     emoji: "📍",
     summary: "Where and how to pin safely for different compound types.",
+    tip: "Log your injection site on every pin — the app tracks site frequency so you can rotate properly and avoid scar tissue.",
     content: [
       "Subcutaneous (SubQ): Belly fat, love handle, or outer thigh. Best for peptides and small volume (< 0.5mL) insulin-syringe pins.",
       "Intramuscular (IM): Glute (ventroglute is safest), quad (vastus lateralis), or delt. Required for oil-based steroids.",
@@ -62,6 +66,7 @@ const GUIDES: Guide[] = [
     icon: Beaker,
     emoji: "🧬",
     summary: "How to run common stacks and what to watch for.",
+    tip: "Use Stash → Add Compound and pick a preset (e.g. Wolverine, GH Stack, TRT Protocol) to auto-fill all compounds and starting doses.",
     content: [
       "Wolverine Stack (BPC-157 + TB-500): Run 10mg/week total (5mg each) for 4–8 weeks for injury repair. Taper to 5mg/week for maintenance.",
       "GH Stack (CJC-1295 No DAC + Ipamorelin): 1-2x daily, separated from carb meals. Ideal time: fasted AM + before sleep.",
@@ -77,6 +82,7 @@ const GUIDES: Guide[] = [
     icon: Clock,
     emoji: "⚡",
     summary: "Get up and running in 5 minutes.",
+    tip: "Go to More → Settings and tap 'Add Demo Data' to instantly populate the app with 30 days of realistic sample data.",
     content: [
       "Step 1: Go to Stash → Add Compound. Select a preset stack or build custom vials.",
       "Step 2: For each vial, hit the Schedule (calendar) icon to set up your dosing protocol (frequency, dose, time of day).",
@@ -92,6 +98,7 @@ const GUIDES: Guide[] = [
     icon: AlertTriangle,
     emoji: "🛡️",
     summary: "How to store compounds and stay safe.",
+    tip: "Track your needles and BAC water vials in Gear Stash (Stash → Gear) so you're never caught short before a pin.",
     content: [
       "Unreconstituted lyophilized peptides: Store in a cool, dry place (or freezer for long-term). Good for 12–24 months frozen.",
       "Reconstituted peptides: Refrigerate at 2–8°C. Good for 4–6 weeks. Never freeze after adding BAC water.",
@@ -176,6 +183,11 @@ export function HelpGuides() {
                 {isOpen && (
                   <div style={{ padding: '0 1rem 1rem' }}>
                     <div style={{ borderTop: '1px solid #27272a', paddingTop: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {/* Per-guide quick tip at the top */}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '0.625rem', padding: '0.625rem 0.75rem', marginBottom: '0.375rem' }}>
+                        <Zap style={{ width: '0.8rem', height: '0.8rem', color: '#f59e0b', flexShrink: 0, marginTop: '0.1rem' }} />
+                        <p style={{ fontSize: '0.775rem', color: '#fbbf24', lineHeight: 1.5, margin: 0 }}>{g.tip}</p>
+                      </div>
                       {g.content.map((line, li) => (
                         <p
                           key={li}

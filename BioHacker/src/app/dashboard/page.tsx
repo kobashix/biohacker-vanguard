@@ -99,17 +99,19 @@ function SnapSection({
         </span>
       </div>
 
-      {/* ── Scrollable content — vertically centered if short ── */}
+      {/* ── Scrollable content — vertically centered if short, scrollable if tall ── */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
-        WebkitOverflowScrolling: 'touch',
-        paddingBottom: '0.5rem',
       }}>
-        {children}
+        {/* Inner wrapper — margin:auto centers short content without blocking scroll on tall content */}
+        <div style={{ margin: 'auto 0', width: '100%', paddingBottom: '0.75rem' }}>
+          {children}
+        </div>
       </div>
 
       {/* ── Fixed footer / swipe hint ── */}

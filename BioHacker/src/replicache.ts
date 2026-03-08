@@ -116,10 +116,12 @@ const mutators = {
   deleteCycle: async (tx: WriteTransaction, id: string) => {
     await tx.del(`cycle/${id}`);
   },
-  seedDemoData: async (tx: WriteTransaction, { vials, protocols, logs }: { vials: Vial[], protocols: Protocol[], logs: DoseLog[] }) => {
+  seedDemoData: async (tx: WriteTransaction, { vials, protocols, logs, subjectiveLogs, supplies }: { vials: Vial[], protocols: Protocol[], logs: DoseLog[], subjectiveLogs?: SubjectiveLog[], supplies?: Supply[] }) => {
     for (const v of vials) await tx.set(`vial/${v.id}`, v);
     for (const p of protocols) await tx.set(`protocol/${p.id}`, p);
     for (const l of logs) await tx.set(`log/${l.id}`, l);
+    for (const s of subjectiveLogs || []) await tx.set(`subjective/${s.id}`, s);
+    for (const sup of supplies || []) await tx.set(`supply/${sup.id}`, sup);
   },
   restoreBackup: async (tx: WriteTransaction, p: { vials: Vial[], protocols: Protocol[], logs: DoseLog[], subjectiveLogs: SubjectiveLog[], supplies: Supply[], cycles: Cycle[] }) => {
     // Pure raw hydration to bypass triggers mathematically modifying other records

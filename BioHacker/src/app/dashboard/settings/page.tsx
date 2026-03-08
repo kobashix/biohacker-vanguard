@@ -110,42 +110,79 @@ export default function SettingsPage() {
   };
 
   const handleSeedDemo = async () => {
-    if (!rep || !confirm("This will add sample vials and protocols to your account. Continue?")) return;
+    if (!rep || !confirm("This will add demo data to your account including vials, logs, wellbeing entries, and gear stash. Continue?")) return;
     setSeeding(true);
 
     const bpcId = crypto.randomUUID();
     const hghId = crypto.randomUUID();
     const anavarId = crypto.randomUUID();
+    const tirzeId = crypto.randomUUID();
+    const testCId = crypto.randomUUID();
 
     const demoVials: Vial[] = [
-      { id: bpcId, name: 'BPC-157 (Recovery)', compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.85, status: 'mixed' },
-      { id: hghId, name: 'HGH (Performance)', compounds: [{name: 'Somatropin', mass_mg: 36, unit: 'IU'}], volume_ml: 5, remaining_volume_ml: 4.5, status: 'mixed' },
-      { id: anavarId, name: 'Anavar (Oral)', compounds: [{name: 'Oxandrolone', mass_mg: 10, unit: 'mg'}], volume_ml: 0, remaining_volume_ml: 0, status: 'pill', pill_count: 48 },
+      { id: bpcId,   name: 'BPC-157 (Recovery)',      compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}],                                 volume_ml: 2,  remaining_volume_ml: 1.6,  status: 'mixed' },
+      { id: hghId,   name: 'CJC-1295 + Ipamorelin',   compounds: [{name: 'CJC-1295 (No DAC / Mod GRF 1-29)', mass_mg: 2, unit: 'mg'}, {name: 'Ipamorelin', mass_mg: 2, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.3, status: 'mixed' },
+      { id: testCId, name: 'Testosterone Cyp 200mg',   compounds: [{name: 'Testosterone Cypionate', mass_mg: 200, unit: 'mg'}],              volume_ml: 10, remaining_volume_ml: 7.5,  status: 'mixed' },
+      { id: tirzeId, name: 'Tirzepatide 5mg',          compounds: [{name: 'Tirzepatide', mass_mg: 5, unit: 'mg'}],                           volume_ml: 1,  remaining_volume_ml: 0.6,  status: 'mixed' },
+      { id: anavarId, name: 'Anavar 10mg (Oral)',       compounds: [{name: 'Oxandrolone (Anavar)', mass_mg: 10, unit: 'mg'}],                volume_ml: 0,  remaining_volume_ml: 0,    status: 'pill', pill_count: 42 },
     ];
 
     const demoProtocols: Protocol[] = [
-      { id: crypto.randomUUID(), vial_id: bpcId, dose_amount: 250, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() },
-      { id: crypto.randomUUID(), vial_id: anavarId, dose_amount: 2, frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() }
+      { id: crypto.randomUUID(), vial_id: bpcId,   dose_amount: 250,  frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
+      { id: crypto.randomUUID(), vial_id: hghId,   dose_amount: 100,  frequency_hours: 24, days_on: 5, days_off: 2, start_time: Date.now() - 30 * 86400000 },
+      { id: crypto.randomUUID(), vial_id: testCId, dose_amount: 100,  frequency_hours: 84, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
+      { id: crypto.randomUUID(), vial_id: tirzeId, dose_amount: 2500, frequency_hours: 168, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
+      { id: crypto.randomUUID(), vial_id: anavarId, dose_amount: 2,   frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
     ];
 
-    // Generate 30 days of historical logs
+    // 30 days of dose logs
     const demoLogs: DoseLog[] = [];
     const now = Date.now();
     const msPerDay = 86400000;
 
     for (let i = 30; i >= 0; i--) {
-      const timestamp = now - (i * msPerDay);
-      // BPC every day
-      demoLogs.push({ id: crypto.randomUUID(), vial_id: bpcId, substance: demoVials[0].name, dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: timestamp - Math.random() * 3600000 });
-      // HGH every other day
+      const ts = now - (i * msPerDay);
+      demoLogs.push({ id: crypto.randomUUID(), vial_id: bpcId, substance: 'BPC-157 (Recovery)', dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: ts + 7 * 3600000 + Math.random() * 600000 });
       if (i % 2 === 0) {
-        demoLogs.push({ id: crypto.randomUUID(), vial_id: hghId, substance: demoVials[1].name, dose_amount: 2, unit: 'IU', units_iu: 20, timestamp: timestamp + Math.random() * 3600000 });
+        demoLogs.push({ id: crypto.randomUUID(), vial_id: testCId, substance: 'Testosterone Cyp 200mg', dose_amount: 100, unit: 'mg', units_iu: 50, timestamp: ts + 19 * 3600000 + Math.random() * 600000, injection_site: ['Left Glute', 'Right Glute', 'Left Delt', 'Right Delt'][i % 4] });
       }
+      if (i % 7 !== 0 && i % 7 !== 6) {
+        demoLogs.push({ id: crypto.randomUUID(), vial_id: hghId, substance: 'CJC-1295 + Ipamorelin', dose_amount: 100, unit: 'mcg', units_iu: 10, timestamp: ts + 21 * 3600000 + Math.random() * 600000 });
+      }
+      if (i % 7 === 0) {
+        demoLogs.push({ id: crypto.randomUUID(), vial_id: tirzeId, substance: 'Tirzepatide 5mg', dose_amount: 2500, unit: 'mcg', units_iu: 25, timestamp: ts + 8 * 3600000 + Math.random() * 600000, injection_site: 'Belly (SubQ)' });
+      }
+      demoLogs.push({ id: crypto.randomUUID(), vial_id: anavarId, substance: 'Anavar 10mg (Oral)', dose_amount: 2, unit: 'tabs', units_iu: 0, timestamp: ts + 12 * 3600000 + Math.random() * 600000 });
     }
 
-    await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs });
+    // 30 days of wellbeing journal entries with realistic progression
+    const subjectiveLogs: SubjectiveLog[] = [];
+    for (let i = 30; i >= 0; i--) {
+      const weekProgress = (30 - i) / 30; // 0 → 1 over 30 days
+      const fluctuation = () => (Math.random() - 0.5) * 2;
+      subjectiveLogs.push({
+        id: crypto.randomUUID(),
+        timestamp: now - (i * msPerDay) + 8 * 3600000,
+        mood:          Math.min(10, Math.max(1, Math.round(5 + weekProgress * 3 + fluctuation()))),
+        energy:        Math.min(10, Math.max(1, Math.round(5 + weekProgress * 3.5 + fluctuation()))),
+        sleep_quality: Math.min(10, Math.max(1, Math.round(6 + weekProgress * 2 + fluctuation()))),
+        soreness:      Math.min(10, Math.max(1, Math.round(5 - weekProgress * 3 + Math.abs(fluctuation())))),
+        notes: i % 5 === 0 ? ['Great pump today, veins popping.', 'PIP minimal from yesterday. Feeling leaner.', 'Energy through the roof today. Sleep was perfect.', 'Tirzepatide week — appetite way down.', 'Recovery feeling dialed in. BPC working.'][i / 5 | 0] : '',
+      });
+    }
+
+    // Gear stash supplies
+    const demoSupplies: Supply[] = [
+      { id: crypto.randomUUID(), name: '31G x 5/16" Insulin Syringes (BD)',   count: 87,  unit: 'pcs'   },
+      { id: crypto.randomUUID(), name: 'Alcohol Prep Pads',                    count: 143, unit: 'pcs'   },
+      { id: crypto.randomUUID(), name: 'Bacteriostatic Water 30mL',            count: 3,   unit: 'vials' },
+      { id: crypto.randomUUID(), name: '23G x 1" IM Needles',                 count: 24,  unit: 'pcs'   },
+      { id: crypto.randomUUID(), name: 'Sterile Saline 0.9% 10mL',            count: 6,   unit: 'vials' },
+    ];
+
+    await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs, subjectiveLogs, supplies: demoSupplies });
     setSeeding(false);
-    alert("Demo Data Added Successfully!");
+    alert("Demo data added! Vials, pins, wellbeing logs, and gear stash are all populated.");
   };
 
   const calendarUrl = user ? `https://biohacker.minmaxmuscle.com/api/calendar/${user.id}` : "";
