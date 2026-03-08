@@ -190,7 +190,7 @@ export default function SettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24 lg:pb-0">
       <header><h1 className="text-3xl font-bold">Settings</h1><p className="text-muted-foreground">Manage your clinical integrations and data safety.</p></header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
