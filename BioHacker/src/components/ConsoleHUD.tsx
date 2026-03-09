@@ -10,7 +10,7 @@ export function ConsoleHUD({ onSignOut }: { onSignOut: () => void }) {
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Inventory", href: "/dashboard#inventory", icon: Beaker },
-    { name: "Punt", href: "/dashboard#scheduler", icon: Calendar },
+    { name: "Schedule", href: "/dashboard#scheduler", icon: Calendar },
     { name: "History", href: "/dashboard/history", icon: Activity },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];

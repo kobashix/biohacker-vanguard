@@ -100,7 +100,18 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
 
   // Handle deep-linked actions (Logging/Editing) from Dashboard/Schedule
   useEffect(() => {
-    if (!externalLoggingVialId || externalLoggingVialId === 'add' || rawVials.length === 0) return;
+    if (!externalLoggingVialId) return;
+
+    if (externalLoggingVialId === 'add') {
+      setIsAdding(true);
+      setLoggingVial(null);
+      setEditingVial(null);
+      setSchedulingVial(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (rawVials.length === 0) return;
 
     const vial = rawVials.find(v => v.id === externalLoggingVialId);
     if (vial) {
@@ -116,7 +127,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [externalLoggingVialId, rawVials.length, protocols.length]); // Use lengths to trigger even if ref is same
+  }, [externalLoggingVialId, rawVials.length, protocols.length]);
 
   useEffect(() => {
     if (!externalEditingVialId || rawVials.length === 0) return;

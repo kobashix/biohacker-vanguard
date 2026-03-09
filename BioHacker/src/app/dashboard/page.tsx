@@ -204,7 +204,7 @@ function DashboardContent() {
             <div className="col-span-8 space-y-8">
               {/* TOP ROW: BENTO - Schedule & Alerts */}
               <div className="grid grid-cols-2 gap-8">
-                <div className="card space-y-4">
+                <div className="card space-y-4" id="scheduler">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold tracking-tight">Protocol Schedule</h3>
                     <div className="p-2 bg-[var(--primary-muted)] rounded-lg">
@@ -221,7 +221,15 @@ function DashboardContent() {
                     <Sparkles className="absolute -right-4 -bottom-4 h-32 w-32 opacity-10 group-hover:rotate-12 transition-transform" />
                     <h3 className="text-2xl font-black mb-2">Cycle Optimizer</h3>
                     <p className="text-white/80 text-sm font-medium mb-6">AI-driven analysis ready for your latest bloodwork results.</p>
-                    <button className="bg-white text-[var(--primary)] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform">Run Analysis</button>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById('cycle-manager');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="bg-white text-[var(--primary)] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform"
+                    >
+                      Run Analysis
+                    </button>
                   </div>
 
                   <div className="card !bg-[var(--muted)] border-none">
@@ -276,7 +284,9 @@ function DashboardContent() {
                   <h3 className="text-xl font-bold tracking-tight">Active Cycle</h3>
                   <Shield className="h-5 w-5 text-[var(--primary)]" />
                 </div>
-                <CycleManager userId={user.id} />
+                <div id="cycle-manager">
+                  <CycleManager userId={user.id} />
+                </div>
               </div>
 
               <div className="card" id="inventory">
