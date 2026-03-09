@@ -285,7 +285,6 @@ function DashboardContent() {
               userId={user.id}
               onSelectVial={(id) => {
                 setActiveLoggingVialId(id);
-                router.push('?tab=inventory');
               }}
               onEditVial={(id) => {
                 setActiveEditingVialId(id);
