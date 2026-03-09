@@ -216,8 +216,8 @@ function DashboardContent() {
           </div>
         ) : (
           <div className="grid grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN: Main Activity (8 cols) */}
-            <div className="col-span-8 space-y-8">
+            {/* LEFT COLUMN: Main Activity (7 cols) */}
+            <div className="col-span-12 xl:col-span-7 space-y-8">
               <div className="card space-y-4" id="scheduler">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold tracking-tight">Protocol Schedule</h3>
@@ -225,14 +225,24 @@ function DashboardContent() {
                     <LayoutDashboard className="h-5 w-5 text-[var(--primary)]" />
                   </div>
                 </div>
-                <div className="!mt-2 min-h-[500px]">
+                <div className="!mt-2">
                   <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
                 </div>
               </div>
+
+              {/* Inline Active Protocols and Stockpile for Desktop */}
+              <div className="space-y-8">
+                <VialManager
+                  userId={user.id}
+                  externalLoggingVialId={null}
+                  externalEditingVialId={null}
+                  hideLists={false}
+                />
+              </div>
             </div>
 
-            {/* RIGHT COLUMN: Management (4 cols) */}
-            <div className="col-span-4 space-y-8">
+            {/* RIGHT COLUMN: Management (5 cols) */}
+            <div className="col-span-12 xl:col-span-5 space-y-8">
               <div className="card" id="inventory">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold tracking-tight">Apothecary</h3>
@@ -251,13 +261,12 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="card !p-6 hover:bg-[var(--muted)] transition-colors cursor-pointer">
-                  <ReconstitutionEngine />
-                </div>
-                <div className="card !p-6 hover:bg-[var(--muted)] transition-colors cursor-pointer">
-                  <HelpGuides />
-                </div>
+              {/* Stacked functional widgets instead of side-by-side grid */}
+              <div className="card !p-6 hover:bg-[var(--muted)] transition-colors cursor-pointer">
+                <ReconstitutionEngine />
+              </div>
+              <div className="card !p-6 hover:bg-[var(--muted)] transition-colors cursor-pointer">
+                <HelpGuides />
               </div>
             </div>
           </div>
@@ -343,13 +352,14 @@ function DashboardContent() {
         )}
       </div>
 
-      {/* ── GLOBAL INTERFACE ENGINES ── */}
+      {/* ── GLOBAL INTERFACE ENGINES (Modals Only) ── */}
       <VialManager
         userId={user.id}
         externalLoggingVialId={activeLoggingVialId}
         externalEditingVialId={activeEditingVialId}
         onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }}
         initialAction={activeLoggingVialId === 'add' ? 'add' : ''}
+        hideLists={true}
       />
     </div>
   );
