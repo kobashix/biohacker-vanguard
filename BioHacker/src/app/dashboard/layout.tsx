@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/login"); // Redirect to login, not "/"
     router.refresh();
   };
 

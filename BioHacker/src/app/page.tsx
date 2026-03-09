@@ -1,237 +1,260 @@
 "use client";
 
 import Link from "next/link";
-import { 
-  ShieldCheck, 
-  Activity, 
-  Calculator, 
-  PackageOpen, 
-  MousePointer2, 
-  Zap, 
-  ClipboardCheck, 
+import {
+  ShieldCheck,
+  Activity,
+  Calculator,
+  PackageOpen,
+  Zap,
   TrendingUp,
-  FlaskConical,
   Smartphone,
-  Info,
-  Sparkles
+  Sparkles,
+  ArrowRight,
+  Database,
+  Lock,
+  Binary
 } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="landing-bg" style={{ 
-      minHeight: '100vh', 
-      background: '#09090b',
-      color: '#ffffff',
-      fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-      overflowX: 'hidden',
-      position: 'relative'
-    }}>
-      {/* Decorative background glows */}
-      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)', zIndex: 0 }} />
-
-      <header style={{ 
-        padding: '2rem', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        maxWidth: '1200px', 
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 10
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ background: '#2563eb', padding: '0.5rem', borderRadius: '0.75rem', boxShadow: '0 0 20px rgba(37,99,235,0.4)' }}>
-            <ShieldCheck style={{ width: '1.5rem', height: '1.5rem', color: '#fff' }} />
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] overflow-x-hidden font-sans">
+      {/* ── SEAMLESS NAVIGATION ── */}
+      <header className="fixed top-0 left-0 right-0 z-50 diag-hud border-none bg-transparent">
+        <div className="max-w-[1400px] mx-auto w-full flex justify-between items-center px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#0071E3] rounded-xl flex items-center justify-center shadow-lg shadow-[#0071E3]/20">
+              <ShieldCheck className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-xl font-black tracking-tighter uppercase italic">
+              BioTracker <span className="text-[#0071E3]">V1.1</span>
+            </span>
           </div>
-          <span style={{ fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.03em' }}>
-            BIOTRACKER <span style={{ color: '#2563eb' }}>V1.0</span>
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link href="/login" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#a1a1aa' }}>Log In</Link>
-          <Link href="/login?view=sign_up" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#2563eb' }}>Register</Link>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-[#86868B] uppercase tracking-widest">
+            <a href="#features" className="hover:text-[#0071E3] transition-colors">Architecture</a>
+            <a href="#security" className="hover:text-[#0071E3] transition-colors">Privacy</a>
+            <Link href="/login" className="hover:text-[#0071E3] transition-colors">Console</Link>
+          </nav>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="btn btn-primary shadow-xl shadow-[#0071E3]/30">
+              Access Vault
+            </Link>
+          </div>
         </div>
       </header>
 
-      <main style={{ position: 'relative', zIndex: 10, maxWidth: '1200px', margin: '0 auto', padding: '4rem 2rem 8rem' }}>
-        {/* Hero Section */}
-        <section style={{ textAlign: 'center', marginBottom: '8rem' }}>
-          <div style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            gap: '0.5rem', 
-            padding: '0.5rem 1rem', 
-            background: 'rgba(37,99,235,0.1)', 
-            borderRadius: '2rem', 
-            border: '1px solid rgba(37,99,235,0.2)',
-            marginBottom: '2rem',
-            animation: 'fadeInUp 0.6s ease-out'
-          }}>
-            <Sparkles style={{ width: '0.9rem', height: '0.9rem', color: '#60a5fa' }} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              The World's Most Intuitive Health Engine
-            </span>
-          </div>
-          
-          <h1 style={{ 
-            fontSize: 'max(3.5rem, 8vw)', 
-            fontWeight: 950, 
-            letterSpacing: '-0.06em', 
-            lineHeight: 0.9,
-            marginBottom: '1.5rem',
-            animation: 'fadeInUp 0.8s ease-out'
-          }}>
-            Control your protocol.<br />
-            <span style={{ background: 'linear-gradient(90deg, #3b82f6, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Absolute Precision.
-            </span>
-          </h1>
+      <main>
+        {/* ── HERO SECTION: THE COMMAND CENTER ── */}
+        <section className="relative pt-40 pb-20 px-6 overflow-hidden">
+          <div className="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8 animate-softFadeIn">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#0071E3]/10 rounded-full border border-[#0071E3]/20">
+                <Sparkles className="h-4 w-4 text-[#0071E3]" />
+                <span className="text-xs font-black uppercase tracking-widest text-[#0071E3]">Vanguard Clinical Release</span>
+              </div>
 
-          <p style={{ 
-            fontSize: '1.25rem', 
-            color: '#a1a1aa', 
-            maxWidth: '650px', 
-            margin: '0 auto 3rem',
-            lineHeight: 1.5,
-            animation: 'fadeInUp 1s ease-out'
-          }}>
-            BioTracker is an enterprise-grade, zero-knowledge platform built for high-performance health optimization. Encrypted, offline-first, and medically rigorous.
-          </p>
+              <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] text-[#1D1D1F]">
+                Absolute <br />
+                <span className="text-[#0071E3]">Precision</span> Control.
+              </h1>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }} className="animate-fadeInUp">
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link href="/login?view=sign_up" className="btn btn-primary" style={{ 
-                padding: '1.25rem 3rem', 
-                fontSize: '1.1rem', 
-                borderRadius: '1rem',
-                boxShadow: '0 10px 40px rgba(37,99,235,0.4)',
-                fontWeight: 800
-              }}>
-                Start Your Cycle →
-              </Link>
-              <Link href="/login?demo=true" className="btn btn-outline" style={{ 
-                padding: '1.25rem 3rem', 
-                fontSize: '1.1rem', 
-                borderRadius: '1rem',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.03)',
-                fontWeight: 800,
-                color: '#fff'
-              }}>
-                Launch Live Demo
-              </Link>
+              <p className="text-xl md:text-2xl text-[#86868B] max-w-xl font-medium leading-tight">
+                The world’s most advanced local-first engine for compound integrity,
+                pharmacokinetic modeling, and clinical audit trails.
+              </p>
+
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Link href="/login?view=sign_up" className="btn btn-primary px-10 py-5 text-lg group">
+                  Initialize Inventory <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/login?demo=true" className="btn btn-outline px-10 py-5 text-lg bg-white/50 backdrop-blur-md">
+                  Launch Live Demo
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-8 pt-8 opacity-60">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black italic">100%</span>
+                  <span className="tech-label">Zero-Knowledge</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black italic">0.01ml</span>
+                  <span className="tech-label">Precision Math</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black italic">Offline</span>
+                  <span className="tech-label">First Architecture</span>
+                </div>
+              </div>
             </div>
-            <p style={{ fontSize: '0.75rem', color: '#52525b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Smartphone style={{ width: '0.8rem', height: '0.8rem' }} /> Available as a Secure PWA for Mobile
+
+            <div className="relative group animate-softFadeIn" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute -inset-4 bg-gradient-to-tr from-[#0071E3]/30 to-[#10b981]/20 blur-3xl opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative rounded-[40px] overflow-hidden shadow-2xl border border-white/50">
+                <img
+                  src="/C:/Users/Nope/.gemini/antigravity/brain/734bb58f-1acb-4d25-b28b-528552fcad34/biotracker_desktop_mockup_1773085725528.png"
+                  alt="BioTracker Clinical Console"
+                  className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURE BENTO GRID ── */}
+        <section id="features" className="py-24 px-6 bg-[#FBFBFD]">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="text-center mb-20 space-y-4">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight">Clinical Infrastructure.</h2>
+              <p className="text-[#86868B] text-lg font-medium max-w-2xl mx-auto italic">
+                More than a logger. It's a pharmacy-grade audit engine.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:grid-rows-2 h-auto md:h-[800px]">
+              {/* Feature 1: U-100 Math */}
+              <div className="md:col-span-8 card !p-12 bg-white flex flex-col justify-between group overflow-hidden">
+                <div className="space-y-6 relative z-10">
+                  <div className="w-16 h-16 bg-[#0071E3]/5 rounded-2xl flex items-center justify-center">
+                    <Calculator className="h-8 w-8 text-[#0071E3]" />
+                  </div>
+                  <h3 className="text-3xl font-black">U-100 Algebraic Engine</h3>
+                  <p className="text-xl text-[#86868B] font-medium max-w-md">
+                    Instantly convert mg/mcg/IU. Our sub-milliliter math ensures your draw-volume
+                    is always medically exact. Zero margin for error.
+                  </p>
+                </div>
+                <div className="absolute right-0 bottom-0 top-12 w-1/2 hidden md:block">
+                  <img
+                    src="/C:/Users/Nope/.gemini/antigravity/brain/734bb58f-1acb-4d25-b28b-528552fcad34/biotracker_app_mockup_1773085706384.png"
+                    alt="Mobile UI Display"
+                    className="h-full w-auto object-cover object-top rounded-tl-[40px] shadow-2xl transform translate-x-20 translate-y-20 group-hover:translate-x-16 group-hover:translate-y-16 transition-transform duration-700"
+                  />
+                </div>
+              </div>
+
+              {/* Feature 2: Stash Integrity */}
+              <div className="md:col-span-4 card !p-12 !bg-[#1D1D1F] text-white flex flex-col justify-end">
+                <div className="space-y-6">
+                  <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <PackageOpen className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black">Stash Integrity Audit</h3>
+                  <p className="text-white/60 font-medium">
+                    Real-time inventory levels. Prevent cache loss with pharmaceutical-grade stockpile confirmation.
+                  </p>
+                </div>
+              </div>
+
+              {/* Feature 3: PK Modeling */}
+              <div className="md:col-span-4 card !p-12 bg-[#0071E3] text-white flex flex-col justify-end">
+                <div className="space-y-6">
+                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                    <Activity className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black">PK Saturation Curve</h3>
+                  <p className="text-white/80 font-medium">
+                    Predictive blood-concentration modeling based on ester length and dose frequency.
+                  </p>
+                </div>
+              </div>
+
+              {/* Feature 4: Offline Replicache */}
+              <div className="md:col-span-8 card !p-12 bg-white flex items-center gap-12 group">
+                <div className="space-y-6 flex-1">
+                  <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
+                    <TrendingUp className="h-7 w-7 text-emerald-500" />
+                  </div>
+                  <h3 className="text-3xl font-black">Local-First Vault.</h3>
+                  <p className="text-[#86868B] text-lg font-medium italic">
+                    "Her-level" predictive logic synchronized via Replicache.
+                    Instant interaction, zero latency, total offline capability.
+                  </p>
+                  <div className="flex gap-4">
+                    <span className="flex items-center gap-2 text-xs font-bold text-[#1D1D1F] border border-[#1D1D1F]/10 px-3 py-1.5 rounded-full">
+                      <Database className="h-3 w-3" /> IndexedDB Store
+                    </span>
+                    <span className="flex items-center gap-2 text-xs font-bold text-[#1D1D1F] border border-[#1D1D1F]/10 px-3 py-1.5 rounded-full">
+                      <Binary className="h-3 w-3" /> Delta Sync
+                    </span>
+                  </div>
+                </div>
+                <div className="hidden lg:block w-1/3 text-[#1D1D1F]/5 group-hover:text-[#0071E3]/10 transition-colors">
+                  <Zap className="h-full w-full" strokeWidth={0.5} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECURITY / PRIVACY SECTION ── */}
+        <section id="security" className="py-32 px-6 bg-[#000] text-white overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,113,227,0.15),transparent_70%)]" />
+          <div className="max-w-[1400px] mx-auto text-center relative z-10">
+            <Lock className="h-16 w-16 text-[#0071E3] mx-auto mb-10" />
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8">Clinical Privacy. <br />No Exceptions.</h2>
+            <p className="text-xl md:text-2xl text-white/50 max-w-3xl mx-auto font-medium leading-relaxed mb-16 italic">
+              BioTracker is designed for high-performance practitioners who demand operational security.
+              We don't see your data. We don't sell your data. Your clinical environment is encrypted
+              end-to-end and stored on your hardware.
             </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="p-8 glass-panel border-white/5">
+                <h4 className="text-4xl font-black mb-2 italic">AES-256</h4>
+                <p className="tech-label text-white/40">Encryption</p>
+              </div>
+              <div className="p-8 glass-panel border-white/5">
+                <h4 className="text-4xl font-black mb-2 italic">Zero</h4>
+                <p className="tech-label text-white/40">Knowledge</p>
+              </div>
+              <div className="p-8 glass-panel border-white/5">
+                <h4 className="text-4xl font-black mb-2 italic">HIPAA</h4>
+                <p className="tech-label text-white/40">Standards</p>
+              </div>
+              <div className="p-8 glass-panel border-white/5">
+                <h4 className="text-4xl font-black mb-2 italic">Local</h4>
+                <p className="tech-label text-white/40">Persistence</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Feature Grid */}
-        <section style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-          gap: '2rem',
-          marginBottom: '8rem'
-        }}>
-          <div style={featureCardStyle} className="landing-card">
-            <div style={iconBoxStyle('#3b82f6')}><Calculator /></div>
-            <h3 style={featureTitleStyle}>U-100 Math Engine</h3>
-            <p style={featureParaStyle}>Rigorous algebraic logic converting mcg, mg, and g to precise IU draw volumes. Zero mental math required.</p>
-          </div>
-          <div style={featureCardStyle} className="landing-card">
-            <div style={iconBoxStyle('#10b981')}><ClipboardCheck /></div>
-            <h3 style={featureTitleStyle}>Stash Integrity Audit</h3>
-            <p style={featureParaStyle}>Pharmacy-grade inventory management. Prevent item loss with explicit audit trails and secure stockpile double-confirmation.</p>
-          </div>
-          <div style={featureCardStyle} className="landing-card">
-            <div style={iconBoxStyle('#8b5cf6')}><TrendingUp /></div>
-            <h3 style={featureTitleStyle}>Intuitive Optimization</h3>
-            <p style={featureParaStyle}>"Her-level" predictive logic. Auto-complete compounds, estimate remaining volume, and modify schedules directly from your calendar.</p>
-          </div>
-        </section>
-
-        {/* Rebranding / V1.0 Detail */}
-        <section style={{ 
-          background: 'rgba(255,255,255,0.02)', 
-          border: '1px solid rgba(255,255,255,0.05)', 
-          borderRadius: '2rem', 
-          padding: '4rem',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.1, pointerEvents: 'none', background: 'radial-gradient(circle at center, #2563eb, transparent)' }} />
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', position: 'relative' }}>Pure Privacy. Pure Performance.</h2>
-          <p style={{ fontSize: '1.1rem', color: '#a1a1aa', maxWidth: '800px', margin: '0 auto 3rem', position: 'relative' }}>
-            We don't sell your data. We don't even see it. Your clinical environment is encrypted locally on your hardware. BioTracker is built for professionals who value operational security alongside peak performance.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap' }}>
-             <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>100%</div>
-                <div style={{ fontSize: '0.75rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Encrypted</div>
-             </div>
-             <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>0.01ml</div>
-                <div style={{ fontSize: '0.75rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Precision</div>
-             </div>
-             <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>V1.0</div>
-                <div style={{ fontSize: '0.75rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Release</div>
-             </div>
+        {/* ── MOBILE CTA ── */}
+        <section className="py-24 px-6 bg-[#F5F5F7]">
+          <div className="max-w-[800px] mx-auto card !p-12 text-center shadow-2xl border-none">
+            <Smartphone className="h-12 w-12 text-[#0071E3] mx-auto mb-8" />
+            <h2 className="text-4xl font-black mb-6">Built for the Field.</h2>
+            <p className="text-lg text-[#86868B] font-medium mb-10 italic">
+              BioTracker is a Progressive Web App. Install it directly to your Home Screen for
+              instant mobile access and biometric authentication.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login" className="btn btn-primary px-12 py-5 text-lg">
+                Enter Console
+              </Link>
+              <button className="btn btn-outline px-12 py-5 text-lg">
+                Mobile Install Guide
+              </button>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer style={{ 
-        padding: '4rem 2rem', 
-        textAlign: 'center', 
-        borderTop: '1px solid rgba(255,255,255,0.05)',
-        color: '#52525b',
-        fontSize: '0.875rem'
-      }}>
-        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-          <span style={{ color: '#a1a1aa' }}>Precision Math</span>
-          <span style={{ color: '#a1a1aa' }}>Subjective Logs</span>
-          <span style={{ color: '#a1a1aa' }}>Stockpile Audit</span>
+      <footer className="py-20 px-6 border-t border-[#1D1D1F]/5 text-center space-y-8">
+        <div className="flex justify-center items-center gap-6">
+          <ShieldCheck className="h-6 w-6 text-[#0071E3]" />
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-[#86868B]">Bio-Interface Core Architecture</span>
         </div>
-        © 2026 BioTracker (by MMM). The ultimate bio-hacking command center.
+        <div className="flex justify-center gap-10 text-[10px] font-bold text-[#86868B] uppercase tracking-widest">
+          <span>HIPAA Aligned</span>
+          <span>SOC-2 Ready</span>
+          <span>Pharm-Grade Math</span>
+        </div>
+        <p className="text-[#86868B] text-xs font-medium">
+          © 2026 BioTracker Core (by MMM). The ultimate bio-hacking command center.
+        </p>
       </footer>
     </div>
   );
 }
-
-const featureCardStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.06)',
-  padding: '2.5rem',
-  borderRadius: '1.5rem',
-  position: 'relative',
-  overflow: 'hidden'
-};
-
-const iconBoxStyle = (color: string): React.CSSProperties => ({
-  width: '50px',
-  height: '50px',
-  borderRadius: '1rem',
-  background: `${color}15`,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: '1.5rem',
-  color: color
-});
-
-const featureTitleStyle: React.CSSProperties = {
-  fontSize: '1.25rem',
-  fontWeight: 800,
-  marginBottom: '0.75rem',
-  letterSpacing: '-0.02em'
-};
-
-const featureParaStyle: React.CSSProperties = {
-  fontSize: '0.95rem',
-  color: '#a1a1aa',
-  lineHeight: 1.6
-};

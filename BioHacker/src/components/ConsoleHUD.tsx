@@ -35,10 +35,23 @@ export function ConsoleHUD({ onSignOut }: { onSignOut: () => void }) {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+
+          const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+            if (item.href.includes('#') && pathname === '/dashboard') {
+              e.preventDefault();
+              const id = item.href.split('#')[1];
+              const element = document.getElementById(id);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }
+          };
+
           return (
             <Link
               key={item.name}
               href={item.href}
+              onClick={handleClick}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-[16px] transition-all
                 ${isActive

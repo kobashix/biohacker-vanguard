@@ -144,10 +144,10 @@ function DashboardContent() {
   const rep = getReplicache(user?.id);
   const coreVials = useSubscribe(rep, async (tx) => {
     return await tx.scan({ prefix: "vial/" }).values().toArray() as Vial[];
-  }, { default: [], dependencies: [user?.id] });
+  }, { default: null, dependencies: [user?.id] });
 
   useEffect(() => {
-    if (user && typeof window !== 'undefined' && window.localStorage.getItem('biohacker_demo_mode') === 'true') {
+    if (user && coreVials !== null && typeof window !== 'undefined' && window.localStorage.getItem('biohacker_demo_mode') === 'true') {
       const seedAndClean = async () => {
         if (!rep) return;
 
@@ -155,7 +155,7 @@ function DashboardContent() {
         window.localStorage.removeItem('biohacker_demo_mode');
 
         // Check if we already have data to prevent flip-flopping
-        if (coreVials.length > 0) {
+        if (coreVials && coreVials.length > 0) {
           return;
         }
 
@@ -171,10 +171,20 @@ function DashboardContent() {
       };
       seedAndClean();
     }
-  }, [user, rep, coreVials.length]);
+  }, [user, rep, coreVials?.length]);
 
-  if (!user) return null;
-  const isEmpty = coreVials.length === 0;
+  if (!user || coreVials === null) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="animate-spin h-10 w-10 text-[var(--primary)]" />
+          <p className="text-sm font-bold text-[var(--muted-foreground)] animate-pulse">Synchronizing Secure Stash...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isEmpty = coreVials?.length === 0;
 
   return (
     <div className="flex flex-col gap-12 max-w-[1600px] mx-auto">
@@ -208,80 +218,27 @@ function DashboardContent() {
           <div className="grid grid-cols-12 gap-8 items-start">
             {/* LEFT COLUMN: Main Activity (8 cols) */}
             <div className="col-span-8 space-y-8">
-              {/* TOP ROW: BENTO - Schedule & Alerts */}
-              <div className="grid grid-cols-2 gap-8">
-                <div className="card space-y-4" id="scheduler">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold tracking-tight">Protocol Schedule</h3>
-                    <div className="p-2 bg-[var(--primary-muted)] rounded-lg">
-                      <LayoutDashboard className="h-5 w-5 text-[var(--primary)]" />
-                    </div>
-                  </div>
-                  <div className="!mt-2 min-h-[300px]">
-                    <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
+              <div className="card space-y-4" id="scheduler">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold tracking-tight">Protocol Schedule</h3>
+                  <div className="p-2 bg-[var(--primary-muted)] rounded-lg">
+                    <LayoutDashboard className="h-5 w-5 text-[var(--primary)]" />
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-8">
-                  <div className="card !bg-[var(--primary)] text-white p-8 group overflow-hidden relative border-none">
-                    <Sparkles className="absolute -right-4 -bottom-4 h-32 w-32 opacity-10 group-hover:rotate-12 transition-transform" />
-                    <h3 className="text-2xl font-black mb-2">Cycle Optimizer</h3>
-                    <p className="text-white/80 text-sm font-medium mb-6">AI-driven analysis ready for your latest bloodwork results.</p>
-                    <button
-                      onClick={() => {
-                        const el = document.getElementById('cycle-manager');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="bg-white text-[var(--primary)] px-6 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition-transform"
-                    >
-                      Run Analysis
-                    </button>
-                  </div>
-
-                  <div className="card !bg-[var(--muted)] border-none">
-                    <InventoryAlerts userId={user.id} />
-                  </div>
+                <div className="!mt-2 min-h-[500px]">
+                  <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
                 </div>
-              </div>
-
-              {/* MIDDLE ROW: Analytics */}
-              <div className="card">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-2xl font-black tracking-tight">Saturation Analytics</h3>
-                    <p className="text-sm text-[var(--muted-foreground)]">Real-time pharmacokinetic projections</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-[var(--primary-muted)] text-[var(--primary)] text-[10px] font-bold rounded-full uppercase tracking-wider">Active Stream</span>
-                  </div>
-                </div>
-                <div className="h-[400px]">
-                  <PKChart userId={user.id} />
-                </div>
-              </div>
-
-              {/* BOTTOM ROW: Wellbeing */}
-              <div className="card">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold tracking-tight">Wellbeing Journal</h3>
-                  <Activity className="h-5 w-5 text-[var(--primary)]" />
-                </div>
-                <SubjectiveLogger userId={user.id} />
               </div>
             </div>
 
             {/* RIGHT COLUMN: Management (4 cols) */}
             <div className="col-span-4 space-y-8">
-              <div className="card">
+              <div className="card" id="inventory">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold tracking-tight">Protocol Engines</h3>
-                  <Zap className="h-5 w-5 text-[var(--secondary)]" />
+                  <h3 className="text-xl font-bold tracking-tight">Apothecary</h3>
+                  <Package className="h-5 w-5 text-[var(--muted-foreground)]" />
                 </div>
-                <div className="flex flex-col items-center justify-center p-8 bg-[var(--muted)]/20 rounded-2xl border-2 border-dashed border-[var(--border)] text-center opacity-40 group">
-                  <Zap className="h-8 w-8 mb-3 text-[var(--secondary)] group-hover:scale-110 transition-transform" />
-                  <p className="text-sm font-bold uppercase tracking-widest">Protocol Engine Active</p>
-                  <p className="text-[10px] mt-1 italic font-medium">Management overlay is globally initialized.</p>
-                </div>
+                <SupplyTracker userId={user.id} />
               </div>
 
               <div className="card">
@@ -292,14 +249,6 @@ function DashboardContent() {
                 <div id="cycle-manager">
                   <CycleManager userId={user.id} />
                 </div>
-              </div>
-
-              <div className="card" id="inventory">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold tracking-tight">Apothecary</h3>
-                  <Package className="h-5 w-5 text-[var(--muted-foreground)]" />
-                </div>
-                <SupplyTracker userId={user.id} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

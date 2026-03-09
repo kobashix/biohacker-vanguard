@@ -7,7 +7,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, SubjectiveLog } from "@/replicache";
 import { format, formatDistanceToNow } from "date-fns";
-import { Download, Syringe, Heart, Smile, Zap, Moon, Activity, BookOpen, ChevronRight, Trash2 } from "lucide-react";
+import { Download, Syringe, Heart, Smile, Zap, Moon, Activity, BookOpen, ChevronRight, Trash2, Pencil, Check } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 function ScoreBar({ value, color, icon: Icon, label }: { value: number; color: string; icon: any; label: string }) {
@@ -184,25 +184,8 @@ function HistoryContent() {
                 {doseLogs.length === 0 && (
                   <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: '#a1a1aa' }}>No pins logged yet.</td></tr>
                 )}
-                {doseLogs.map((item: any, idx: number) => (
-                  <tr key={idx}>
-                    <td className="text-xs font-mono">{format(item.timestamp, 'MMM d, h:mm a')}</td>
-                    <td style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.substance}</td>
-                    <td style={{ color: '#2563eb', fontWeight: 700 }}>{item.dose_amount} {item.unit}</td>
-                    <td style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{item.injection_site || '—'}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        onClick={async () => {
-                          if (confirm(`Delete this log entry for ${item.substance}?`)) {
-                            await rep?.mutate.deleteDoseLog(item.id);
-                          }
-                        }}
-                        className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all border-none cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
+                {doseLogs.map((item: any) => (
+                  <DoseLogRow key={item.id} item={item} rep={rep} />
                 ))}
               </tbody>
             </table>
@@ -212,7 +195,7 @@ function HistoryContent() {
 
       {/* Wellbeing Journal View */}
       {view === 'wellbeing' && (
-        <div>
+        <div className="space-y-4">
           {subjectiveLogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 1rem', background: '#18181b', borderRadius: '1rem', border: '1px solid #27272a' }}>
               <BookOpen style={{ width: '2.5rem', height: '2.5rem', margin: '0 auto 1rem', color: '#27272a' }} />
@@ -224,14 +207,108 @@ function HistoryContent() {
               <p style={{ fontSize: '0.8rem', color: '#a1a1aa', marginBottom: '1rem', fontWeight: 600 }}>
                 {subjectiveLogs.length} {subjectiveLogs.length === 1 ? 'entry' : 'entries'} total
               </p>
-              {subjectiveLogs.map((entry: any, idx: number) => (
-                <WellbeingCard key={idx} entry={entry} />
+              {subjectiveLogs.map((entry: any) => (
+                <WellbeingCard key={entry.id} entry={entry} />
               ))}
             </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function DoseLogRow({ item, rep }: { item: DoseLog; rep: any }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValues, setEditValues] = useState({
+    dose_amount: item.dose_amount,
+    injection_site: item.injection_site || '',
+    timestamp: format(item.timestamp, "yyyy-MM-dd'T'HH:mm")
+  });
+
+  const handleSave = async () => {
+    try {
+      await rep?.mutate.updateDoseLog({
+        id: item.id,
+        dose_amount: Number(editValues.dose_amount),
+        injection_site: editValues.injection_site,
+        timestamp: new Date(editValues.timestamp).getTime()
+      });
+      setIsEditing(false);
+    } catch (e) {
+      alert("Failed to update log.");
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <tr className="bg-[var(--primary-muted)]/10">
+        <td>
+          <input
+            type="datetime-local"
+            className="form-input text-xs"
+            value={editValues.timestamp}
+            onChange={e => setEditValues({ ...editValues, timestamp: e.target.value })}
+          />
+        </td>
+        <td style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.substance}</td>
+        <td>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              className="form-input text-xs w-16"
+              value={editValues.dose_amount}
+              onChange={e => setEditValues({ ...editValues, dose_amount: Number(e.target.value) })}
+            />
+            <span className="text-xs text-muted-foreground">{item.unit}</span>
+          </div>
+        </td>
+        <td>
+          <input
+            type="text"
+            className="form-input text-xs"
+            placeholder="Site"
+            value={editValues.injection_site}
+            onChange={e => setEditValues({ ...editValues, injection_site: e.target.value })}
+          />
+        </td>
+        <td style={{ textAlign: 'right' }}>
+          <div className="flex justify-end gap-2">
+            <button onClick={handleSave} className="btn btn-primary px-3 py-1 text-xs">Save</button>
+            <button onClick={() => setIsEditing(false)} className="btn btn-outline px-3 py-1 text-xs">Cancel</button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr>
+      <td className="text-xs font-mono">{format(item.timestamp, 'MMM d, h:mm a')}</td>
+      <td style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.substance}</td>
+      <td style={{ color: 'var(--primary)', fontWeight: 700 }}>{item.dose_amount} {item.unit}</td>
+      <td style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{item.injection_site || 'â€”'}</td>
+      <td style={{ textAlign: 'right' }}>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary)] hover:text-white transition-all border-none cursor-pointer"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={async () => {
+              if (confirm(`Delete this log entry for ${item.substance}?`)) {
+                await rep?.mutate.deleteDoseLog(item.id);
+              }
+            }}
+            className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--destructive)] hover:text-white transition-all border-none cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
   );
 }
 

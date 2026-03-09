@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, dropReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
-import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud } from "lucide-react";
+import { generateDemoData } from "@/lib/demoData";
+import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud, User } from "lucide-react";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [purging, setPurging] = useState(false);
-  
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mgmzvczfnqlvqvrsnnxj.supabase.co',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_PImzukJvV70WqN1GwWUtuQ_ewZGSmoe'
@@ -67,10 +68,10 @@ export default function SettingsPage() {
   };
 
   const handleExportBackup = () => {
-    const backup = { 
-      timestamp: Date.now(), 
+    const backup = {
+      timestamp: Date.now(),
       user: user?.email,
-      vials, protocols, logs, subjectiveLogs, supplies, cycles 
+      vials, protocols, logs, subjectiveLogs, supplies, cycles
     };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -89,7 +90,7 @@ export default function SettingsPage() {
       try {
         const json = JSON.parse(event.target?.result as string);
         if (!confirm(`Restore backup from ${new Date(json.timestamp).toLocaleDateString()}? This is irreversible.`)) return;
-        
+
         await rep.mutate.restoreBackup({
           vials: json.vials || [],
           protocols: json.protocols || [],
@@ -113,107 +114,43 @@ export default function SettingsPage() {
     if (!rep || !confirm("This will add demo data to your account including vials, logs, wellbeing entries, and gear stash. Continue?")) return;
     setSeeding(true);
 
-    const bpcId = crypto.randomUUID();
-    const hghId = crypto.randomUUID();
-    const anavarId = crypto.randomUUID();
-    const tirzeId = crypto.randomUUID();
-    const testCId = crypto.randomUUID();
+    const data = generateDemoData();
 
-    const demoVials: Vial[] = [
-      { id: bpcId,   name: 'BPC-157 (Recovery)',      compounds: [{name: 'BPC-157', mass_mg: 5, unit: 'mg'}],                                 volume_ml: 2,  remaining_volume_ml: 1.6,  status: 'mixed' },
-      { id: hghId,   name: 'CJC-1295 + Ipamorelin',   compounds: [{name: 'CJC-1295 (No DAC / Mod GRF 1-29)', mass_mg: 2, unit: 'mg'}, {name: 'Ipamorelin', mass_mg: 2, unit: 'mg'}], volume_ml: 2, remaining_volume_ml: 1.3, status: 'mixed' },
-      { id: testCId, name: 'Testosterone Cyp 200mg',   compounds: [{name: 'Testosterone Cypionate', mass_mg: 200, unit: 'mg'}],              volume_ml: 10, remaining_volume_ml: 7.5,  status: 'mixed' },
-      { id: tirzeId, name: 'Tirzepatide 5mg',          compounds: [{name: 'Tirzepatide', mass_mg: 5, unit: 'mg'}],                           volume_ml: 1,  remaining_volume_ml: 0.6,  status: 'mixed' },
-      { id: anavarId, name: 'Anavar 10mg (Oral)',       compounds: [{name: 'Oxandrolone (Anavar)', mass_mg: 10, unit: 'mg'}],                volume_ml: 0,  remaining_volume_ml: 0,    status: 'pill', pill_count: 42 },
-    ];
+    await rep.mutate.seedDemoData({
+      vials: data.demoVials,
+      protocols: data.demoProtocols,
+      logs: data.demoLogs,
+      subjectiveLogs: data.subjectiveLogs,
+      supplies: data.demoSupplies,
+      cycles: data.demoCycles
+    });
 
-    const demoProtocols: Protocol[] = [
-      { id: crypto.randomUUID(), vial_id: bpcId,   dose_amount: 250,  frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
-      { id: crypto.randomUUID(), vial_id: hghId,   dose_amount: 100,  frequency_hours: 24, days_on: 5, days_off: 2, start_time: Date.now() - 30 * 86400000 },
-      { id: crypto.randomUUID(), vial_id: testCId, dose_amount: 100,  frequency_hours: 84, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
-      { id: crypto.randomUUID(), vial_id: tirzeId, dose_amount: 2500, frequency_hours: 168, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
-      { id: crypto.randomUUID(), vial_id: anavarId, dose_amount: 2,   frequency_hours: 24, days_on: 7, days_off: 0, start_time: Date.now() - 30 * 86400000 },
-    ];
-
-    // 30 days of dose logs
-    const demoLogs: DoseLog[] = [];
-    const now = Date.now();
-    const msPerDay = 86400000;
-
-    for (let i = 30; i >= 0; i--) {
-      const ts = now - (i * msPerDay);
-      demoLogs.push({ id: crypto.randomUUID(), vial_id: bpcId, substance: 'BPC-157 (Recovery)', dose_amount: 250, unit: 'mcg', units_iu: 10, timestamp: ts + 7 * 3600000 + Math.random() * 600000 });
-      if (i % 2 === 0) {
-        demoLogs.push({ id: crypto.randomUUID(), vial_id: testCId, substance: 'Testosterone Cyp 200mg', dose_amount: 100, unit: 'mg', units_iu: 50, timestamp: ts + 19 * 3600000 + Math.random() * 600000, injection_site: ['Left Glute', 'Right Glute', 'Left Delt', 'Right Delt'][i % 4] });
-      }
-      if (i % 7 !== 0 && i % 7 !== 6) {
-        demoLogs.push({ id: crypto.randomUUID(), vial_id: hghId, substance: 'CJC-1295 + Ipamorelin', dose_amount: 100, unit: 'mcg', units_iu: 10, timestamp: ts + 21 * 3600000 + Math.random() * 600000 });
-      }
-      if (i % 7 === 0) {
-        demoLogs.push({ id: crypto.randomUUID(), vial_id: tirzeId, substance: 'Tirzepatide 5mg', dose_amount: 2500, unit: 'mcg', units_iu: 25, timestamp: ts + 8 * 3600000 + Math.random() * 600000, injection_site: 'Belly (SubQ)' });
-      }
-      demoLogs.push({ id: crypto.randomUUID(), vial_id: anavarId, substance: 'Anavar 10mg (Oral)', dose_amount: 2, unit: 'tabs', units_iu: 0, timestamp: ts + 12 * 3600000 + Math.random() * 600000 });
-    }
-
-    // 30 days of wellbeing journal entries with realistic progression
-    const subjectiveLogs: SubjectiveLog[] = [];
-    for (let i = 30; i >= 0; i--) {
-      const weekProgress = (30 - i) / 30; // 0 → 1 over 30 days
-      const fluctuation = () => (Math.random() - 0.5) * 2;
-      subjectiveLogs.push({
-        id: crypto.randomUUID(),
-        timestamp: now - (i * msPerDay) + 8 * 3600000,
-        mood:          Math.min(10, Math.max(1, Math.round(5 + weekProgress * 3 + fluctuation()))),
-        energy:        Math.min(10, Math.max(1, Math.round(5 + weekProgress * 3.5 + fluctuation()))),
-        sleep_quality: Math.min(10, Math.max(1, Math.round(6 + weekProgress * 2 + fluctuation()))),
-        soreness:      Math.min(10, Math.max(1, Math.round(5 - weekProgress * 3 + Math.abs(fluctuation())))),
-        notes: i % 5 === 0 ? ['Great pump today, veins popping.', 'PIP minimal from yesterday. Feeling leaner.', 'Energy through the roof today. Sleep was perfect.', 'Tirzepatide week — appetite way down.', 'Recovery feeling dialed in. BPC working.'][i / 5 | 0] : '',
-      });
-    }
-
-    // Gear stash supplies
-    const demoSupplies: Supply[] = [
-      { id: crypto.randomUUID(), name: '31G x 5/16" Insulin Syringes (BD)',   count: 87,  unit: 'pcs'   },
-      { id: crypto.randomUUID(), name: 'Alcohol Prep Pads',                    count: 143, unit: 'pcs'   },
-      { id: crypto.randomUUID(), name: 'Bacteriostatic Water 30mL',            count: 3,   unit: 'vials' },
-      { id: crypto.randomUUID(), name: '23G x 1" IM Needles',                 count: 24,  unit: 'pcs'   },
-      { id: crypto.randomUUID(), name: 'Sterile Saline 0.9% 10mL',            count: 6,   unit: 'vials' },
-    ];
-
-    // Demo cycle phases
-    const today = new Date();
-    const fmt = (d: Date) => d.toISOString().split('T')[0];
-    const daysAgo = (n: number) => { const d = new Date(today); d.setDate(d.getDate() - n); return d; };
-    const daysAhead = (n: number) => { const d = new Date(today); d.setDate(d.getDate() + n); return d; };
-
-    const demoCycles: Cycle[] = [
-      {
-        id: crypto.randomUUID(),
-        name: '🏋️ Mass Builder — Winter Blast',
-        start_date: fmt(daysAgo(120)),
-        end_date: fmt(daysAgo(30)),
-        vial_ids: [testCId, anavarId],
-        notes: '12-week bulk. Test Cyp 400mg/wk + Anavar kickstart (wks 1-4). Gained 14lbs, kept 10 after water drop.',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: '🔄 TRT + Peptides Cruise',
-        start_date: fmt(daysAgo(31)),
-        vial_ids: [testCId, bpcId, hghId, tirzeId],
-        notes: 'Maintenance cruise. Test Cyp 150mg/wk TRT dose. Running BPC-157 for elbow repair + CJC/Ipamorelin for GH pulse + Tirzepatide 2.5mg/wk.',
-      },
-      {
-        id: crypto.randomUUID(),
-        name: '✂️ Summer Cut — Planned',
-        start_date: fmt(daysAhead(14)),
-        end_date: fmt(daysAhead(104)),
-        notes: 'Planned 12-wk cut starting after cruise. Test E 250mg + Anavar 50mg/day wks 7-12 + Tirzepatide titrate to 5mg/wk.',
-      },
-    ];
-
-    await rep.mutate.seedDemoData({ vials: demoVials, protocols: demoProtocols, logs: demoLogs, subjectiveLogs, supplies: demoSupplies, cycles: demoCycles });
     setSeeding(false);
     alert("Demo data added! Vials, pins, wellbeing journals, and inventory items are all populated.");
+  };
+
+  const [fullName, setFullName] = useState("");
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  useEffect(() => {
+    if (user?.user_metadata?.full_name) {
+      setFullName(user.user_metadata.full_name);
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    setUpdatingProfile(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: fullName }
+      });
+      if (error) throw error;
+      alert("Profile updated successfully!");
+    } catch (e: any) {
+      alert(`Update failed: ${e.message}`);
+    } finally {
+      setUpdatingProfile(false);
+    }
   };
 
   const calendarUrl = user ? `https://biohacker.minmaxmuscle.com/api/calendar/${user.id}` : "";
@@ -222,7 +159,45 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 pb-24 lg:pb-0">
-      <header><h1 className="text-3xl font-bold">Settings</h1><p className="text-muted-foreground">Manage your clinical integrations and data safety.</p></header>
+      <header>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">Manage your clinical integrations and data safety.</p>
+      </header>
+
+      {/* Account Profile Section */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title"><User className="h-5 w-5 text-primary" /> Account Profile</h3>
+          <p className="card-description">Your identity in the BioTracker network.</p>
+        </div>
+        <div className="card-content">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <input className="form-input bg-muted/20" readOnly value={user.email} />
+              <p className="text-[10px] text-muted-foreground mt-1">Managed via Supabase Auth</p>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <div className="flex gap-2">
+                <input
+                  className="form-input"
+                  placeholder="Clinical Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+                <button
+                  onClick={handleUpdateProfile}
+                  disabled={updatingProfile}
+                  className="btn btn-primary px-4"
+                >
+                  {updatingProfile ? "..." : "Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         {/* iCal Integration */}

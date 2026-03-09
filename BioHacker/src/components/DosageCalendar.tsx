@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
-import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight, Activity, Settings, Clock, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight, Activity, Settings, Clock, Plus, Loader2 } from "lucide-react";
 import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay, isWeekend } from "date-fns";
 
 interface DosageCalendarProps {
@@ -19,15 +19,15 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
 
   const logs = useSubscribe(rep, async (tx) => {
     return (await tx.scan({ prefix: "log/" }).values().toArray()) as DoseLog[];
-  }, { default: [] });
+  }, { default: null });
 
   const protocols = useSubscribe(rep, async (tx) => {
     return (await tx.scan({ prefix: "protocol/" }).values().toArray()) as Protocol[];
-  }, { default: [] });
+  }, { default: null });
 
   const vials = useSubscribe(rep, async (tx) => {
     return (await tx.scan({ prefix: "vial/" }).values().toArray()) as Vial[];
-  }, { default: [] });
+  }, { default: null });
 
   const days = useMemo(() => {
     const start = startOfWeek(currentWeek);
@@ -35,6 +35,8 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
   }, [currentWeek]);
 
   const getDosesForDay = (day: Date) => {
+    if (!protocols || !vials || !logs) return [];
+
     const dailyDoses: any[] = [];
     const dayStart = startOfDay(day).getTime();
     const dayEnd = endOfDay(day).getTime();
@@ -97,8 +99,9 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
 
     return dailyDoses.sort((a, b) => a.rawTime - b.rawTime);
   };
+  const isLoading = logs === null || protocols === null || vials === null;
   const selectedDay = days[selectedDayIndex] || days[0];
-  const selectedDoses = getDosesForDay(selectedDay);
+  const selectedDoses = isLoading ? [] : getDosesForDay(selectedDay);
 
   return (
     <div className="p-6 space-y-8">
@@ -167,78 +170,87 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
 
       {/* ── Dose Detail List ── */}
       <div className="space-y-6 pt-2">
-        <div className="flex justify-between items-center px-1">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-[var(--foreground)]">
-              {format(selectedDay, 'EEEE, MMMM d')}
-            </span>
-            {isSameDay(selectedDay, new Date()) && (
-              <span className="text-[10px] bg-[var(--primary-muted)] text-[var(--primary)] px-2.5 py-0.5 rounded-full font-black uppercase">Today</span>
-            )}
-          </div>
-          <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider opacity-60">
-            {selectedDoses.length} {selectedDoses.length === 1 ? 'Scheduled' : 'Scheduled'}
-          </span>
-        </div>
-
-        {selectedDoses.length === 0 ? (
-          <div className="py-12 flex flex-col items-center justify-center bg-[var(--muted)]/30 rounded-[var(--radius)] text-center">
-            <Activity className="h-8 w-8 mb-3 text-[var(--muted-foreground)] opacity-40" />
-            <span className="text-xs font-bold text-[var(--muted-foreground)] opacity-60">No protocols scheduled for this window.</span>
+        {isLoading ? (
+          <div className="py-24 flex flex-col items-center justify-center text-center">
+            <Loader2 className="h-8 w-8 mb-3 text-[var(--primary)] animate-spin" />
+            <span className="text-xs font-bold text-[var(--muted-foreground)] animate-pulse uppercase tracking-widest">Hydrating Protocol Engine...</span>
           </div>
         ) : (
-          <div className="space-y-3">
-            {selectedDoses.map((dose, idx) => (
-              <div
-                key={idx}
-                onClick={() => onSelectVial(dose.vialId)}
-                className={`
-                  group flex items-center gap-4 p-5 rounded-2xl transition-all cursor-pointer border-2
-                  ${dose.completed
-                    ? "bg-[var(--success)]/5 border-[var(--success)]/20"
-                    : "bg-[var(--card)] border-transparent shadow-sm hover:border-[var(--primary)]/30 hover:shadow-md"}
-                `}
-              >
-                <div className={`
-                  w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors
-                  ${dose.completed
-                    ? 'bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/20'
-                    : 'bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--primary-muted)] group-hover:text-[var(--primary)]'}
-                `}>
-                  {dose.completed ? <CheckCircle2 className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-lg tracking-tight text-[var(--foreground)] truncate">
-                    {dose.name}
-                  </p>
-                  <p className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest flex items-center gap-2">
-                    <Clock className="h-3 w-3" /> {dose.time} • {dose.amount}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {dose.completed ? (
-                    <span className="text-[10px] font-black text-[var(--success)] uppercase tracking-widest bg-[var(--success)]/10 px-3 py-1 rounded-full">Logged</span>
-                  ) : (
-                    <div className="flex gap-2">
-                      {onEditVial && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }}
-                          className="p-2.5 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all sm:opacity-0 group-hover:opacity-100"
-                        >
-                          <Settings className="h-4 w-4" />
-                        </button>
-                      )}
-                      <button className="btn btn-primary !p-2 !rounded-xl">
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
+          <>
+            <div className="flex justify-between items-center px-1">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-bold text-[var(--foreground)]">
+                  {format(selectedDay, 'EEEE, MMMM d')}
+                </span>
+                {format(selectedDay, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && (
+                  <span className="text-[10px] bg-[var(--primary-muted)] text-[var(--primary)] px-2.5 py-0.5 rounded-full font-black uppercase">Today</span>
+                )}
               </div>
-            ))}
-          </div>
+              <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider opacity-60">
+                {selectedDoses.length} {selectedDoses.length === 1 ? 'Scheduled' : 'Scheduled'}
+              </span>
+            </div>
+
+            {selectedDoses.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center bg-[var(--muted)]/30 rounded-[var(--radius)] text-center">
+                <Activity className="h-8 w-8 mb-3 text-[var(--muted-foreground)] opacity-40" />
+                <span className="text-xs font-bold text-[var(--muted-foreground)] opacity-60">No protocols scheduled for this window.</span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {selectedDoses.map((dose, idx) => (
+                  <div
+                    key={idx}
+                    onClick={() => onSelectVial(dose.vialId)}
+                    className={`
+                      group flex items-center gap-4 p-5 rounded-2xl transition-all cursor-pointer border-2
+                      ${dose.completed
+                        ? "bg-[var(--success)]/5 border-[var(--success)]/20"
+                        : "bg-[var(--card)] border-transparent shadow-sm hover:border-[var(--primary)]/30 hover:shadow-md"}
+                    `}
+                  >
+                    <div className={`
+                      w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors
+                      ${dose.completed
+                        ? 'bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/20'
+                        : 'bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--primary-muted)] group-hover:text-[var(--primary)]'}
+                    `}>
+                      {dose.completed ? <CheckCircle2 className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-lg tracking-tight text-[var(--foreground)] truncate">
+                        {dose.name}
+                      </p>
+                      <p className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest flex items-center gap-2">
+                        <Clock className="h-3 w-3" /> {dose.time} • {dose.amount}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {dose.completed ? (
+                        <span className="text-[10px] font-black text-[var(--success)] uppercase tracking-widest bg-[var(--success)]/10 px-3 py-1 rounded-full">Logged</span>
+                      ) : (
+                        <div className="flex gap-2">
+                          {onEditVial && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }}
+                              className="p-2.5 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all sm:opacity-0 group-hover:opacity-100"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button className="btn btn-primary !p-2 !rounded-xl">
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
