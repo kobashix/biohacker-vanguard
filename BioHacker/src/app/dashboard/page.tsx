@@ -236,7 +236,6 @@ function DashboardContent() {
                   userId={user.id}
                   externalLoggingVialId={null}
                   externalEditingVialId={null}
-                  hideLists={false}
                 />
               </div>
             </div>

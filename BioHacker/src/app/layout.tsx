@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
 const space = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk", display: "swap" });
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en" className={`${outfit.variable} ${space.variable}`}>
       <body style={{ fontFamily: "var(--font-sans)" }}>
         {children}
+        <Toaster position="top-right" theme="dark" richColors />
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { useSubscribe } from "replicache-react";
 import { getReplicache, dropReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
 import { generateDemoData } from "@/lib/demoData";
 import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud, User } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
@@ -57,11 +58,11 @@ export default function SettingsPage() {
         await rep.mutate.purgeAllData();
       }
 
-      alert(`Purge Complete!\n\nAll Local and Server data has been queued for deletion.`);
-      window.location.href = '/dashboard';
+      toast.success('Purge Complete! All Local and Server data has been queued for deletion.');
+      setTimeout(() => window.location.href = '/dashboard', 1500);
     } catch (e: any) {
       console.error(e);
-      alert(`Purge failed: ${e.message}`);
+      toast.error(`Purge failed: ${e.message}`);
     } finally {
       setPurging(false);
     }
@@ -100,9 +101,9 @@ export default function SettingsPage() {
           cycles: json.cycles || []
         });
 
-        alert("Backup restored successfully. The changes will sync to the server momentarily.");
+        toast.success("Backup restored successfully. The changes will sync to the server momentarily.");
       } catch (err) {
-        alert("Invalid backup file format.");
+        toast.error("Invalid backup file format.");
         console.error(err);
       }
     };
@@ -126,7 +127,7 @@ export default function SettingsPage() {
     });
 
     setSeeding(false);
-    alert("Demo data added! Vials, pins, wellbeing journals, and inventory items are all populated.");
+    toast.success("Demo data added! Vials, pins, wellbeing journals, and inventory items are all populated.");
   };
 
   const [fullName, setFullName] = useState("");
@@ -145,9 +146,9 @@ export default function SettingsPage() {
         data: { full_name: fullName }
       });
       if (error) throw error;
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (e: any) {
-      alert(`Update failed: ${e.message}`);
+      toast.error(`Update failed: ${e.message}`);
     } finally {
       setUpdatingProfile(false);
     }

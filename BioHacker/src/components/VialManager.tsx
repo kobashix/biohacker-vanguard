@@ -43,9 +43,17 @@ interface VialManagerProps {
   externalEditingVialId?: string | null;
   onLoggingComplete?: () => void;
   initialAction?: string;
+  hideLists?: boolean;
 }
 
-export function VialManager({ userId, externalLoggingVialId, externalEditingVialId, onLoggingComplete, initialAction }: VialManagerProps) {
+export function VialManager({
+  userId,
+  externalLoggingVialId,
+  externalEditingVialId,
+  onLoggingComplete,
+  initialAction,
+  hideLists = false
+}: VialManagerProps) {
   const [vialName, setVialName] = useState("");
   const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
   const [volume, setVolume] = useState("2");
@@ -539,160 +547,164 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
       )}
 
       {/* ACTIVE PROTOCOL SECTION */}
-      <div className="space-y-6">
-        <div className="flex justify-between items-center px-2">
-          <div className="flex items-center gap-3">
-            <Activity className="h-5 w-5 text-[var(--primary)]" />
-            <h3 className="text-xl font-black tracking-tight">Active Protocols</h3>
-          </div>
-          <button
-            onClick={() => { setIsAdding(true); setEditingVial(null); setLoggingVial(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="btn btn-primary !py-2 !px-4 text-[10px] gap-2"
-          >
-            <Plus className="h-4 w-4" /> Initialize
-          </button>
-        </div>
+      {!hideLists && (
+        <>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center px-2">
+              <div className="flex items-center gap-3">
+                <Activity className="h-5 w-5 text-[var(--primary)]" />
+                <h3 className="text-xl font-black tracking-tight">Active Protocols</h3>
+              </div>
+              <button
+                onClick={() => { setIsAdding(true); setEditingVial(null); setLoggingVial(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="btn btn-primary !py-2 !px-4 text-[10px] gap-2"
+              >
+                <Plus className="h-4 w-4" /> Initialize
+              </button>
+            </div>
 
-        <div className="space-y-4">
-          {inventory.active.map(group => (
-            <div
-              key={group.vial.id}
-              className="card !p-5 hover:scale-[1.01] transition-transform group"
-            >
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6">
-                <div className="flex gap-5 items-start sm:items-center">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-colors ${group.vial.status === 'mixed' ? 'bg-[var(--primary-muted)] border-[var(--primary)]/20 text-[var(--primary)]' : group.vial.status === 'pill' ? 'bg-[var(--success-muted)] border-[var(--success)]/20 text-[var(--success)]' : 'bg-[var(--muted)] border-transparent text-[var(--muted-foreground)]'}`}>
-                    {group.vial.status === 'mixed' ? <Droplets className="h-7 w-7" /> : group.vial.status === 'pill' ? <CircleDot className="h-7 w-7" /> : <Beaker className="h-7 w-7" />}
+            <div className="space-y-4">
+              {inventory.active.map(group => (
+                <div
+                  key={group.vial.id}
+                  className="card !p-5 hover:scale-[1.01] transition-transform group"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6">
+                    <div className="flex gap-5 items-start sm:items-center">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-colors ${group.vial.status === 'mixed' ? 'bg-[var(--primary-muted)] border-[var(--primary)]/20 text-[var(--primary)]' : group.vial.status === 'pill' ? 'bg-[var(--success-muted)] border-[var(--success)]/20 text-[var(--success)]' : 'bg-[var(--muted)] border-transparent text-[var(--muted-foreground)]'}`}>
+                        {group.vial.status === 'mixed' ? <Droplets className="h-7 w-7" /> : group.vial.status === 'pill' ? <CircleDot className="h-7 w-7" /> : <Beaker className="h-7 w-7" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-black text-xl tracking-tight leading-tight">{group.vial.name}</div>
+                        <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider mt-1 opacity-60">
+                          {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
+                        </div>
+                        {group.vial.status === 'mixed' && (
+                          <div className="flex gap-4 mt-3">
+                            {group.vial.bac_water_ml ? <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">{group.vial.bac_water_ml}ML BAC</span> : null}
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${group.vial.remaining_percent_est && group.vial.remaining_percent_est < 20 ? 'text-[var(--secondary)] bg-[var(--secondary)]/10' : 'text-[var(--primary)] bg-[var(--primary)]/10'}`}>
+                              {group.vial.remaining_percent_est ?? 100}% Level
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Grid */}
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--primary)] text-white hover:brightness-110 transition-all shadow-lg shadow-[var(--primary)]/20"
+                        title="Log Dose"
+                      >
+                        <Syringe className="h-5 w-5 mx-auto" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSchedulingVial(group.vial);
+                          setDoseAmount(group.protocol?.dose_amount.toString() || "250");
+                          const f = group.protocol?.frequency_hours || 24;
+                          setFrequency(f.toString());
+                          setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : f === 12 ? 'twice_daily' : 'custom');
+                          setDaysOn(group.protocol?.days_on?.toString() || "7");
+                          setTimeBuckets(group.protocol?.time_buckets || []);
+                          setDoseUnit(group.protocol?.dose_unit || getDoseUnitLabel(group.vial, 0));
+
+                          // Initialize preferred start time from existing record
+                          if (group.protocol?.start_time) {
+                            const d = new Date(group.protocol.start_time);
+                            const h = d.getHours().toString().padStart(2, '0');
+                            const m = d.getMinutes().toString().padStart(2, '0');
+                            setPreferredStartTime(`${h}:${m}`);
+                          } else {
+                            setPreferredStartTime("08:00");
+                          }
+                        }}
+                        className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
+                        title="Set Protocol"
+                      >
+                        <Calendar className="h-5 w-5 mx-auto" />
+                      </button>
+                      <button
+                        onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        className="p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
+                        title="Edit Vial"
+                      >
+                        <Edit3 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm(`Permanently delete ${group.vial.name}?`)) {
+                            if (group.protocol) await rep?.mutate.deleteProtocol(group.protocol.id);
+                            await rep?.mutate.deleteVial(group.vial.id);
+                          }
+                        }}
+                        className="p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-black text-xl tracking-tight leading-tight">{group.vial.name}</div>
-                    <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider mt-1 opacity-60">
+
+                  {group.protocol && (
+                    <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap gap-2">
+                      <div className="text-[10px] font-black bg-[var(--primary)] text-white px-3 py-1 rounded-full shadow-sm">
+                        {group.protocol.dose_amount}{group.protocol.dose_unit || getDoseUnitLabel(group.vial, 0)} • Every {group.protocol.frequency_hours !== 24 ? `${group.protocol.frequency_hours}H` : 'Day'}
+                      </div>
+                      {group.protocol.skip_weekends && <div className="text-[10px] font-black bg-[var(--secondary)] text-white px-3 py-1 rounded-full shadow-sm">No Weekends</div>}
+                      {group.protocol.time_buckets?.map(b => (
+                        <div key={b} className="text-[10px] font-black border border-[var(--primary)] text-[var(--primary)] px-3 py-0.5 rounded-full capitalize">{b}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* STRATEGIC STOCKPILE */}
+          <div className="space-y-6 opacity-60 hover:opacity-100 transition-opacity">
+            <div className="flex justify-between items-center px-2">
+              <div className="flex items-center gap-3">
+                <Archive className="h-5 w-5 text-[var(--muted-foreground)]" />
+                <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Cold Stockpile</h3>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {inventory.stockpile.map(group => (
+                <div key={group.vial.id} className="card !p-4 border-dashed flex justify-between items-center group bg-[var(--muted)]/20 shadow-none">
+                  <div>
+                    <div className="font-black text-sm uppercase tracking-tight">{group.vial.name} <span className="text-[var(--primary)] ml-2">Qty {group.count}</span></div>
+                    <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase mt-0.5 opacity-60">
                       {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
                     </div>
-                    {group.vial.status === 'mixed' && (
-                      <div className="flex gap-4 mt-3">
-                        {group.vial.bac_water_ml ? <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">{group.vial.bac_water_ml}ML BAC</span> : null}
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${group.vial.remaining_percent_est && group.vial.remaining_percent_est < 20 ? 'text-[var(--secondary)] bg-[var(--secondary)]/10' : 'text-[var(--primary)] bg-[var(--primary)]/10'}`}>
-                          {group.vial.remaining_percent_est ?? 100}% Level
-                        </span>
-                      </div>
-                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (confirm(`Permanently delete all ${group.count} ${group.vial.name} items?`)) {
+                          for (const id of group.ids) await rep?.mutate.deleteVial(id);
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-
-                {/* Action Grid */}
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--primary)] text-white hover:brightness-110 transition-all shadow-lg shadow-[var(--primary)]/20"
-                    title="Log Dose"
-                  >
-                    <Syringe className="h-5 w-5 mx-auto" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSchedulingVial(group.vial);
-                      setDoseAmount(group.protocol?.dose_amount.toString() || "250");
-                      const f = group.protocol?.frequency_hours || 24;
-                      setFrequency(f.toString());
-                      setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : f === 12 ? 'twice_daily' : 'custom');
-                      setDaysOn(group.protocol?.days_on?.toString() || "7");
-                      setTimeBuckets(group.protocol?.time_buckets || []);
-                      setDoseUnit(group.protocol?.dose_unit || getDoseUnitLabel(group.vial, 0));
-
-                      // Initialize preferred start time from existing record
-                      if (group.protocol?.start_time) {
-                        const d = new Date(group.protocol.start_time);
-                        const h = d.getHours().toString().padStart(2, '0');
-                        const m = d.getMinutes().toString().padStart(2, '0');
-                        setPreferredStartTime(`${h}:${m}`);
-                      } else {
-                        setPreferredStartTime("08:00");
-                      }
-                    }}
-                    className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
-                    title="Set Protocol"
-                  >
-                    <Calendar className="h-5 w-5 mx-auto" />
-                  </button>
-                  <button
-                    onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                    className="p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
-                    title="Edit Vial"
-                  >
-                    <Edit3 className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (confirm(`Permanently delete ${group.vial.name}?`)) {
-                        if (group.protocol) await rep?.mutate.deleteProtocol(group.protocol.id);
-                        await rep?.mutate.deleteVial(group.vial.id);
-                      }
-                    }}
-                    className="p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-
-              {group.protocol && (
-                <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap gap-2">
-                  <div className="text-[10px] font-black bg-[var(--primary)] text-white px-3 py-1 rounded-full shadow-sm">
-                    {group.protocol.dose_amount}{group.protocol.dose_unit || getDoseUnitLabel(group.vial, 0)} • Every {group.protocol.frequency_hours !== 24 ? `${group.protocol.frequency_hours}H` : 'Day'}
-                  </div>
-                  {group.protocol.skip_weekends && <div className="text-[10px] font-black bg-[var(--secondary)] text-white px-3 py-1 rounded-full shadow-sm">No Weekends</div>}
-                  {group.protocol.time_buckets?.map(b => (
-                    <div key={b} className="text-[10px] font-black border border-[var(--primary)] text-[var(--primary)] px-3 py-0.5 rounded-full capitalize">{b}</div>
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* STRATEGIC STOCKPILE */}
-      <div className="space-y-6 opacity-60 hover:opacity-100 transition-opacity">
-        <div className="flex justify-between items-center px-2">
-          <div className="flex items-center gap-3">
-            <Archive className="h-5 w-5 text-[var(--muted-foreground)]" />
-            <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Cold Stockpile</h3>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {inventory.stockpile.map(group => (
-            <div key={group.vial.id} className="card !p-4 border-dashed flex justify-between items-center group bg-[var(--muted)]/20 shadow-none">
-              <div>
-                <div className="font-black text-sm uppercase tracking-tight">{group.vial.name} <span className="text-[var(--primary)] ml-2">Qty {group.count}</span></div>
-                <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase mt-0.5 opacity-60">
-                  {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
-                >
-                  <Edit3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={async () => {
-                    if (confirm(`Permanently delete all ${group.count} ${group.vial.name} items?`)) {
-                      for (const id of group.ids) await rep?.mutate.deleteVial(id);
-                    }
-                  }}
-                  className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        </>
+      )}
 
       {/* ── PROTOCOL SCHEDULING SHEET ── */}
       {schedulingVial && (
