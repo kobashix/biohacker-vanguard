@@ -19,7 +19,6 @@ import { SubjectiveLogger } from "@/components/SubjectiveLogger";
 import { HelpGuides } from "@/components/HelpGuides";
 import { CycleManager } from "@/components/CycleManager";
 import { SupplyTracker } from "@/components/SupplyTracker";
-import { GlobalQuickTip } from "@/components/GlobalQuickTip";
 import { PerformInventory } from "@/components/PerformInventory";
 
 /* ─── Dot Indicator (Mobile) ─────────────────────────────────────────── */
@@ -171,7 +170,6 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col gap-12 max-w-[1600px] mx-auto">
-      <GlobalQuickTip />
 
       {/* ── DESKTOP LAYOUT ── */}
       <div className="hidden lg:flex flex-col gap-10">

@@ -16,16 +16,17 @@ const QUICK_TIPS = [
 export function GlobalQuickTip() {
   const [tipIndex, setTipIndex] = useState(0);
 
-  // Pick a random tip on mount
   useEffect(() => {
     setTipIndex(Math.floor(Math.random() * QUICK_TIPS.length));
   }, []);
 
   return (
-    <div style={{ padding: '0.75rem 1rem', background: 'rgba(245,158,11,0.05)', borderBottom: '1px solid rgba(245,158,11,0.15)', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-      <Zap style={{ width: '0.9rem', height: '0.9rem', color: '#f59e0b', flexShrink: 0, marginTop: '0.1rem' }} />
-      <p style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#fbbf24', lineHeight: 1.4, margin: 0 }}>
-        <strong style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '0.25rem' }}>Tip:</strong>
+    <div className="bg-amber-500/5 border-b border-amber-500/10 py-3 px-6 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="p-2 bg-amber-500/10 rounded-xl">
+        <Zap className="h-4 w-4 text-amber-500" />
+      </div>
+      <p className="text-xs font-semibold text-amber-600/80 leading-relaxed italic">
+        <span className="text-amber-600 font-black uppercase tracking-widest mr-2 not-italic text-[10px]">Optimization Tip:</span>
         {QUICK_TIPS[tipIndex]}
       </p>
     </div>
