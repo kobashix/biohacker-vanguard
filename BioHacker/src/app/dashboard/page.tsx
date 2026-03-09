@@ -311,7 +311,7 @@ function DashboardContent() {
             <div className="grid grid-cols-12 gap-10">
             {/* Main column */}
             <div className="col-span-8 flex flex-col gap-10">
-              <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
+              <div id="scheduler"><DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} /></div>
               <SubjectiveLogger userId={user.id} />
               <PKChart userId={user.id} />
             </div>
@@ -319,7 +319,7 @@ function DashboardContent() {
             <div className="col-span-4 flex flex-col gap-10">
               <InventoryAlerts userId={user.id} />
               <CycleManager userId={user.id} />
-              <SupplyTracker userId={user.id} />
+              <div id="inventory"><SupplyTracker userId={user.id} /></div>
               <VialManager 
                 userId={user.id} 
                 externalLoggingVialId={activeLoggingVialId} 

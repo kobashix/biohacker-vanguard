@@ -536,7 +536,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                       setDoseAmount(group.protocol?.dose_amount.toString() || "250"); 
                       const f = group.protocol?.frequency_hours || 24; 
                       setFrequency(f.toString()); 
-                      setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : 'custom'); 
+                      setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : f === 12 ? 'twice_daily' : 'custom'); 
                       setDaysOn(group.protocol?.days_on?.toString() || "7"); 
                       setDaysOff(group.protocol?.days_off?.toString() || "0"); 
                       setSkipWeekends(group.protocol?.skip_weekends || false); 
@@ -628,19 +628,21 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
 
             <div className="sheet-section">
               <p className="sheet-section-label">Frequency</p>
-              <div className="seg-control" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                {(['daily', 'weekly', 'custom'] as const).map(f => (
+              <div className="seg-control" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                {(['twice_daily', 'daily', 'weekly', 'custom'] as const).map(f => (
                   <button
                     key={f}
                     type="button"
+                    style={{ fontSize: '0.75rem', padding: '0.5rem' }}
                     className={`seg-btn ${frequencyType === f ? 'active' : ''}`}
                     onClick={() => {
                       setFrequencyType(f);
-                      if (f === 'daily') setFrequency('24');
+                      if (f === 'twice_daily') setFrequency('12');
+                      else if (f === 'daily') setFrequency('24');
                       else if (f === 'weekly') setFrequency('168');
                     }}
                   >
-                    {f === 'daily' ? '⚡ Daily' : f === 'weekly' ? '📆 Weekly' : '⚙️ Custom'}
+                    {f === 'twice_daily' ? '⏱️ Twice' : f === 'daily' ? '⚡ Daily' : f === 'weekly' ? '📆 Weekly' : '⚙️ Custom'}
                   </button>
                 ))}
               </div>

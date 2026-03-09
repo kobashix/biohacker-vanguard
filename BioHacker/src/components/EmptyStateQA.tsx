@@ -268,9 +268,21 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                     </div>
                     <div>
                       <label className="form-label" style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Frequency</label>
-                      <div className="seg-control" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                      <div className="seg-control" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                        <button 
+                          className={`seg-btn ${vial.activeCycle.frequency_hours === 12 ? 'active' : ''}`}
+                          style={{ fontSize: '0.75rem', padding: '0.5rem' }}
+                          onClick={() => {
+                            const newVials = [...vials];
+                            if (newVials[index].activeCycle) {
+                              (newVials[index].activeCycle as any).frequency_hours = 12;
+                            }
+                            setVials(newVials);
+                          }}
+                        >Twice</button>
                         <button 
                           className={`seg-btn ${vial.activeCycle.frequency_hours === 24 ? 'active' : ''}`}
+                          style={{ fontSize: '0.75rem', padding: '0.5rem' }}
                           onClick={() => {
                             const newVials = [...vials];
                             if (newVials[index].activeCycle) {
@@ -281,6 +293,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                         >Daily</button>
                         <button 
                           className={`seg-btn ${vial.activeCycle.frequency_hours === 84 ? 'active' : ''}`}
+                          style={{ fontSize: '0.75rem', padding: '0.5rem' }}
                           onClick={() => {
                             const newVials = [...vials];
                             if (newVials[index].activeCycle) {
@@ -291,6 +304,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                         >E3.5D</button>
                         <button 
                           className={`seg-btn ${vial.activeCycle.frequency_hours === 168 ? 'active' : ''}`}
+                          style={{ fontSize: '0.75rem', padding: '0.5rem' }}
                           onClick={() => {
                             const newVials = [...vials];
                             if (newVials[index].activeCycle) {
