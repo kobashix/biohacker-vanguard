@@ -150,6 +150,15 @@ function DashboardContent() {
     if (user && typeof window !== 'undefined' && window.localStorage.getItem('biohacker_demo_mode') === 'true') {
       const seedAndClean = async () => {
         if (!rep) return;
+
+        // Clear flag early to prevent race conditions
+        window.localStorage.removeItem('biohacker_demo_mode');
+
+        // Check if we already have data to prevent flip-flopping
+        if (coreVials.length > 0) {
+          return;
+        }
+
         const data = generateDemoData();
         await rep.mutate.seedDemoData({
           vials: data.demoVials,
@@ -159,11 +168,10 @@ function DashboardContent() {
           supplies: data.demoSupplies,
           cycles: data.demoCycles
         });
-        window.localStorage.removeItem('biohacker_demo_mode');
       };
       seedAndClean();
     }
-  }, [user, rep]);
+  }, [user, rep, coreVials.length]);
 
   if (!user) return null;
   const isEmpty = coreVials.length === 0;
@@ -269,12 +277,11 @@ function DashboardContent() {
                   <h3 className="text-xl font-bold tracking-tight">Protocol Engines</h3>
                   <Zap className="h-5 w-5 text-[var(--secondary)]" />
                 </div>
-                <VialManager
-                  userId={user.id}
-                  externalLoggingVialId={activeLoggingVialId}
-                  externalEditingVialId={activeEditingVialId}
-                  onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }}
-                />
+                <div className="flex flex-col items-center justify-center p-8 bg-[var(--muted)]/20 rounded-2xl border-2 border-dashed border-[var(--border)] text-center opacity-40 group">
+                  <Zap className="h-8 w-8 mb-3 text-[var(--secondary)] group-hover:scale-110 transition-transform" />
+                  <p className="text-sm font-bold uppercase tracking-widest">Protocol Engine Active</p>
+                  <p className="text-[10px] mt-1 italic font-medium">Management overlay is globally initialized.</p>
+                </div>
               </div>
 
               <div className="card">
@@ -362,14 +369,8 @@ function DashboardContent() {
                   <SupplyTracker userId={user.id} initialAction={action === 'supply' ? 'add' : ''} />
                 </div>
 
-                <div className="card">
-                  <VialManager
-                    userId={user.id}
-                    externalLoggingVialId={activeLoggingVialId === 'add' ? null : activeLoggingVialId}
-                    externalEditingVialId={activeEditingVialId}
-                    onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }}
-                    initialAction={activeLoggingVialId === 'add' ? 'add' : ''}
-                  />
+                <div className="card h-24 flex items-center justify-center text-[var(--muted-foreground)] opacity-40 italic text-sm">
+                  Apothecary Management Mode
                 </div>
               </div>
             )}
@@ -392,6 +393,15 @@ function DashboardContent() {
           </div>
         )}
       </div>
+
+      {/* ── GLOBAL INTERFACE ENGINES ── */}
+      <VialManager
+        userId={user.id}
+        externalLoggingVialId={activeLoggingVialId}
+        externalEditingVialId={activeEditingVialId}
+        onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }}
+        initialAction={activeLoggingVialId === 'add' ? 'add' : ''}
+      />
     </div>
   );
 }

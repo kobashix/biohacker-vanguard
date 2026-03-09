@@ -14,7 +14,7 @@ function LoginContent() {
   const [loading, setLoading] = useState(isDemoMode);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
-  
+
   const router = useRouter();
 
   const supabase = createBrowserClient(
@@ -25,16 +25,23 @@ function LoginContent() {
   // Handle instant demo mode authentication
   useEffect(() => {
     if (isDemoMode) {
+      console.log("[auth] Initializing Live Demo sequence...");
       const startDemo = async () => {
+        setLoading(true);
         try {
           const { error: authError } = await supabase.auth.signInAnonymously();
-          if (authError) throw authError;
-          
+          if (authError) {
+            console.error("[auth] Demo sign-in error:", authError);
+            throw authError;
+          }
+
+          console.log("[auth] Demo sign-in successful. Setting demo flag and redirecting...");
           window.localStorage.setItem('biohacker_demo_mode', 'true');
-          router.push("/dashboard");
+          router.replace("/dashboard");
           router.refresh();
         } catch (err: any) {
-          setError(err.message || "Failed to initialize Live Demo.");
+          console.error("[auth] Critical failure during demo boot:", err);
+          setError(`Live Demo Initialization Failed: ${err.message || "Unknown Error"}. Please ensure Anonymous Auth is enabled in Supabase.`);
           setLoading(false);
         }
       };
@@ -65,7 +72,7 @@ function LoginContent() {
         if (authError) throw authError;
         alert("Check your email for the confirmation link!");
       }
-      
+
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
@@ -89,7 +96,7 @@ function LoginContent() {
             BioTracker (by MMM) Zero-Knowledge Portal
           </p>
         </div>
-        
+
         <div className="card-content">
           {isDemoMode ? (
             <div style={{ padding: '2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -100,52 +107,52 @@ function LoginContent() {
             <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div className="form-group">
                 <label className="form-label">Email Address</label>
-              <input 
-                className="form-input" 
-                type="email" 
-                placeholder="name@company.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input 
-                className="form-input" 
-                type="password" 
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="alert-box" style={{ marginTop: '0' }}>
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
+                <input
+                  className="form-input"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
-            )}
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input
+                  className="form-input"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
-              disabled={loading}
-              style={{ width: '100%', height: '2.75rem' }}
-            >
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                mode === "login" ? "Sign In" : "Register"
+              {error && (
+                <div className="alert-box" style={{ marginTop: '0' }}>
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+                style={{ width: '100%', height: '2.75rem' }}
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  mode === "login" ? "Sign In" : "Register"
+                )}
+              </button>
+            </form>
           )}
 
           {!isDemoMode && (
             <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
-              <button 
+              <button
                 onClick={() => setMode(mode === "login" ? "signup" : "login")}
                 className="btn-outline"
                 style={{ border: 'none', background: 'none', color: 'var(--primary)', cursor: 'pointer' }}
