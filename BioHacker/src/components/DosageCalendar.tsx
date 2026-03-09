@@ -55,11 +55,15 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
       const frequencyMs = protocol.frequency_hours * 3600000;
 
       if (protocol.time_buckets && protocol.time_buckets.length > 0) {
+        const anchor = new Date(protocol.start_time);
+        const anchorHour = anchor.getHours();
+        const anchorMin = anchor.getMinutes();
+
         protocol.time_buckets.forEach(bucket => {
           const occ = new Date(day);
-          if (bucket === 'morning') occ.setHours(8, 0, 0, 0);
-          else if (bucket === 'afternoon') occ.setHours(14, 0, 0, 0);
-          else if (bucket === 'night') occ.setHours(20, 0, 0, 0);
+          if (bucket === 'morning') occ.setHours(anchorHour, anchorMin, 0, 0);
+          else if (bucket === 'afternoon') occ.setHours(anchorHour + 6, anchorMin, 0, 0);
+          else if (bucket === 'night') occ.setHours(anchorHour + 12, anchorMin, 0, 0);
           occurrences.push(occ.getTime());
         });
       } else {

@@ -597,10 +597,18 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                       setFrequency(f.toString());
                       setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : f === 12 ? 'twice_daily' : 'custom');
                       setDaysOn(group.protocol?.days_on?.toString() || "7");
-                      setDaysOff(group.protocol?.days_off?.toString() || "0");
-                      setSkipWeekends(group.protocol?.skip_weekends || false);
                       setTimeBuckets(group.protocol?.time_buckets || []);
                       setDoseUnit(group.protocol?.dose_unit || getDoseUnitLabel(group.vial, 0));
+
+                      // Initialize preferred start time from existing record
+                      if (group.protocol?.start_time) {
+                        const d = new Date(group.protocol.start_time);
+                        const h = d.getHours().toString().padStart(2, '0');
+                        const m = d.getMinutes().toString().padStart(2, '0');
+                        setPreferredStartTime(`${h}:${m}`);
+                      } else {
+                        setPreferredStartTime("08:00");
+                      }
                     }}
                     className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
                     title="Set Protocol"
@@ -830,8 +838,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-4">
-                  {[{ label: 'Start Time', type: 'time', val: preferredStartTime, set: setPreferredStartTime },
-                  { label: 'Days On', type: 'number', val: daysOn, set: setDaysOn },
+                  {[{ label: 'Days On', type: 'number', val: daysOn, set: setDaysOn },
                   { label: 'Days Off', type: 'number', val: daysOff, set: setDaysOff }].map(({ label, type, val, set }) => (
                     <div key={label} className="space-y-2">
                       <label className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">{label}</label>
@@ -846,17 +853,15 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                 </div>
               )}
 
-              {frequencyType === 'weekly' && (
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">Start Time</label>
-                  <input
-                    className="form-input !py-3 text-center font-black text-lg w-full"
-                    type="time"
-                    value={preferredStartTime}
-                    onChange={e => setPreferredStartTime(e.target.value)}
-                  />
-                </div>
-              )}
+              <div className="space-y-4">
+                <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">Anchor / Morning Start Time</label>
+                <input
+                  className="form-input !py-3 text-center font-black text-lg w-full"
+                  type="time"
+                  value={preferredStartTime}
+                  onChange={e => setPreferredStartTime(e.target.value)}
+                />
+              </div>
 
               <button
                 className="btn btn-primary w-full py-6 mt-6 shadow-xl shadow-[var(--primary)]/20 text-lg"
