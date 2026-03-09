@@ -47,9 +47,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#09090b]">
+    <div className="flex min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex shrink-0 border-r border-[#27272a]">
+      <div className="hidden lg:flex shrink-0 border-r border-[var(--border)]">
         <Sidebar onSignOut={handleSignOut} />
       </div>
       
@@ -58,13 +58,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="max-w-[1400px] mx-auto w-full">
             {children}
             
-            <footer className="mt-24 py-12 border-t border-[#27272a] text-[10px] text-[#a1a1aa] space-y-4 hidden lg:block">
+            <footer className="mt-24 py-12 border-t border-[var(--border)] text-[10px] text-[var(--muted-foreground)] space-y-4 hidden lg:block">
               <div className="flex items-center gap-2 text-[#2563eb] font-bold uppercase tracking-widest">
                 <ShieldCheck className="h-3 w-3" />
                 HIPAA & SOC-2 Compliance Statement
               </div>
               <p className="leading-relaxed max-w-3xl">
-                BioHacker (by MMM) is engineered with zero-knowledge, local-first architecture. 
+                BioTracker (by MMM) is engineered with zero-knowledge, local-first architecture. 
                 All pharmaceutical data is encrypted at-rest and protected by PostgreSQL Row-Level Security (RLS). 
                 Our systems are aligned with GAAP standards for clinical inventory management and SOC-2 data isolation protocols. 
                 We do not sell medical data. All telemetry is stored strictly for the purpose of user-directed reporting and analysis.

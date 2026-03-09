@@ -19,14 +19,14 @@ const NAV_ITEMS = [
   },
   {
     id: "inventory",
-    name: "Inventory",
+    name: "Stash",
     icon: Beaker,
     href: "/dashboard?tab=inventory",
     tabMatch: "inventory",
     subs: [
-      { label: "View Inventory", href: "/dashboard?tab=inventory", icon: Eye },
+      { label: "View Stash", href: "/dashboard?tab=inventory", icon: Eye },
       { label: "Perform Inventory", href: "/dashboard?tab=inventory&action=perform", icon: Package },
-      { label: "Modify Inventory", href: "/dashboard?tab=inventory&action=add", icon: Plus },
+      { label: "Add to Stash", href: "/dashboard?tab=inventory&action=add", icon: Plus },
     ] as SubItem[],
   },
   {
