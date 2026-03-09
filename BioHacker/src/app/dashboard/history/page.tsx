@@ -7,7 +7,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, SubjectiveLog } from "@/replicache";
 import { format, formatDistanceToNow } from "date-fns";
-import { Download, Syringe, Heart, Smile, Zap, Moon, Activity, BookOpen, ChevronRight } from "lucide-react";
+import { Download, Syringe, Heart, Smile, Zap, Moon, Activity, BookOpen, ChevronRight, Trash2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 function ScoreBar({ value, color, icon: Icon, label }: { value: number; color: string; icon: any; label: string }) {
@@ -177,11 +177,12 @@ function HistoryContent() {
                   <th>Compound</th>
                   <th>Dose</th>
                   <th>Site</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {doseLogs.length === 0 && (
-                  <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2.5rem', color: '#a1a1aa' }}>No pins logged yet.</td></tr>
+                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2.5rem', color: '#a1a1aa' }}>No pins logged yet.</td></tr>
                 )}
                 {doseLogs.map((item: any, idx: number) => (
                   <tr key={idx}>
@@ -189,6 +190,18 @@ function HistoryContent() {
                     <td style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.substance}</td>
                     <td style={{ color: '#2563eb', fontWeight: 700 }}>{item.dose_amount} {item.unit}</td>
                     <td style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{item.injection_site || '—'}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        onClick={async () => {
+                          if (confirm(`Delete this log entry for ${item.substance}?`)) {
+                            await rep?.mutate.deleteDoseLog(item.id);
+                          }
+                        }}
+                        className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all border-none cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

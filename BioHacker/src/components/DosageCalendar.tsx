@@ -73,7 +73,7 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
 
       occurrences.forEach(occTime => {
         const isCompleted = logs.some(l =>
-          l.vial_id === vial.id && Math.abs(l.timestamp - occTime) < 7200000
+          l.vial_id === vial.id && Math.abs(l.timestamp - occTime) < 21600000
         );
         let unit = 'mcg';
         if (vial.status === 'pill') unit = 'pills';

@@ -17,7 +17,7 @@ export type Vial = {
   bac_water_ml?: number;
   remaining_percent_est?: number;
   status: 'powder' | 'mixed' | 'pill';
-  pill_count?: number; 
+  pill_count?: number;
 };
 
 export type DoseLog = {
@@ -25,8 +25,8 @@ export type DoseLog = {
   vial_id: string;
   substance: string;
   dose_amount: number;
-  unit: string; 
-  units_iu: number; 
+  unit: string;
+  units_iu: number;
   timestamp: number;
   injection_site?: string;
 };
@@ -102,13 +102,42 @@ const mutators = {
       } else if (vial.status === 'mixed') {
         await tx.set(`vial/${vial.id}`, {
           ...vial,
-          remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - NEEDLE_DEAD_SPACE_ML.toNumber()), 
+          remaining_volume_ml: Math.max(0, vial.remaining_volume_ml - (log.units_iu / 100) - NEEDLE_DEAD_SPACE_ML.toNumber()),
         });
       }
     }
   },
   logSubjective: async (tx: WriteTransaction, log: SubjectiveLog) => {
     await tx.set(`subjective/${log.id}`, log);
+  },
+  deleteDoseLog: async (tx: WriteTransaction, id: string) => {
+    const log = (await tx.get(`log/${id}`)) as DoseLog | undefined;
+    if (!log) return;
+
+    // Reverse the volume/pill count reduction
+    const vial = (await tx.get(`vial/${log.vial_id}`)) as Vial | undefined;
+    if (vial) {
+      if (vial.status === 'pill') {
+        await tx.set(`vial/${vial.id}`, {
+          ...vial,
+          pill_count: (vial.pill_count || 0) + log.dose_amount,
+        });
+      } else if (vial.status === 'mixed') {
+        await tx.set(`vial/${vial.id}`, {
+          ...vial,
+          remaining_volume_ml: vial.remaining_volume_ml + (log.units_iu / 100) + NEEDLE_DEAD_SPACE_ML.toNumber(),
+        });
+      }
+    }
+    await tx.del(`log/${id}`);
+  },
+  updateDoseLog: async (tx: WriteTransaction, update: Partial<DoseLog> & { id: string }) => {
+    const prev = (await tx.get(`log/${update.id}`)) as DoseLog | undefined;
+    if (prev) {
+      // NOTE: We don't adjust volume here for simplicity in this V1. 
+      // User can delete and re-log if amount was wrong.
+      await tx.set(`log/${update.id}`, { ...prev, ...update });
+    }
   },
   updateSupply: async (tx: WriteTransaction, supply: Supply) => {
     await tx.set(`supply/${supply.id}`, supply);
@@ -177,14 +206,14 @@ export function getReplicache(userId: string) {
 export async function dropReplicache(userId: string) {
   if (typeof window === 'undefined' || !userId) return;
   const dbName = `biohacker-${userId}`;
-  
+
   if (replicache && replicacheUserId === userId) {
     console.log(`[replicache] Closing active instance for ${userId} before drop`);
     await replicache.close();
     replicache = null;
     replicacheUserId = null;
   }
-  
+
   console.log(`[replicache] Dropping database ${dbName}`);
   try {
     await dropDatabase(dbName);
