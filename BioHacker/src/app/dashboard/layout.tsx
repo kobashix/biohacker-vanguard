@@ -49,11 +49,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)] selection:text-[var(--primary-foreground)]">
-      {/* Top Diagnostic HUD */}
-      <ConsoleHUD onSignOut={handleSignOut} />
-
-      <div className="pt-20 flex flex-col min-w-0">
+      <div className="sticky top-0 z-50 w-full flex flex-col shadow-sm">
+        <ConsoleHUD onSignOut={handleSignOut} />
         <GlobalQuickTip />
+      </div>
+
+      <div className="flex flex-col min-w-0">
         <main className="flex-1 px-4 py-8 lg:p-12 pb-28 lg:pb-16 overflow-x-hidden">
           <div className="max-w-[1600px] mx-auto w-full">
             {children}
