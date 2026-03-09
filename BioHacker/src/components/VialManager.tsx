@@ -76,6 +76,7 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
   const [skipWeekends, setSkipWeekends] = useState(false);
   const [timeBuckets, setTimeBuckets] = useState<('morning' | 'afternoon' | 'night')[]>([]);
   const [preferredStartTime, setPreferredStartTime] = useState("08:00");
+  const [weeklyDay, setWeeklyDay] = useState("1"); // Default to Monday
 
   // Logging State
   const [targetCompoundIndex, setTargetCompoundIndex] = useState(0);
@@ -192,15 +193,34 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
     if (existing) await rep.mutate.deleteProtocol(existing.id);
 
     const [hours, minutes] = preferredStartTime.split(':').map(Number);
-    const start = new Date();
+    let start = new Date();
     start.setHours(hours, minutes, 0, 0);
+
+    let finalDaysOn = parseInt(daysOn);
+    let finalDaysOff = parseInt(daysOff);
+    let finalFrequency = parseFloat(frequency);
+
+    if (frequencyType === 'weekly') {
+      finalFrequency = 168;
+      finalDaysOn = 1;
+      finalDaysOff = 6;
+
+      // Pivot start date to the selected day of the week
+      const targetDay = parseInt(weeklyDay);
+      const currentDay = start.getDay();
+      const diff = targetDay - currentDay;
+      start.setDate(start.getDate() + diff);
+
+      // If the calculated start is in the future relative to "now" but in this week, that's fine.
+      // We want the most recent or upcoming "anchor" day.
+    }
 
     await rep.mutate.createProtocol({
       id: crypto.randomUUID(), vial_id: vialId, dose_amount: parseFloat(doseAmount),
       dose_unit: doseUnit,
-      frequency_hours: parseFloat(frequency),
-      days_on: parseInt(daysOn),
-      days_off: parseInt(daysOff),
+      frequency_hours: finalFrequency,
+      days_on: finalDaysOn,
+      days_off: finalDaysOff,
       skip_weekends: skipWeekends,
       time_buckets: timeBuckets,
       start_time: start.getTime(),
@@ -776,21 +796,56 @@ export function VialManager({ userId, externalLoggingVialId, externalEditingVial
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                {[{ label: 'Start Time', type: 'time', val: preferredStartTime, set: setPreferredStartTime },
-                { label: 'Days On', type: 'number', val: daysOn, set: setDaysOn },
-                { label: 'Days Off', type: 'number', val: daysOff, set: setDaysOff }].map(({ label, type, val, set }) => (
-                  <div key={label} className="space-y-2">
-                    <label className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">{label}</label>
-                    <input
-                      className="form-input !py-3 text-center font-black text-lg"
-                      type={type}
-                      value={val}
-                      onChange={e => set(e.target.value)}
-                    />
+              {frequencyType === 'weekly' ? (
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">Specific Day of Week</label>
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => setWeeklyDay(i.toString())}
+                        className={`
+                          py-3 rounded-xl font-bold text-xs border transition-all
+                          ${weeklyDay === i.toString()
+                            ? "bg-[var(--primary)] text-white border-[var(--primary)] shadow-md"
+                            : "bg-[var(--muted)] border-transparent text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"}
+                        `}
+                      >
+                        {day.toUpperCase()}
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-4">
+                  {[{ label: 'Start Time', type: 'time', val: preferredStartTime, set: setPreferredStartTime },
+                  { label: 'Days On', type: 'number', val: daysOn, set: setDaysOn },
+                  { label: 'Days Off', type: 'number', val: daysOff, set: setDaysOff }].map(({ label, type, val, set }) => (
+                    <div key={label} className="space-y-2">
+                      <label className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">{label}</label>
+                      <input
+                        className="form-input !py-3 text-center font-black text-lg"
+                        type={type}
+                        value={val}
+                        onChange={e => set(e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {frequencyType === 'weekly' && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider px-1">Start Time</label>
+                  <input
+                    className="form-input !py-3 text-center font-black text-lg w-full"
+                    type="time"
+                    value={preferredStartTime}
+                    onChange={e => setPreferredStartTime(e.target.value)}
+                  />
+                </div>
+              )}
 
               <button
                 className="btn btn-primary w-full py-6 mt-6 shadow-xl shadow-[var(--primary)]/20 text-lg"
