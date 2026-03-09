@@ -85,22 +85,22 @@ function SnapSection({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.875rem 0 0.625rem',
-        borderBottom: '1px solid #27272a',
+        borderBottom: '1px solid var(--border)',
         marginBottom: '0.875rem',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '1.1rem' }}>{emoji}</span>
-          <span style={{ fontSize: '0.875rem', fontWeight: 800, color: '#fafafa', letterSpacing: '-0.01em' }}>{label}</span>
+          <span style={{ fontSize: '0.875rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.01em' }}>{label}</span>
         </div>
         <span style={{
           fontSize: '0.7rem',
           fontWeight: 700,
-          color: '#3f3f46',
-          background: '#18181b',
-          border: '1px solid #27272a',
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
           borderRadius: '99px',
           padding: '0.2rem 0.6rem',
           letterSpacing: '0.05em',
+          color: 'var(--foreground)'
         }}>
           {index + 1} / {total}
         </span>
@@ -129,18 +129,18 @@ function SnapSection({
         justifyContent: 'center',
         gap: '0.5rem',
         padding: '0.625rem 0 0.5rem',
-        borderTop: '1px solid #1a1a1e',
+        borderTop: '1px solid var(--border)',
       }}>
         {nextLabel ? (
           <>
-            <div style={{ width: '28px', height: '3px', borderRadius: '2px', background: '#27272a' }} />
-            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#3f3f46', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div style={{ width: '28px', height: '3px', borderRadius: '2px', background: 'var(--border)' }} />
+            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               swipe ↓ {nextLabel}
             </span>
-            <div style={{ width: '28px', height: '3px', borderRadius: '2px', background: '#27272a' }} />
+            <div style={{ width: '28px', height: '3px', borderRadius: '2px', background: 'var(--border)' }} />
           </>
         ) : (
-          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#3f3f46', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             ↑ swipe up to go back
           </span>
         )}
@@ -311,17 +311,14 @@ function DashboardContent() {
             <div className="grid grid-cols-12 gap-10">
             {/* Main column */}
             <div className="col-span-8 flex flex-col gap-10">
-              <CycleManager userId={user.id} />
               <DosageCalendar userId={user.id} onSelectVial={(id) => setActiveLoggingVialId(id)} onEditVial={(id) => setActiveEditingVialId(id)} />
-              <div className="grid grid-cols-2 gap-10">
-                <SubjectiveLogger userId={user.id} />
-                <HelpGuides />
-              </div>
+              <SubjectiveLogger userId={user.id} />
               <PKChart userId={user.id} />
             </div>
             {/* Side column */}
             <div className="col-span-4 flex flex-col gap-10">
               <InventoryAlerts userId={user.id} />
+              <CycleManager userId={user.id} />
               <SupplyTracker userId={user.id} />
               <VialManager 
                 userId={user.id} 
@@ -330,6 +327,7 @@ function DashboardContent() {
                 onLoggingComplete={() => { setActiveLoggingVialId(null); setActiveEditingVialId(null); }} 
               />
               <ReconstitutionEngine />
+              <HelpGuides />
             </div>
           </div>
         )}

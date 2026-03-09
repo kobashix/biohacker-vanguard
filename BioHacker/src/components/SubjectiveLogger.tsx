@@ -43,7 +43,7 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
   const SliderRow = ({ label, icon: Icon, value, onChange, color }: any) => (
     <div style={{ marginBottom: '1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.375rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a1a1aa' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted-foreground)' }}>
           <Icon style={{ width: '0.875rem', height: '0.875rem', color }} />
           {label}
         </div>
@@ -52,7 +52,7 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
           {[...Array(10)].map((_, i) => (
             <div key={i} style={{
               width: '6px', height: '6px', borderRadius: '3px',
-              background: i < value ? color : '#27272a',
+              background: i < value ? color : 'var(--border)',
               transition: 'background 0.1s',
             }} />
           ))}
@@ -85,10 +85,10 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
             href="/dashboard/history?view=wellbeing"
             style={{
               display: 'flex', alignItems: 'center', gap: '0.25rem',
-              fontSize: '0.75rem', fontWeight: 700, color: '#2563eb',
+              fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)',
               textDecoration: 'none', whiteSpace: 'nowrap',
               padding: '0.375rem 0.625rem',
-              background: 'rgba(37,99,235,0.1)',
+              background: 'var(--primary-muted)',
               borderRadius: '0.5rem',
             }}
           >
@@ -129,7 +129,7 @@ export function SubjectiveLogger({ userId }: { userId: string }) {
           onClick={handleSave}
           className={`btn w-full flex gap-2 mt-2 ${saved ? 'btn-outline' : 'btn-primary'}`}
           disabled={saved}
-          style={saved ? { borderColor: '#10b981', color: '#10b981' } : {}}
+          style={saved ? { borderColor: 'var(--success)', color: 'var(--success)' } : {}}
         >
           {saved ? <><Check className="h-4 w-4" /> Entry Recorded ✓</> : <><Save className="h-4 w-4" /> Log Check-In</>}
         </button>

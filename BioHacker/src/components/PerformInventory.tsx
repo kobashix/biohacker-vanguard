@@ -54,30 +54,38 @@ export function PerformInventory({ userId }: { userId: string }) {
           <h3 className="card-title text-primary">Perform Inventory</h3>
           <p className="card-description">Bulk update all your physical counts rapidly.</p>
         </div>
-        <button 
-          onClick={handleSaveAll}
-          disabled={!hasEdits}
-          className="btn btn-primary px-4 py-2 flex items-center gap-2 disabled:opacity-50"
-          style={{ background: success ? '#10b981' : undefined }}
-        >
-          {success ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {success ? "Saved" : "Save Counts"}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            onClick={() => window.history.pushState(null, '', '?tab=inventory')}
+            className="btn btn-outline px-3 py-2 text-xs"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={handleSaveAll}
+            disabled={!hasEdits}
+            className="btn btn-primary px-4 py-2 flex items-center gap-2 disabled:opacity-50"
+            style={{ background: success ? 'var(--success)' : undefined }}
+          >
+            {success ? <CheckCircle2 className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+            {success ? "Saved" : "Save Counts"}
+          </button>
+        </div>
       </div>
 
       <div className="card-content p-0">
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           
           {/* VIALS */}
-          <div style={{ background: '#18181b', padding: '0.5rem 1rem', borderBottom: '1px solid #27272a', borderTop: '1px solid #27272a' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#a1a1aa', letterSpacing: '0.05em' }}>Vial Volumes (mL)</span>
+          <div style={{ background: 'var(--input-bg)', padding: '0.5rem 1rem', borderBottom: '1px solid var(--border)', borderTop: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--muted-foreground)', letterSpacing: '0.05em' }}>Vial Volumes (mL)</span>
           </div>
           {vials.length === 0 && <div className="p-4 text-sm text-muted-foreground text-center">No vials found.</div>}
           {vials.map(v => (
-            <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', borderBottom: '1px solid #1f1f22' }}>
+            <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
               <div style={{ flex: 1, minWidth: 0, paddingRight: '1rem' }}>
-                <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fafafa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</p>
-                <p style={{ fontSize: '0.75rem', color: '#71717a' }}>Capacity: {v.volume_ml} mL</p>
+                <p style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--foreground)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Capacity: {v.volume_ml} mL</p>
               </div>
               <input 
                 type="number"
@@ -86,21 +94,21 @@ export function PerformInventory({ userId }: { userId: string }) {
                 max={v.volume_ml}
                 value={vialEdits[v.id] ?? v.remaining_volume_ml}
                 onChange={e => handleVialChange(v.id, e.target.value)}
-                style={{ width: '80px', padding: '0.5rem', background: '#09090b', border: '1px solid #27272a', borderRadius: '0.5rem', color: '#fff', fontSize: '1rem', textAlign: 'center' }}
+                style={{ width: '80px', padding: '0.5rem', background: 'var(--background)', border: '1px solid var(--border)', borderRadius: '0.5rem', color: 'var(--foreground)', fontSize: '1rem', textAlign: 'center' }}
               />
             </div>
           ))}
 
           {/* SUPPLIES */}
-          <div style={{ background: '#18181b', padding: '0.5rem 1rem', borderBottom: '1px solid #27272a', borderTop: '1px solid #27272a', marginTop: vials.length ? '1rem' : 0 }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#a1a1aa', letterSpacing: '0.05em' }}>Gear & Supplies</span>
+          <div style={{ background: 'var(--input-bg)', padding: '0.5rem 1rem', borderBottom: '1px solid var(--border)', borderTop: '1px solid var(--border)', marginTop: vials.length ? '1rem' : 0 }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--muted-foreground)', letterSpacing: '0.05em' }}>Gear & Supplies</span>
           </div>
           {supplies.length === 0 && <div className="p-4 text-sm text-muted-foreground text-center">No gear found.</div>}
           {supplies.map(s => (
-            <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', borderBottom: '1px solid #1f1f22' }}>
+            <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
               <div style={{ flex: 1, minWidth: 0, paddingRight: '1rem' }}>
-                <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fafafa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</p>
-                <p style={{ fontSize: '0.75rem', color: '#71717a' }}>Unit: {s.unit}</p>
+                <p style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--foreground)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>Unit: {s.unit}</p>
               </div>
               <input 
                 type="number"
@@ -108,7 +116,7 @@ export function PerformInventory({ userId }: { userId: string }) {
                 min="0"
                 value={supplyEdits[s.id] ?? s.count}
                 onChange={e => handleSupplyChange(s.id, e.target.value)}
-                style={{ width: '80px', padding: '0.5rem', background: '#09090b', border: '1px solid #27272a', borderRadius: '0.5rem', color: '#fff', fontSize: '1rem', textAlign: 'center' }}
+                style={{ width: '80px', padding: '0.5rem', background: 'var(--background)', border: '1px solid var(--border)', borderRadius: '0.5rem', color: 'var(--foreground)', fontSize: '1rem', textAlign: 'center' }}
               />
             </div>
           ))}

@@ -50,7 +50,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                 <p className="sheet-section-label">Item Name</p>
                 <input
                   className="form-input"
-                  style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a' }}
+                  style={{ background: 'var(--input-bg)', color: 'var(--foreground)', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid var(--border)' }}
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. 31G Insulin Syringes"
@@ -73,7 +73,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                 </div>
                 <input
                   className="form-input"
-                  style={{ marginTop: '0.5rem', background: '#18181b', border: '2px solid #27272a', borderRadius: '0.75rem', padding: '0.75rem' }}
+                  style={{ marginTop: '0.5rem', background: 'var(--input-bg)', color: 'var(--foreground)', border: '2px solid var(--border)', borderRadius: '0.75rem', padding: '0.75rem' }}
                   value={unit}
                   onChange={e => setUnit(e.target.value)}
                   placeholder="Or type a custom unit"
@@ -100,7 +100,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
           {supplies.length === 0 ? (
             <button
               onClick={() => setIsAdding(true)}
-              style={{ width: '100%', padding: '2rem 1rem', border: '2px dashed #27272a', borderRadius: '0.875rem', color: '#a1a1aa', background: 'none', cursor: 'pointer', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}
+              style={{ width: '100%', padding: '2rem 1rem', border: '2px dashed var(--border)', borderRadius: '0.875rem', color: 'var(--muted-foreground)', background: 'none', cursor: 'pointer', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}
             >
               <Package className="h-8 w-8" style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
               <p>No gear tracked yet</p>
@@ -109,11 +109,11 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {supplies.map(s => (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#18181b', border: '1px solid #27272a', borderRadius: '0.875rem', padding: '0.875rem 1rem' }}>
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '0.875rem', padding: '0.875rem 1rem' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
-                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: s.count < 10 ? '#ef4444' : '#2563eb', lineHeight: 1.2 }}>
-                      {s.count} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a1a1aa', textTransform: 'uppercase' }}>{s.unit}</span>
+                    <p style={{ fontWeight: 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--foreground)' }}>{s.name}</p>
+                    <p style={{ fontSize: '1.25rem', fontWeight: 800, color: s.count < 10 ? 'var(--destructive)' : 'var(--primary)', lineHeight: 1.2 }}>
+                      {s.count} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>{s.unit}</span>
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
@@ -129,7 +129,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                           }
                         }
                       }} 
-                      style={{ padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: '#09090b', border: '1px solid #27272a', color: '#fafafa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}
+                      style={{ padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}
                     >
                       Audit
                     </button>
@@ -149,7 +149,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                   </div>
                 </div>
               ))}
-              <button onClick={() => setIsAdding(true)} style={{ border: '2px dashed #27272a', borderRadius: '0.875rem', padding: '0.75rem', color: '#a1a1aa', background: 'none', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+              <button onClick={() => setIsAdding(true)} style={{ border: '2px dashed var(--border)', borderRadius: '0.875rem', padding: '0.75rem', color: 'var(--muted-foreground)', background: 'none', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
                 <Plus className="h-4 w-4" /> Add Item
               </button>
             </div>

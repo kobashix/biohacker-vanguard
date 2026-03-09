@@ -136,17 +136,17 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
                 transition: 'all 0.15s',
               }}
             >
-              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', color: isSelected ? '#2563eb' : '#71717a' }}>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', color: isSelected ? 'var(--primary)' : 'var(--muted-foreground)' }}>
                 {format(day, 'EEE')}
               </span>
-              <span style={{ fontSize: '0.95rem', fontWeight: isToday || isSelected ? 800 : 500, color: isSelected ? '#2563eb' : isToday ? '#fafafa' : '#a1a1aa', lineHeight: 1 }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: isToday || isSelected ? 800 : 500, color: isSelected ? 'var(--primary)' : isToday ? 'var(--foreground)' : 'var(--muted-foreground)', lineHeight: 1 }}>
                 {format(day, 'd')}
               </span>
               {/* Dot indicator */}
               {hasPin && (
                 <div style={{
                   width: '5px', height: '5px', borderRadius: '50%',
-                  background: doneCount === doses.length ? '#10b981' : '#2563eb',
+                  background: doneCount === doses.length ? 'var(--success)' : 'var(--primary)',
                 }} />
               )}
             </button>
@@ -155,27 +155,27 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
       </div>
 
       {/* ── Selected day detail ── */}
-      <div style={{ borderTop: '1px solid #27272a', paddingTop: '0.875rem' }}>
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <span style={{ fontSize: '0.875rem', fontWeight: 800 }}>
             {format(selectedDay, 'EEEE, MMMM d')}
             {isSameDay(selectedDay, new Date()) && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: '#2563eb', color: '#fff', borderRadius: '99px', padding: '0.1rem 0.5rem', fontWeight: 700 }}>TODAY</span>
+              <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: 'var(--primary)', color: 'var(--primary-foreground)', borderRadius: '99px', padding: '0.1rem 0.5rem', fontWeight: 700 }}>TODAY</span>
             )}
           </span>
-          <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
             {selectedDoses.length > 0 ? `${selectedDoses.filter(d => d.completed).length}/${selectedDoses.length} done` : 'Rest day'}
           </span>
         </div>
 
         {selectedDoses.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem', color: '#3f3f46', fontSize: '0.85rem' }}>
+          <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>
             🛌 No pins scheduled — rest day
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {selectedDoses.map((dose, idx) => (
-              <div
+                <div
                 key={idx}
                 onClick={() => onSelectVial(dose.vialId)}
                 style={{
@@ -184,8 +184,8 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
                   gap: '0.875rem',
                   padding: '0.75rem 0.875rem',
                   borderRadius: '0.75rem',
-                  border: `1px solid ${dose.completed ? '#10b981' : '#27272a'}`,
-                  background: dose.completed ? 'rgba(16,185,129,0.07)' : '#18181b',
+                  border: `1px solid ${dose.completed ? 'var(--success)' : 'var(--border)'}`,
+                  background: dose.completed ? 'rgba(16,185,129,0.07)' : 'var(--input-bg)',
                   cursor: 'pointer',
                   transition: 'all 0.15s',
                 }}
@@ -193,22 +193,22 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
                 {/* Status dot */}
                 <div style={{
                   width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
-                  background: dose.completed ? '#10b981' : '#27272a',
-                  border: dose.completed ? 'none' : '2px solid #3f3f46',
+                  background: dose.completed ? 'var(--success)' : 'var(--border)',
+                  border: dose.completed ? 'none' : '2px solid var(--muted-foreground)',
                 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--foreground)' }}>
                     {dose.name}
                   </p>
-                  <p style={{ fontSize: '0.75rem', color: '#a1a1aa', marginTop: '0.1rem' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.1rem' }}>
                     {dose.time} · {dose.amount}
                   </p>
                 </div>
-                {dose.completed && <CheckCircle2 style={{ width: '1.1rem', height: '1.1rem', color: '#10b981', flexShrink: 0 }} />}
+                {dose.completed && <CheckCircle2 style={{ width: '1.1rem', height: '1.1rem', color: 'var(--success)', flexShrink: 0 }} />}
                 {!dose.completed && onEditVial && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }} 
-                    style={{ padding: '0.25rem', background: 'none', border: 'none', color: '#a1a1aa', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    style={{ padding: '0.25rem', background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     title="Edit Compound"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>

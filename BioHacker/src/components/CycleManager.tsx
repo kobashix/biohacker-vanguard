@@ -101,7 +101,7 @@ export function CycleManager({ userId }: { userId: string }) {
               <form onSubmit={handleAdd} className="space-y-6">
                 <div className="sheet-section">
                   <p className="sheet-section-label">Linked Compounds (Optional)</p>
-                  <p style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '0.75rem' }}>Select active vials to associate with this cycle.</p>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: '0.75rem' }}>Select active vials to associate with this cycle.</p>
                   {activeVials.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
                       {activeVials.map(v => (
@@ -112,9 +112,9 @@ export function CycleManager({ userId }: { userId: string }) {
                           style={{
                             display: 'flex', alignItems: 'center', gap: '0.5rem',
                             padding: '0.75rem 1rem', borderRadius: '0.75rem',
-                            border: `2px solid ${selectedVialIds.includes(v.id) ? '#2563eb' : '#27272a'}`,
-                            background: selectedVialIds.includes(v.id) ? 'rgba(37,99,235,0.15)' : '#18181b',
-                            color: selectedVialIds.includes(v.id) ? '#60a5fa' : '#a1a1aa',
+                            border: `2px solid ${selectedVialIds.includes(v.id) ? 'var(--primary)' : 'var(--border)'}`,
+                            background: selectedVialIds.includes(v.id) ? 'var(--primary-muted)' : 'var(--input-bg)',
+                            color: selectedVialIds.includes(v.id) ? 'var(--primary)' : 'var(--muted-foreground)',
                             fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer'
                           }}
                         >
@@ -123,15 +123,15 @@ export function CycleManager({ userId }: { userId: string }) {
                       ))}
                     </div>
                   ) : (
-                    <div style={{ fontSize: '0.875rem', color: '#a1a1aa', background: '#18181b', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #27272a' }}>No active vials in inventory to link.</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', background: 'var(--input-bg)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>No active vials in inventory to link.</div>
                   )}
                 </div>
 
-                <div className="sheet-section" style={{ borderTop: '1px solid #27272a', paddingTop: '1.5rem' }}>
+                <div className="sheet-section" style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
                   <p className="sheet-section-label">Phase Name (Optional)</p>
                   <input
                     className="form-input"
-                    style={{ background: '#18181b', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid #27272a', fontWeight: 700 }}
+                    style={{ background: 'var(--input-bg)', color: 'var(--foreground)', fontSize: '1rem', padding: '0.875rem', borderRadius: '0.75rem', border: '2px solid var(--border)', fontWeight: 700 }}
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder={selectedVialIds.length > 0 ? 'Auto-generates from compounds...' : 'e.g. Mass Phase 1'}
@@ -141,11 +141,11 @@ export function CycleManager({ userId }: { userId: string }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div>
                     <p className="sheet-section-label">Start Date</p>
-                    <input className="form-input" style={{ background: '#18181b', borderRadius: '0.75rem', border: '2px solid #27272a', padding: '0.875rem' }} type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+                    <input className="form-input" style={{ background: 'var(--input-bg)', color: 'var(--foreground)', borderRadius: '0.75rem', border: '2px solid var(--border)', padding: '0.875rem' }} type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
                   </div>
                   <div>
                     <p className="sheet-section-label">End Date</p>
-                    <input className="form-input" style={{ background: '#18181b', borderRadius: '0.75rem', border: '2px solid #27272a', padding: '0.875rem' }} type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                    <input className="form-input" style={{ background: 'var(--input-bg)', color: 'var(--foreground)', borderRadius: '0.75rem', border: '2px solid var(--border)', padding: '0.875rem' }} type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                   </div>
                 </div>
 
@@ -174,7 +174,7 @@ export function CycleManager({ userId }: { userId: string }) {
                       const vial = vials.find(v => v.id === vid);
                       if (!vial) return null;
                       return (
-                        <div key={vid} className="flex items-center gap-1 text-[9px] font-bold uppercase bg-[#18181b] border border-[#27272a] text-muted-foreground px-1.5 py-0.5 rounded shadow-sm">
+                        <div key={vid} className="flex items-center gap-1 text-[9px] font-bold uppercase bg-[var(--input-bg)] border border-[var(--border)] text-[var(--muted-foreground)] px-1.5 py-0.5 rounded shadow-sm">
                           <LinkIcon className="h-2.5 w-2.5 text-primary" />
                           {vial.name}
                         </div>
