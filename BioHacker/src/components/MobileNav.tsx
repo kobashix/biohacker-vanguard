@@ -138,20 +138,23 @@ export function MobileNav() {
           />
           {/* Tray */}
           <div
-            className="fixed bottom-[65px] left-0 right-0 z-[99] mx-3 mb-2 rounded-2xl overflow-hidden"
-            style={{ background: 'var(--card)', border: '1px solid var(--border)', boxShadow: '0 -8px 32px rgba(0,0,0,0.4)' }}
+            className="fixed bottom-[80px] left-4 right-4 z-[99] rounded-3xl overflow-hidden shadow-2xl animate-softFadeIn"
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+            }}
           >
             {/* Tray header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem 0.5rem', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>
-                {NAV_ITEMS.find(i => i.id === openSub)?.name}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--muted-foreground)] opacity-60">
+                {NAV_ITEMS.find(i => i.id === openSub)?.name} Sequence
               </span>
-              <button onClick={() => setOpenSub(null)} style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer', padding: '0.25rem' }}>
+              <button onClick={() => setOpenSub(null)} className="p-2 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
             {/* Sub items */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', padding: '0.75rem' }}>
+            <div className="grid grid-cols-2 gap-3 p-4">
               {NAV_ITEMS.find(i => i.id === openSub)?.subs.map(sub => {
                 const Icon = sub.href === '#theme' ? (theme === 'dark' ? Moon : Sun) : sub.icon;
                 const isSelected = sub.href === '#theme' ? false : pathname === sub.href;
@@ -160,24 +163,12 @@ export function MobileNav() {
                     key={sub.label}
                     href={sub.href}
                     onClick={(e) => handleSubClick(sub, e)}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.875rem 0.5rem',
-                      borderRadius: '0.875rem',
-                      background: 'var(--input-bg)',
-                      border: '1px solid var(--border)',
-                      color: isSelected ? 'var(--primary)' : 'var(--foreground)',
-                      textDecoration: 'none',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      textAlign: 'center',
-                    }}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--muted)]/50 border border-transparent hover:border-[var(--primary)]/20 hover:bg-[var(--card)] transition-all group"
                   >
-                    <Icon style={{ width: '1.25rem', height: '1.25rem', color: sub.href === '#logout' ? 'var(--destructive)' : 'var(--primary)' }} />
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>{sub.label}</span>
+                    <div className="p-2.5 rounded-xl bg-[var(--card)] shadow-sm group-hover:bg-[var(--primary-muted)] transition-colors">
+                      <Icon className={`h-5 w-5 ${sub.href === '#logout' ? 'text-[var(--destructive)]' : 'text-[var(--primary)]'}`} />
+                    </div>
+                    <span className="text-xs font-bold text-[var(--foreground)]">{sub.label}</span>
                   </Link>
                 );
               })}
@@ -187,8 +178,8 @@ export function MobileNav() {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-md border-t border-[#27272a] flex justify-around items-center pb-safe-bottom shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.5)]"
-        style={{ background: 'rgba(9,9,11,0.97)', minHeight: '64px' }}
+      <nav className="fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-xl border-t border-[var(--border)] flex justify-around items-center pb-safe-bottom shadow-lg"
+        style={{ background: 'var(--glass-bg)', minHeight: '72px' }}
       >
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -199,42 +190,40 @@ export function MobileNav() {
             <button
               key={item.id}
               onClick={() => handleNavTap(item)}
-              className="flex flex-col items-center justify-center gap-1 flex-1 transition-all"
+              className="flex flex-col items-center justify-center gap-1.5 flex-1 transition-all relative"
               style={{
-                minHeight: '64px',
+                minHeight: '72px',
                 background: 'none',
                 border: 'none',
-                color: subOpen ? '#2563eb' : active ? '#2563eb' : '#71717a',
+                color: active || subOpen ? 'var(--primary)' : 'var(--muted-foreground)',
                 cursor: 'pointer',
-                transform: active || subOpen ? 'scale(1.08)' : 'scale(1)',
-                transition: 'all 0.15s',
+                transform: active || subOpen ? 'scale(1.05)' : 'scale(1)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              <div style={{ position: 'relative' }}>
+              <div className={`
+                p-2 rounded-xl transition-colors
+                ${active || subOpen ? 'bg-[var(--primary-muted)]' : 'bg-transparent'}
+              `}>
                 <Icon
                   style={{
-                    width: '1.5rem',
-                    height: '1.5rem',
-                    fill: active || subOpen ? 'rgba(37,99,235,0.15)' : 'none',
+                    width: '1.4rem',
+                    height: '1.4rem',
                   }}
                 />
                 {item.subs.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '-3px',
-                    right: '-5px',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: subOpen ? '#2563eb' : '#3f3f46',
-                  }} />
+                  <div className={`
+                    absolute top-2 right-1/2 translate-x-4 w-1.5 h-1.5 rounded-full
+                    ${subOpen ? 'bg-[var(--primary)]' : 'bg-[var(--muted-foreground)] opacity-30'}
+                  `} />
                 )}
               </div>
               <span style={{
-                fontSize: '10px',
-                fontWeight: active || subOpen ? 800 : 500,
+                fontSize: '9px',
+                fontWeight: 800,
                 textTransform: 'uppercase',
-                letterSpacing: '0.05em',
+                letterSpacing: '0.08em',
+                opacity: active || subOpen ? 1 : 0.6
               }}>{item.name}</span>
             </button>
           );
