@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
-import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight, Activity, Settings, Clock, Plus } from "lucide-react";
 import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay, isWeekend } from "date-fns";
 
 interface DosageCalendarProps {
@@ -93,25 +93,36 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
 
     return dailyDoses.sort((a, b) => a.rawTime - b.rawTime);
   };
-
   const selectedDay = days[selectedDayIndex] || days[0];
   const selectedDoses = getDosesForDay(selectedDay);
 
   return (
-    <div className="card">
-      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h3 className="card-title"><CalendarIcon className="h-5 w-5 text-primary" /> Pin Schedule</h3>
-          <p className="card-description">{format(days[0], 'MMM d')} – {format(days[6], 'MMM d, yyyy')}</p>
+    <div className="p-6 space-y-8">
+      <div className="flex justify-between items-center px-1">
+        <div className="flex items-center gap-3">
+          <CalendarIcon className="h-5 w-5 text-[var(--primary)]" />
+          <h3 className="text-xl font-black tracking-tight">
+            {format(days[0], 'MMM d')} – {format(days[6], 'MMM d')}
+          </h3>
         </div>
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronLeft className="h-4 w-4" /></button>
-          <button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))} className="btn btn-outline p-1"><ChevronRight className="h-4 w-4" /></button>
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
+            className="p-2.5 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
+            className="p-2.5 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      {/* ── Day pill selector (both mobile and desktop) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem', padding: '0 0 0.75rem' }}>
+      {/* ── Day chip selector ── */}
+      <div className="grid grid-cols-7 gap-3">
         {days.map((day, i) => {
           const isToday = isSameDay(day, new Date());
           const isSelected = i === selectedDayIndex;
@@ -123,97 +134,104 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
             <button
               key={i}
               onClick={() => setSelectedDayIndex(i)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.2rem',
-                padding: '0.5rem 0.25rem',
-                borderRadius: '0.75rem',
-                border: isSelected ? '1.5px solid #2563eb' : '1.5px solid transparent',
-                background: isSelected ? 'rgba(37,99,235,0.12)' : isToday ? 'rgba(37,99,235,0.05)' : 'transparent',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
+              className={`
+                flex flex-col items-center gap-2 py-4 rounded-2xl transition-all border-2 relative
+                ${isSelected
+                  ? "bg-[var(--primary)] border-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/20"
+                  : isToday
+                    ? "bg-[var(--muted)] border-[var(--primary)]/20 text-[var(--foreground)]"
+                    : "bg-[var(--muted)]/50 border-transparent text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:border-[var(--border)]"}
+              `}
             >
-              <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', color: isSelected ? 'var(--primary)' : 'var(--muted-foreground)' }}>
-                {format(day, 'EEE')}
-              </span>
-              <span style={{ fontSize: '0.95rem', fontWeight: isToday || isSelected ? 800 : 500, color: isSelected ? 'var(--primary)' : isToday ? 'var(--foreground)' : 'var(--muted-foreground)', lineHeight: 1 }}>
+              <span className={`text-[10px] font-black uppercase tracking-wider opacity-60`}>{format(day, 'EEE')}</span>
+              <span className={`text-xl font-black tracking-tight`}>
                 {format(day, 'd')}
               </span>
-              {/* Dot indicator */}
+              {/* Status Indicator */}
               {hasPin && (
-                <div style={{
-                  width: '5px', height: '5px', borderRadius: '50%',
-                  background: doneCount === doses.length ? 'var(--success)' : 'var(--primary)',
-                }} />
+                <div className={`
+                  w-1.5 h-1.5 rounded-full
+                  ${isSelected
+                    ? 'bg-white'
+                    : doneCount === doses.length ? 'bg-[var(--success)]' : 'bg-[var(--primary)]'}
+                `} />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* ── Selected day detail ── */}
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.875rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <span style={{ fontSize: '0.875rem', fontWeight: 800 }}>
-            {format(selectedDay, 'EEEE, MMMM d')}
+      {/* ── Dose Detail List ── */}
+      <div className="space-y-6 pt-2">
+        <div className="flex justify-between items-center px-1">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-[var(--foreground)]">
+              {format(selectedDay, 'EEEE, MMMM d')}
+            </span>
             {isSameDay(selectedDay, new Date()) && (
-              <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', background: 'var(--primary)', color: 'var(--primary-foreground)', borderRadius: '99px', padding: '0.1rem 0.5rem', fontWeight: 700 }}>TODAY</span>
+              <span className="text-[10px] bg-[var(--primary-muted)] text-[var(--primary)] px-2.5 py-0.5 rounded-full font-black uppercase">Today</span>
             )}
-          </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-            {selectedDoses.length > 0 ? `${selectedDoses.filter(d => d.completed).length}/${selectedDoses.length} done` : 'Rest day'}
+          </div>
+          <span className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-wider opacity-60">
+            {selectedDoses.length} {selectedDoses.length === 1 ? 'Scheduled' : 'Scheduled'}
           </span>
         </div>
 
         {selectedDoses.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--muted-foreground)', fontSize: '0.85rem' }}>
-            🛌 No pins scheduled — rest day
+          <div className="py-12 flex flex-col items-center justify-center bg-[var(--muted)]/30 rounded-[var(--radius)] text-center">
+            <Activity className="h-8 w-8 mb-3 text-[var(--muted-foreground)] opacity-40" />
+            <span className="text-xs font-bold text-[var(--muted-foreground)] opacity-60">No protocols scheduled for this window.</span>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="space-y-3">
             {selectedDoses.map((dose, idx) => (
-                <div
+              <div
                 key={idx}
                 onClick={() => onSelectVial(dose.vialId)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.875rem',
-                  padding: '0.75rem 0.875rem',
-                  borderRadius: '0.75rem',
-                  border: `1px solid ${dose.completed ? 'var(--success)' : 'var(--border)'}`,
-                  background: dose.completed ? 'rgba(16,185,129,0.07)' : 'var(--input-bg)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                }}
+                className={`
+                  group flex items-center gap-4 p-5 rounded-2xl transition-all cursor-pointer border-2
+                  ${dose.completed
+                    ? "bg-[var(--success)]/5 border-[var(--success)]/20"
+                    : "bg-[var(--card)] border-transparent shadow-sm hover:border-[var(--primary)]/30 hover:shadow-md"}
+                `}
               >
-                {/* Status dot */}
-                <div style={{
-                  width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0,
-                  background: dose.completed ? 'var(--success)' : 'var(--border)',
-                  border: dose.completed ? 'none' : '2px solid var(--muted-foreground)',
-                }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--foreground)' }}>
+                <div className={`
+                  w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors
+                  ${dose.completed
+                    ? 'bg-[var(--success)] text-white shadow-lg shadow-[var(--success)]/20'
+                    : 'bg-[var(--muted)] text-[var(--muted-foreground)] group-hover:bg-[var(--primary-muted)] group-hover:text-[var(--primary)]'}
+                `}>
+                  {dose.completed ? <CheckCircle2 className="h-5 w-5" /> : <Activity className="h-5 w-5" />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-lg tracking-tight text-[var(--foreground)] truncate">
                     {dose.name}
                   </p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.1rem' }}>
-                    {dose.time} · {dose.amount}
+                  <p className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase tracking-widest flex items-center gap-2">
+                    <Clock className="h-3 w-3" /> {dose.time} • {dose.amount}
                   </p>
                 </div>
-                {dose.completed && <CheckCircle2 style={{ width: '1.1rem', height: '1.1rem', color: 'var(--success)', flexShrink: 0 }} />}
-                {!dose.completed && onEditVial && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }} 
-                    style={{ padding: '0.25rem', background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                    title="Edit Compound"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-edit-3"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                  </button>
-                )}
+
+                <div className="flex items-center gap-2">
+                  {dose.completed ? (
+                    <span className="text-[10px] font-black text-[var(--success)] uppercase tracking-widest bg-[var(--success)]/10 px-3 py-1 rounded-full">Logged</span>
+                  ) : (
+                    <div className="flex gap-2">
+                      {onEditVial && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onEditVial(dose.vialId); }}
+                          className="p-2.5 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all sm:opacity-0 group-hover:opacity-100"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </button>
+                      )}
+                      <button className="btn btn-primary !p-2 !rounded-xl">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

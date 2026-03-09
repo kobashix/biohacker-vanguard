@@ -97,12 +97,12 @@ export function EmptyStateQA({ userId }: { userId: string }) {
               <p style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', lineHeight: 1.4 }}>Full inventory tracking and cache loss prevention.</p>
             </div>
             <div className="landing-card" style={{ padding: '1rem', background: 'var(--input-bg)', borderRadius: '1rem', border: '1px solid var(--border)' }}>
-              <Activity style={{ color: '#10b981', width: '20px', height: '20px', marginBottom: '0.5rem' }} />
+              <Activity style={{ color: 'var(--success)', width: '20px', height: '20px', marginBottom: '0.5rem' }} />
               <div style={{ fontWeight: 800, fontSize: '0.8rem', marginBottom: '0.25rem' }}>PK Analysis</div>
               <p style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', lineHeight: 1.4 }}>Real-time blood concentration modeling.</p>
             </div>
             <div className="landing-card" style={{ padding: '1rem', background: 'var(--input-bg)', borderRadius: '1rem', border: '1px solid var(--border)' }}>
-              <Calendar style={{ color: '#f59e0b', width: '20px', height: '20px', marginBottom: '0.5rem' }} />
+              <Calendar style={{ color: 'var(--primary)', width: '20px', height: '20px', marginBottom: '0.5rem' }} />
               <div style={{ fontWeight: 800, fontSize: '0.8rem', marginBottom: '0.25rem' }}>Scheduling</div>
               <p style={{ fontSize: '0.7rem', color: 'var(--muted-foreground)', lineHeight: 1.4 }}>Intelligent dose clustering and cycle management.</p>
             </div>
@@ -220,17 +220,17 @@ export function EmptyStateQA({ userId }: { userId: string }) {
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: '32px', height: '32px', background: '#f59e0b20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Syringe style={{ width: '18px', height: '18px', color: '#f59e0b' }} />
+            <div style={{ width: '32px', height: '32px', background: 'var(--primary-muted)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Syringe style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
             </div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b', letterSpacing: '0.1em' }}>PHASE 02/03</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '0.1em' }}>PHASE 02/03</span>
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '0.5rem' }}>Active Protocols</h2>
           <p style={{ color: 'var(--muted-foreground)', marginBottom: '2rem' }}>Which of your items are you actively taking today? Define the doses below.</p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
             {vials.map((vial, index) => (
-              <div key={vial.id} style={{ border: `2px solid ${vial.activeCycle ? '#f59e0b' : 'var(--border)'}`, borderRadius: '1rem', padding: '1rem', transition: 'all 0.2s', background: vial.activeCycle ? 'rgba(245, 158, 11, 0.05)' : 'var(--input-bg)' }}>
+              <div key={vial.id} style={{ border: `2px solid ${vial.activeCycle ? 'var(--primary)' : 'var(--border)'}`, borderRadius: '1rem', padding: '1rem', transition: 'all 0.2s', background: vial.activeCycle ? 'rgba(245, 158, 11, 0.05)' : 'var(--input-bg)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: vial.activeCycle ? '1rem' : 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <input 
@@ -241,7 +241,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                         newVials[index].activeCycle = e.target.checked ? { dose_amount: 50, frequency_hours: 84 } : false;
                         setVials(newVials);
                       }}
-                      style={{ width: '1.25rem', height: '1.25rem', accentColor: '#f59e0b', cursor: 'pointer' }}
+                      style={{ width: '1.25rem', height: '1.25rem', accentColor: 'var(--primary)', cursor: 'pointer' }}
                     />
                     <span style={{ fontWeight: 800 }}>{vial.name}</span>
                   </div>
@@ -251,7 +251,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                 {vial.activeCycle && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', paddingLeft: '1.75rem' }}>
                     <div>
-                      <label className="form-label" style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Dose Amount ({vial.unit})</label>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>Dose Amount ({vial.unit})</label>
                       <input 
                         type="number" 
                         className="form-input" 
@@ -267,7 +267,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
                       />
                     </div>
                     <div>
-                      <label className="form-label" style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Frequency</label>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>Frequency</label>
                       <div className="seg-control" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
                         <button 
                           className={`seg-btn ${vial.activeCycle.frequency_hours === 12 ? 'active' : ''}`}
@@ -355,7 +355,7 @@ export function EmptyStateQA({ userId }: { userId: string }) {
       {step === 5 && (
         <div className="animate-fadeIn">
           <div style={{ width: '80px', height: '80px', background: 'rgba(16,185,129,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <CheckCircle2 style={{ width: '40px', height: '40px', color: '#10b981' }} />
+            <CheckCircle2 style={{ width: '40px', height: '40px', color: 'var(--success)' }} />
           </div>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '0.5rem' }}>Environment Ready</h2>
           <p style={{ color: 'var(--muted-foreground)', marginBottom: '2.5rem' }}>Your initial configuration is loaded. Your dashboard is tailored to your objects.</p>

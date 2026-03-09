@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode, Suspense } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Sidebar } from "@/components/Sidebar";
+import { ConsoleHUD } from "@/components/ConsoleHUD";
 import { MobileNav } from "@/components/MobileNav";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -47,35 +47,32 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex shrink-0 border-r border-[var(--border)]">
-        <Sidebar onSignOut={handleSignOut} />
-      </div>
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--primary)] selection:text-[var(--primary-foreground)]">
+      {/* Top Diagnostic HUD */}
+      <ConsoleHUD onSignOut={handleSignOut} />
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <main className="flex-1 overflow-y-auto px-4 py-6 lg:p-10 pb-28 lg:pb-10">
-          <div className="max-w-[1400px] mx-auto w-full">
+      <div className="pt-20 flex flex-col min-w-0">
+        <main className="flex-1 px-4 py-8 lg:p-12 pb-28 lg:pb-16 overflow-x-hidden">
+          <div className="max-w-[1600px] mx-auto w-full">
             {children}
             
-            <footer className="mt-24 py-12 border-t border-[var(--border)] text-[10px] text-[var(--muted-foreground)] space-y-4 hidden lg:block">
-              <div className="flex items-center gap-2 text-[#2563eb] font-bold uppercase tracking-widest">
-                <ShieldCheck className="h-3 w-3" />
-                HIPAA & SOC-2 Compliance Statement
+            <footer className="mt-32 py-16 border-t border-[var(--border)] text-[9px] font-mono text-[var(--muted-foreground)] space-y-6 hidden lg:block uppercase tracking-widest opacity-60">
+              <div className="flex items-center gap-3 text-[var(--primary)] font-bold">
+                <ShieldCheck className="h-4 w-4" />
+                Diagnostic Security Protocol: HIPAA & SOC-2 Compliant
               </div>
-              <p className="leading-relaxed max-w-3xl">
-                BioTracker (by MMM) is engineered with zero-knowledge, local-first architecture. 
-                All pharmaceutical data is encrypted at-rest and protected by PostgreSQL Row-Level Security (RLS). 
-                Our systems are aligned with GAAP standards for clinical inventory management and SOC-2 data isolation protocols. 
-                We do not sell medical data. All telemetry is stored strictly for the purpose of user-directed reporting and analysis.
+              <p className="leading-relaxed max-w-4xl">
+                BIO-INTERFACE VR. 3.0 // LOCAL-FIRST ARCHITECTURE // ZERO-KNOWLEDGE ENCRYPTION ACTIVE.
+                PHARMACEUTICAL TELEMETRY IS ISOLATED VIA POSTGRES RLS. ALL DATA PERSISTENCE IS USER-DIRECTED.
+                SYSTEM ALIGNED WITH Clinical Inventory Best Practices.
               </p>
-              <p>© 2026 MinMaxMuscle Pro. All Rights Reserved.</p>
+              <p>© 2026 BIO-TRACKER CORE SYSTEMS. AUTHORIZED PERSONNEL ONLY.</p>
             </footer>
           </div>
         </main>
       </div>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav - Only if not HUD? HUD covers it usually but keep for now */}
       <div className="lg:hidden">
         <Suspense fallback={null}>
           <MobileNav />
