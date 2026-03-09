@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, DoseLog, Protocol, Vial } from "@/replicache";
 import { Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight, Activity, Settings, Clock, Plus, Loader2 } from "lucide-react";
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInDays, startOfDay, endOfDay, isWeekend } from "date-fns";
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, differenceInCalendarDays, startOfDay, endOfDay, isWeekend } from "date-fns";
 
 interface DosageCalendarProps {
   userId: string;
@@ -50,7 +50,7 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
       const daysOff = protocol.days_off || 0;
       const cycleLength = daysOn + daysOff;
       const protocolStart = new Date(protocol.start_time);
-      const diffDays = differenceInDays(day, startOfDay(protocolStart));
+      const diffDays = differenceInCalendarDays(day, startOfDay(protocolStart));
       if (!(diffDays >= 0 && (diffDays % cycleLength) < daysOn)) return;
 
       const occurrences: number[] = [];
