@@ -28,24 +28,27 @@ export async function POST(request: NextRequest) {
     const { name, args } = m;
 
     if (name === 'createVial' || name === 'updateVial') {
-      await supabase.from('vials').upsert({
+      const { error } = await supabase.from('vials').upsert({
         id: args.id, user_id: user.id, name: args.name, status: args.status,
         volume_ml: args.volume_ml, remaining_volume_ml: args.remaining_volume_ml,
         pill_count: args.pill_count, compounds: args.compounds
       });
+      if (error) console.error(`[PUSH ERROR] ${name} failed:`, error);
     }
 
     if (name === 'deleteVial') {
-      await supabase.from('vials').delete().eq('id', args).eq('user_id', user.id);
+      const { error } = await supabase.from('vials').delete().eq('id', args).eq('user_id', user.id);
+      if (error) console.error(`[PUSH ERROR] ${name} failed:`, error);
     }
 
     if (name === 'createProtocol') {
-      await supabase.from('protocols').upsert({
+      const { error } = await supabase.from('protocols').upsert({
         id: args.id, user_id: user.id, vial_id: args.vial_id,
         dose_amount: args.dose_amount, frequency_hours: args.frequency_hours,
         days_on: args.days_on, days_off: args.days_off, start_time: args.start_time,
         skip_weekends: args.skip_weekends, time_buckets: args.time_buckets
       });
+      if (error) console.error(`[PUSH ERROR] ${name} failed:`, error);
     }
 
     if (name === 'deleteProtocol') {
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
     if (name === 'logDose') {
       await supabase.from('dose_logs').insert({
         id: args.id, user_id: user.id, vial_id: args.vial_id,
-        substance: args.substance, dose_amount: args.dose_amount, 
+        substance: args.substance, dose_amount: args.dose_amount,
         units_iu: args.units_iu, timestamp: args.timestamp,
         injection_site: args.injection_site
       });
@@ -94,24 +97,50 @@ export async function POST(request: NextRequest) {
 
     if (name === 'seedDemoData' || name === 'restoreBackup') {
       const { vials, protocols, logs, subjectiveLogs, supplies, cycles } = args;
-      
-      if (vials && vials.length > 0) {
-        await supabase.from('vials').upsert(vials.map((v: any) => ({ ...v, user_id: user.id })));
-      }
-      if (protocols && protocols.length > 0) {
-        await supabase.from('protocols').upsert(protocols.map((p: any) => ({ ...p, user_id: user.id })));
-      }
-      if (logs && logs.length > 0) {
-        await supabase.from('dose_logs').upsert(logs.map((l: any) => ({ ...l, user_id: user.id })));
-      }
-      if (subjectiveLogs && subjectiveLogs.length > 0) {
-        await supabase.from('subjective_logs').upsert(subjectiveLogs.map((s: any) => ({ ...s, user_id: user.id })));
-      }
-      if (supplies && supplies.length > 0) {
-        await supabase.from('supplies').upsert(supplies.map((sup: any) => ({ ...sup, user_id: user.id })));
-      }
-      if (cycles && cycles.length > 0) {
-        await supabase.from('cycles').upsert(cycles.map((c: any) => ({ ...c, user_id: user.id })));
+
+      try {
+        if (vials && vials.length > 0) {
+          const { error } = await supabase.from('vials').upsert(vials.map((v: any) => ({
+            id: v.id, user_id: user.id, name: v.name, status: v.status, volume_ml: v.volume_ml,
+            remaining_volume_ml: v.remaining_volume_ml, pill_count: v.pill_count, compounds: v.compounds
+          })));
+          if (error) console.error('[SYNC ERROR] Vials Upsert Failed:', error);
+        }
+        if (protocols && protocols.length > 0) {
+          const { error } = await supabase.from('protocols').upsert(protocols.map((p: any) => ({
+            id: p.id, user_id: user.id, vial_id: p.vial_id, dose_amount: p.dose_amount, frequency_hours: p.frequency_hours,
+            days_on: p.days_on, days_off: p.days_off, start_time: p.start_time, skip_weekends: p.skip_weekends, time_buckets: p.time_buckets
+          })));
+          if (error) console.error('[SYNC ERROR] Protocols Upsert Failed:', error);
+        }
+        if (logs && logs.length > 0) {
+          const { error } = await supabase.from('dose_logs').upsert(logs.map((l: any) => ({
+            id: l.id, user_id: user.id, vial_id: l.vial_id, substance: l.substance, dose_amount: l.dose_amount,
+            units_iu: l.units_iu, timestamp: l.timestamp, injection_site: l.injection_site
+          })));
+          if (error) console.error('[SYNC ERROR] Dose Logs Upsert Failed:', error);
+        }
+        if (subjectiveLogs && subjectiveLogs.length > 0) {
+          const { error } = await supabase.from('subjective_logs').upsert(subjectiveLogs.map((s: any) => ({
+            id: s.id, user_id: user.id, timestamp: s.timestamp, mood: s.mood, energy: s.energy, sleep_quality: s.sleep_quality,
+            soreness: s.soreness, notes: s.notes
+          })));
+          if (error) console.error('[SYNC ERROR] Subjective Logs Upsert Failed:', error);
+        }
+        if (supplies && supplies.length > 0) {
+          const { error } = await supabase.from('supplies').upsert(supplies.map((sup: any) => ({
+            id: sup.id, user_id: user.id, name: sup.name, count: sup.count, unit: sup.unit
+          })));
+          if (error) console.error('[SYNC ERROR] Supplies Upsert Failed:', error);
+        }
+        if (cycles && cycles.length > 0) {
+          const { error } = await supabase.from('cycles').upsert(cycles.map((c: any) => ({
+            id: c.id, user_id: user.id, name: c.name, start_date: c.start_date, end_date: c.end_date, notes: c.notes
+          })));
+          if (error) console.error('[SYNC ERROR] Cycles Upsert Failed:', error);
+        }
+      } catch (err) {
+        console.error('[SYNC ERROR] Fatal exception during demo seeding:', err);
       }
     }
 

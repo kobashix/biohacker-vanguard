@@ -26,9 +26,17 @@ export async function POST(request: NextRequest) {
     supabase.from('cycles').select('*').eq('user_id', user.id),
   ]);
 
+  // CRITICAL: If any query failed, do NOT return a partial patch. 
+  // Returning op: 'clear' with a partial dataset will wipe the user's local state.
+  const errors = [vialsRes, logsRes, protocolsRes, subjectiveRes, suppliesRes, cyclesRes].filter(r => r.error);
+  if (errors.length > 0) {
+    console.error('[PULL ERROR] Supabase fetch failed:', errors.map(e => e.error));
+    return new Response('Internal Server Error', { status: 500 });
+  }
+
   // Always clear Replicache's local store then reload from Supabase.
   // This guarantees Supabase is canonical and no stale local mutations persist.
-  const patch: object[] = [{ op: 'clear' }];
+  const patch: any[] = [{ op: 'clear' }];
 
   vialsRes.data?.forEach(v => patch.push({ op: 'put', key: `vial/${v.id}`, value: v }));
   logsRes.data?.forEach(l => patch.push({ op: 'put', key: `log/${l.id}`, value: l }));
@@ -40,11 +48,16 @@ export async function POST(request: NextRequest) {
   // lastMutationIDChanges tells Replicache which local pending mutations have been
   // processed server-side. By returning the clientID's current push mutation ID,
   // we prevent Replicache from re-applying any pending mutations on top of the clean pull.
-  const { data: clientRow } = await supabase
+  const { data: clientRow, error: clientError } = await supabase
     .from('replicache_clients')
     .select('last_mutation_id')
     .eq('id', clientID)
     .single();
+
+  if (clientError && clientError.code !== 'PGRST116') { // PGRST116 is 'no rows' which is fine
+    console.error('[PULL ERROR] Client lookup failed:', clientError);
+    return new Response('Internal Server Error', { status: 500 });
+  }
 
   const lastMutationID = clientRow?.last_mutation_id ?? 0;
 
