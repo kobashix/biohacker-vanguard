@@ -173,7 +173,7 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
         {isLoading ? (
           <div className="py-24 flex flex-col items-center justify-center text-center">
             <Loader2 className="h-8 w-8 mb-3 text-[var(--primary)] animate-spin" />
-            <span className="text-xs font-bold text-[var(--muted-foreground)] animate-pulse uppercase tracking-widest">Hydrating Protocol Engine...</span>
+            <span className="text-xs font-bold text-[var(--muted-foreground)] animate-pulse uppercase tracking-widest">Hydrating Schedule Engine...</span>
           </div>
         ) : (
           <>
@@ -194,7 +194,7 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
             {selectedDoses.length === 0 ? (
               <div className="py-12 flex flex-col items-center justify-center bg-[var(--muted)]/30 rounded-[var(--radius)] text-center">
                 <Activity className="h-8 w-8 mb-3 text-[var(--muted-foreground)] opacity-40" />
-                <span className="text-xs font-bold text-[var(--muted-foreground)] opacity-60">No protocols scheduled for this window.</span>
+                <span className="text-xs font-bold text-[var(--muted-foreground)] opacity-60">No items scheduled for this window.</span>
               </div>
             ) : (
               <div className="space-y-3">

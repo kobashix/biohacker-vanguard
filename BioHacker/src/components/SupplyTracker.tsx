@@ -42,7 +42,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
               <button className="sheet-back-btn" onClick={() => setIsAdding(false)}>
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <span className="sheet-title">Add to Gear Stash</span>
+              <span className="sheet-title">Add to Inventory Stash</span>
             </div>
 
             <form onSubmit={handleAdd}>
@@ -89,8 +89,8 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
       <div className="card">
         <div className="card-header flex justify-between items-center">
           <div>
-            <h3 className="card-title"><Package className="h-5 w-5 text-primary" /> Gear Stash</h3>
-            <p className="card-description">Needles, wipes, bac water &amp; more.</p>
+            <h3 className="card-title"><Package className="h-5 w-5 text-primary" /> Inventory Stash</h3>
+            <p className="card-description">Supplies, wipes, water &amp; more.</p>
           </div>
           <button onClick={() => setIsAdding(true)} className="btn btn-outline p-2">
             <Plus className="h-4 w-4" />
@@ -103,8 +103,8 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
               style={{ width: '100%', padding: '2rem 1rem', border: '2px dashed var(--border)', borderRadius: '0.875rem', color: 'var(--muted-foreground)', background: 'none', cursor: 'pointer', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600 }}
             >
               <Package className="h-8 w-8" style={{ margin: '0 auto 0.5rem', opacity: 0.4 }} />
-              <p>No gear tracked yet</p>
-              <p style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>Tap to add syringes, wipes, bac water</p>
+              <p>No supplies tracked yet</p>
+              <p style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>Tap to add supplies, wipes, water</p>
             </button>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -117,7 +117,7 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
-                    <button 
+                    <button
                       onClick={() => {
                         const newVal = prompt(`Inventory Check — Enter exact new count for ${s.name} (Current: ${s.count}):`, s.count.toString());
                         if (newVal !== null) {
@@ -128,19 +128,19 @@ export function SupplyTracker({ userId, initialAction }: { userId: string; initi
                             alert("Invalid number. Count not updated.");
                           }
                         }
-                      }} 
+                      }}
                       style={{ padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--background)', border: '1px solid var(--border)', color: 'var(--foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700 }}
                     >
                       Audit
                     </button>
-                    <button 
-                      onClick={() => { 
-                        if(confirm(`WARNING: Remove ${s.name} from the Strategic Stockpile completely?`)) {
-                          if(confirm(`Are you absolutely certain? This will delete the item record to prevent accidental cache loss.`)) {
-                            rep?.mutate.updateSupply({...s, count: -999}); 
+                    <button
+                      onClick={() => {
+                        if (confirm(`WARNING: Remove ${s.name} from the Strategic Stockpile completely?`)) {
+                          if (confirm(`Are you absolutely certain? This will delete the item record to prevent accidental cache loss.`)) {
+                            rep?.mutate.updateSupply({ ...s, count: -999 });
                           }
                         }
-                      }} 
+                      }}
                       style={{ width: '2.25rem', height: '2.25rem', borderRadius: '0.5rem', background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       title="Delete Item"
                     >

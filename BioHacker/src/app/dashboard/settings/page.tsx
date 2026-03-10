@@ -112,7 +112,7 @@ export default function SettingsPage() {
   };
 
   const handleSeedDemo = async () => {
-    if (!rep || !confirm("This will add demo data to your account including vials, logs, wellbeing entries, and gear stash. Continue?")) return;
+    if (!rep || !confirm("This will add demo data to your account including vials, logs, wellbeing entries, and inventory stash. Continue?")) return;
     setSeeding(true);
 
     const data = generateDemoData();
@@ -205,14 +205,14 @@ export default function SettingsPage() {
     <div className="space-y-8 pb-24 lg:pb-0">
       <header>
         <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your clinical integrations and data safety.</p>
+        <p className="text-muted-foreground">Manage your integrations and data safety.</p>
       </header>
 
       {/* Account Profile Section */}
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title"><User className="h-5 w-5 text-primary" /> Account Profile</h3>
-          <p className="card-description">Your identity in the BioTracker network.</p>
+          <h3 className="card-title"><User className="h-5 w-5 text-primary" /> User Profile</h3>
+          <p className="card-description">Your profile settings and identity.</p>
         </div>
         <div className="card-content">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -246,7 +246,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         {/* iCal Integration */}
         <div className="card border-primary bg-primary/5">
-          <div className="card-header"><h3 className="card-title text-primary"><Calendar className="h-5 w-5" /> Calendar Sync</h3><p className="card-description">Get native dose reminders on all your devices.</p></div>
+          <div className="card-header"><h3 className="card-title text-primary"><Calendar className="h-5 w-5" /> Calendar Sync</h3><p className="card-description">Get native reminders on all your devices.</p></div>
           <div className="card-content space-y-6">
             <div className="p-4 bg-background border border-border rounded-lg">
               <label className="text-[10px] font-bold text-muted-foreground uppercase block mb-2">iCal Feed URL</label>
@@ -308,8 +308,8 @@ export default function SettingsPage() {
                     <span className="text-xs font-black uppercase tracking-tight">Anomalies Detected</span>
                   </div>
                   <ul className="text-[11px] font-bold space-y-1 text-muted-foreground list-disc pl-4">
-                    {orphanedProtocols.length > 0 && <li>{orphanedProtocols.length} Protocols without valid vials found.</li>}
-                    {duplicateProtocols.length > 0 && <li>{duplicateProtocols.length} Redundant protocol rules detected.</li>}
+                    {orphanedProtocols.length > 0 && <li>{orphanedProtocols.length} Schedules without valid vials.</li>}
+                    {duplicateProtocols.length > 0 && <li>{duplicateProtocols.length} Redundant schedule rules.</li>}
                   </ul>
                   <button
                     onClick={handleFixAuditData}

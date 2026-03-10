@@ -287,10 +287,10 @@ export function VialManager({
               </button>
               <div className="flex flex-col">
                 <h2 className="text-2xl font-black tracking-tight text-[var(--foreground)]">
-                  {loggingVial ? `Log Dose` : editingVial ? `Configure Vial` : 'Initialize Protocol'}
+                  {loggingVial ? `Log Dose` : editingVial ? `Configure Vial` : 'Add New Supply'}
                 </h2>
                 <p className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
-                  {loggingVial ? loggingVial.name : editingVial ? editingVial.name : 'V3 Deploy System'}
+                  {loggingVial ? loggingVial.name : editingVial ? editingVial.name : 'Vial Management'}
                 </p>
               </div>
             </div>
@@ -315,7 +315,7 @@ export function VialManager({
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-end px-1">
-                      <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Dose magnitude</label>
+                      <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Dose Amount</label>
                       <span className="text-xs font-black text-[var(--primary)] uppercase">
                         {protocols.find(p => p.vial_id === loggingVial.id)?.dose_unit || getDoseUnitLabel(loggingVial, targetCompoundIndex)}
                       </span>
@@ -456,7 +456,7 @@ export function VialManager({
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Visual State</label>
+                    <label className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider">Physical Form</label>
                     <div className="grid grid-cols-3 gap-3">
                       {['powder', 'mixed', 'pill'].map(s => (
                         <button
@@ -537,7 +537,7 @@ export function VialManager({
                   )}
 
                   <button type="submit" className="btn btn-primary w-full py-6 mt-6 shadow-xl shadow-[var(--primary)]/20 text-lg">
-                    {editingVial ? 'Save Changes' : 'Initialize Vials'}
+                    {editingVial ? 'Save Changes' : 'Add Vials'}
                   </button>
                 </form>
               )}
@@ -553,13 +553,13 @@ export function VialManager({
             <div className="flex justify-between items-center px-2">
               <div className="flex items-center gap-3">
                 <Activity className="h-5 w-5 text-[var(--primary)]" />
-                <h3 className="text-xl font-black tracking-tight">Active Protocols</h3>
+                <h3 className="text-xl font-black tracking-tight">Active Schedules</h3>
               </div>
               <button
                 onClick={() => { setIsAdding(true); setEditingVial(null); setLoggingVial(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="btn btn-primary !py-2 !px-4 text-[10px] gap-2"
               >
-                <Plus className="h-4 w-4" /> Initialize
+                <Plus className="h-4 w-4" /> Add Vials
               </button>
             </div>
 
@@ -623,7 +623,7 @@ export function VialManager({
                           }
                         }}
                         className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--primary-muted)] hover:text-[var(--primary)] transition-all"
-                        title="Set Protocol"
+                        title="Set Schedule"
                       >
                         <Calendar className="h-5 w-5 mx-auto" />
                       </button>
@@ -663,7 +663,7 @@ export function VialManager({
                       <button
                         onClick={() => rep?.mutate.deleteProtocol(p.id)}
                         className="p-1 hover:text-[var(--secondary)] transition-colors opacity-0 group-hover:opacity-100"
-                        title="Remove this protocol rule"
+                        title="Remove this schedule rule"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -675,11 +675,11 @@ export function VialManager({
           </div>
 
           {/* STRATEGIC STOCKPILE */}
-          <div className="space-y-6 opacity-60 hover:opacity-100 transition-opacity">
+          <div className="space-y-6 transition-opacity">
             <div className="flex justify-between items-center px-2">
               <div className="flex items-center gap-3">
                 <Archive className="h-5 w-5 text-[var(--muted-foreground)]" />
-                <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Cold Stockpile</h3>
+                <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Inventory Stash</h3>
               </div>
             </div>
 
@@ -729,7 +729,7 @@ export function VialManager({
                 <ArrowLeft className="h-5 w-5" />
               </button>
               <div className="flex flex-col">
-                <h2 className="text-2xl font-black tracking-tight">Set Protocol</h2>
+                <h2 className="text-2xl font-black tracking-tight">Set Schedule</h2>
                 <p className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">{schedulingVial.name}</p>
               </div>
             </div>
@@ -890,7 +890,7 @@ export function VialManager({
                 className="btn btn-primary w-full py-6 mt-6 shadow-xl shadow-[var(--primary)]/20 text-lg"
                 onClick={() => handleSaveProtocol(schedulingVial.id)}
               >
-                Activate Protocol
+                Activate Schedule
               </button>
             </div>
           </div>

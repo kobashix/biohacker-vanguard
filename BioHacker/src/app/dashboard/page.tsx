@@ -105,7 +105,7 @@ function MobileSnapDash({ userId, onSelectVial, onEditVial }: { userId: string; 
     <>
       <DotIndicator count={SNAP_SECTION_DEFS.length} activeIndex={activeSection} />
       <div ref={containerRef} className="overflow-y-scroll snap-y snap-mandatory h-[calc(100dvh-120px)] scrollbar-hide">
-        <SnapSection emoji="📅" label="Protocol Schedule" index={0} total={3} nextLabel="Journal">
+        <SnapSection emoji="📅" label="Your Schedule" index={0} total={3} nextLabel="Journal">
           <DosageCalendar userId={userId} onSelectVial={onSelectVial} onEditVial={onEditVial} />
         </SnapSection>
         <SnapSection emoji="💓" label="Mood & Journal" index={1} total={3} nextLabel="Monitoring">
@@ -202,10 +202,13 @@ function DashboardContent() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setActiveLoggingVialId('add')}
+              onClick={() => {
+                setActiveLoggingVialId(null);
+                setTimeout(() => setActiveLoggingVialId('add'), 10);
+              }}
               className="btn btn-primary gap-2"
             >
-              <Plus className="h-5 w-5" /> Initialize Protocol
+              <Plus className="h-5 w-5" /> Add New Vials
             </button>
           </div>
         </div>
@@ -220,7 +223,7 @@ function DashboardContent() {
             <div className="col-span-12 xl:col-span-7 space-y-8">
               <div className="card space-y-4" id="scheduler">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold tracking-tight">Protocol Schedule</h3>
+                  <h3 className="text-xl font-bold tracking-tight">Your Schedule</h3>
                   <div className="p-2 bg-[var(--primary-muted)] rounded-lg">
                     <LayoutDashboard className="h-5 w-5 text-[var(--primary)]" />
                   </div>
@@ -244,7 +247,7 @@ function DashboardContent() {
             <div className="col-span-12 xl:col-span-5 space-y-8">
               <div className="card" id="inventory">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold tracking-tight">Apothecary</h3>
+                  <h3 className="text-xl font-bold tracking-tight">Supplies stash</h3>
                   <Package className="h-5 w-5 text-[var(--muted-foreground)]" />
                 </div>
                 <SupplyTracker userId={user.id} />
@@ -308,7 +311,7 @@ function DashboardContent() {
                     <div className="p-3 bg-white/20 rounded-2xl">
                       <Plus className="h-8 w-8" />
                     </div>
-                    <span className="font-bold text-sm">Add Protocol</span>
+                    <span className="font-bold text-sm">Add Schedule</span>
                   </button>
                   <button
                     onClick={() => router.push('?tab=inventory&action=supply')}
@@ -326,7 +329,7 @@ function DashboardContent() {
                 </div>
 
                 <div className="card h-24 flex items-center justify-center text-[var(--muted-foreground)] opacity-40 italic text-sm">
-                  Apothecary Management Mode
+                  Supply Management Mode
                 </div>
               </div>
             )}
