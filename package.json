@@ -4,5 +4,11 @@
   "scripts": {
     "build": "cd BioHacker && npm run build",
     "vercel-build": "cd BioHacker && npm run build"
+  },
+  "workspaces": [
+    "BioHacker"
+  ],
+  "dependencies": {
+    "sonner": "^2.0.7"
   }
 }

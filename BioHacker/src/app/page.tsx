@@ -92,7 +92,7 @@ export default function LandingPage() {
               <div className="absolute -inset-4 bg-gradient-to-tr from-[#0071E3]/30 to-[#10b981]/20 blur-3xl opacity-30 group-hover:opacity-50 transition-opacity" />
               <div className="relative rounded-[40px] overflow-hidden shadow-2xl border border-white/50">
                 <img
-                  src="/C:/Users/Nope/.gemini/antigravity/brain/734bb58f-1acb-4d25-b28b-528552fcad34/biotracker_desktop_mockup_1773085725528.png"
+                  src="/images/desktop_mockup.png"
                   alt="BioTracker Clinical Console"
                   className="w-full h-auto transform group-hover:scale-[1.02] transition-transform duration-700"
                 />
@@ -126,7 +126,7 @@ export default function LandingPage() {
                 </div>
                 <div className="absolute right-0 bottom-0 top-12 w-1/2 hidden md:block">
                   <img
-                    src="/C:/Users/Nope/.gemini/antigravity/brain/734bb58f-1acb-4d25-b28b-528552fcad34/biotracker_app_mockup_1773085706384.png"
+                    src="/images/app_mockup.png"
                     alt="Mobile UI Display"
                     className="h-full w-auto object-cover object-top rounded-tl-[40px] shadow-2xl transform translate-x-20 translate-y-20 group-hover:translate-x-16 group-hover:translate-y-16 transition-transform duration-700"
                   />

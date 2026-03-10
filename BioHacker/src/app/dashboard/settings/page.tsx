@@ -48,7 +48,7 @@ export default function SettingsPage() {
   }, { default: [] });
 
   const handlePurgeAll = async () => {
-    if (!confirm('âš狢 This will permanently delete ALL your vials, protocols, logs, and supplies. This cannot be undone. Type DELETE in the next prompt to confirm.')) return;
+    if (!confirm('⚠️ This will permanently delete ALL your vials, protocols, logs, and supplies. This cannot be undone. Type DELETE in the next prompt to confirm.')) return;
     const typed = prompt('Type DELETE to confirm permanent data purge:');
     if (typed !== 'DELETE') return;
 
@@ -214,7 +214,7 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase text-muted-foreground">iPhone Sync Instructions:</h4>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">Settings â†’ Calendar â†’ Accounts â†’ Add Account â†’ Other â†’ Add Subscribed Calendar. Paste the URL above.</p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar. Paste the URL above.</p>
             </div>
           </div>
         </div>
