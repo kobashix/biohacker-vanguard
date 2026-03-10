@@ -5,7 +5,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useSubscribe } from "replicache-react";
 import { getReplicache, dropReplicache, Vial, Protocol, DoseLog, SubjectiveLog, Supply, Cycle } from "@/replicache";
 import { generateDemoData } from "@/lib/demoData";
-import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud, User } from "lucide-react";
+import { Shield, Download, AlertTriangle, Calendar, Copy, Check, Beaker, Wand2, UploadCloud, User, Activity, Search, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
@@ -130,6 +130,49 @@ export default function SettingsPage() {
     toast.success("Demo data added! Vials, pins, wellbeing journals, and inventory items are all populated.");
   };
 
+  // Diagnostic Audit Logic
+  const orphanedProtocols = protocols.filter(p => !vials.some(v => v.id === p.vial_id));
+  const vialsWithDuplicates = vials.filter(v => protocols.filter(p => p.vial_id === v.id).length > 1);
+  const duplicateProtocols = protocols.filter(p => {
+    const vProts = protocols.filter(p2 => p2.vial_id === p.vial_id);
+    if (vProts.length <= 1) return false;
+    // Keep the one with the latest start_time or highest ID if same time
+    const sorted = [...vProts].sort((a, b) => b.start_time - a.start_time);
+    return p.id !== sorted[0].id;
+  });
+
+  const [fixingData, setFixingData] = useState(false);
+  const handleFixAuditData = async () => {
+    if (!rep) return;
+    setFixingData(true);
+    try {
+      let deadCount = 0;
+      // 1. Delete Orphaned
+      for (const p of orphanedProtocols) {
+        await rep.mutate.deleteProtocol(p.id);
+        deadCount++;
+      }
+      // 2. Delete Duplicates
+      for (const p of duplicateProtocols) {
+        await rep.mutate.deleteProtocol(p.id);
+        deadCount++;
+      }
+
+      toast.success(`Audit Complete! Cleaned up ${deadCount} problematic protocol records.`);
+    } catch (e: any) {
+      toast.error(`Fix failed: ${e.message}`);
+    } finally {
+      setFixingData(false);
+    }
+  };
+
+  const handleForcePull = async () => {
+    if (!rep) return;
+    toast.info("Requesting fresh sync from server...");
+    await rep.pull();
+    toast.success("Sync complete!");
+  };
+
   const [fullName, setFullName] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
@@ -238,6 +281,58 @@ export default function SettingsPage() {
                   <input type="file" accept=".json" onChange={handleImportBackup} className="hidden" />
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title"><Activity className="h-5 w-5 text-primary" /> System Metrics & Audit</h3>
+              <p className="card-description">Diagnose and repair record inconsistencies.</p>
+            </div>
+            <div className="card-content">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground">Total Vials</p>
+                  <p className="text-xl font-black">{vials.length}</p>
+                </div>
+                <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground">Active Rules</p>
+                  <p className="text-xl font-black">{protocols.length}</p>
+                </div>
+              </div>
+
+              {(orphanedProtocols.length > 0 || duplicateProtocols.length > 0) ? (
+                <div className="p-4 bg-secondary/10 border border-secondary/20 rounded-xl mb-6 space-y-3">
+                  <div className="flex items-center gap-2 text-secondary">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-xs font-black uppercase tracking-tight">Anomalies Detected</span>
+                  </div>
+                  <ul className="text-[11px] font-bold space-y-1 text-muted-foreground list-disc pl-4">
+                    {orphanedProtocols.length > 0 && <li>{orphanedProtocols.length} Protocols without valid vials found.</li>}
+                    {duplicateProtocols.length > 0 && <li>{duplicateProtocols.length} Redundant protocol rules detected.</li>}
+                  </ul>
+                  <button
+                    onClick={handleFixAuditData}
+                    disabled={fixingData}
+                    className="w-full btn btn-primary !bg-secondary hover:!bg-secondary/90 !py-2 text-[10px] gap-2"
+                  >
+                    {fixingData ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
+                    Repair Stale Data
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4 bg-success/5 border border-success/20 rounded-xl mb-6 flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                  <span className="text-[10px] font-black uppercase text-success tracking-widest">Database Health: Optimal</span>
+                </div>
+              )}
+
+              <button
+                onClick={handleForcePull}
+                className="w-full btn btn-outline !py-3 text-[10px] gap-2 border-dashed"
+              >
+                <RefreshCw className="h-4 w-4" /> Force Cloud Sync
+              </button>
             </div>
           </div>
 

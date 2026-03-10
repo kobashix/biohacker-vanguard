@@ -166,6 +166,7 @@ const mutators = {
     for (const c of p.cycles || []) await tx.set(`cycle/${c.id}`, c);
   },
   purgeAllData: async (tx: WriteTransaction) => {
+    console.debug('[mutator] purgeAllData');
     const prefixes = ['vial/', 'protocol/', 'log/', 'subjective/', 'supply/', 'cycle/'];
     for (const prefix of prefixes) {
       const keys = await tx.scan({ prefix }).keys().toArray();
@@ -199,6 +200,9 @@ export function getReplicache(userId: string) {
       pullURL: '/api/replicache/pull',
       mutators,
     });
+    if (typeof window !== 'undefined') {
+      (window as any).replicache = replicache;
+    }
   }
   return replicache;
 }

@@ -151,12 +151,12 @@ export function VialManager({
   }, [externalEditingVialId, rawVials.length]);
 
   const inventory = useMemo(() => {
-    const active: { vial: Vial; count: number; ids: string[]; protocol?: Protocol }[] = [];
+    const active: { vial: Vial; count: number; ids: string[]; protocols: Protocol[] }[] = [];
     const stockpileGroups: Record<string, { vial: Vial; count: number; ids: string[] }> = {};
     rawVials.forEach(v => {
-      const protocol = protocols.find(p => p.vial_id === v.id);
-      if (v.status === 'mixed' || v.status === 'pill' || (v.status === 'powder' && protocol)) {
-        active.push({ vial: v, count: 1, ids: [v.id], protocol });
+      const vProtocols = protocols.filter(p => p.vial_id === v.id);
+      if (v.status === 'mixed' || v.status === 'pill' || (v.status === 'powder' && vProtocols.length > 0)) {
+        active.push({ vial: v, count: 1, ids: [v.id], protocols: vProtocols });
       } else {
         const compoundsKey = (v.compounds || []).map(c => `${c.name}:${c.mass_mg}:${c.unit || 'mg'}`).join('|');
         const key = `${v.status}-${compoundsKey}`;
@@ -208,8 +208,8 @@ export function VialManager({
 
   const handleSaveProtocol = async (vialId: string) => {
     if (!rep) return;
-    const existing = protocols.find(p => p.vial_id === vialId);
-    if (existing) await rep.mutate.deleteProtocol(existing.id);
+    const existing = protocols.filter(p => p.vial_id === vialId);
+    for (const p of existing) await rep.mutate.deleteProtocol(p.id);
 
     const [hours, minutes] = preferredStartTime.split(':').map(Number);
     let start = new Date();
@@ -593,7 +593,7 @@ export function VialManager({
                     {/* Action Grid */}
                     <div className="flex gap-2 w-full sm:w-auto">
                       <button
-                        onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocol?.dose_amount.toString() || "250"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        onClick={() => { setLoggingVial(group.vial); setDoseAmount(group.protocols[0]?.dose_amount.toString() || "250"); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                         className="flex-1 sm:flex-none p-3 rounded-xl bg-[var(--primary)] text-white hover:brightness-110 transition-all shadow-lg shadow-[var(--primary)]/20"
                         title="Log Dose"
                       >
@@ -602,17 +602,19 @@ export function VialManager({
                       <button
                         onClick={() => {
                           setSchedulingVial(group.vial);
-                          setDoseAmount(group.protocol?.dose_amount.toString() || "250");
-                          const f = group.protocol?.frequency_hours || 24;
+                          const p = group.protocols[0];
+                          setDoseAmount(p?.dose_amount.toString() || "250");
+                          const f = p?.frequency_hours || 24;
                           setFrequency(f.toString());
                           setFrequencyType(f === 168 ? 'weekly' : f === 24 ? 'daily' : f === 12 ? 'twice_daily' : 'custom');
-                          setDaysOn(group.protocol?.days_on?.toString() || "7");
-                          setTimeBuckets(group.protocol?.time_buckets || []);
-                          setDoseUnit(group.protocol?.dose_unit || getDoseUnitLabel(group.vial, 0));
+                          setDaysOn(p?.days_on?.toString() || "7");
+                          setDaysOff(p?.days_off?.toString() || "0");
+                          setTimeBuckets(p?.time_buckets || []);
+                          setDoseUnit(p?.dose_unit || getDoseUnitLabel(group.vial, 0));
 
                           // Initialize preferred start time from existing record
-                          if (group.protocol?.start_time) {
-                            const d = new Date(group.protocol.start_time);
+                          if (p?.start_time) {
+                            const d = new Date(p.start_time);
                             const h = d.getHours().toString().padStart(2, '0');
                             const m = d.getMinutes().toString().padStart(2, '0');
                             setPreferredStartTime(`${h}:${m}`);
@@ -635,7 +637,7 @@ export function VialManager({
                       <button
                         onClick={async () => {
                           if (confirm(`Permanently delete ${group.vial.name}?`)) {
-                            if (group.protocol) await rep?.mutate.deleteProtocol(group.protocol.id);
+                            for (const p of group.protocols) await rep?.mutate.deleteProtocol(p.id);
                             await rep?.mutate.deleteVial(group.vial.id);
                           }
                         }}
@@ -647,17 +649,26 @@ export function VialManager({
                     </div>
                   </div>
 
-                  {group.protocol && (
-                    <div className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap gap-2">
-                      <div className="text-[10px] font-black bg-[var(--primary)] text-white px-3 py-1 rounded-full shadow-sm">
-                        {group.protocol.dose_amount}{group.protocol.dose_unit || getDoseUnitLabel(group.vial, 0)} • Every {group.protocol.frequency_hours !== 24 ? `${group.protocol.frequency_hours}H` : 'Day'}
+                  {group.protocols.map(p => (
+                    <div key={p.id} className="mt-4 pt-4 border-t border-[var(--border)] flex flex-wrap gap-2 items-center justify-between">
+                      <div className="flex flex-wrap gap-2">
+                        <div className="text-[10px] font-black bg-[var(--primary)] text-white px-3 py-1 rounded-full shadow-sm">
+                          {p.dose_amount}{p.dose_unit || getDoseUnitLabel(group.vial, 0)} • Every {p.frequency_hours !== 24 ? `${p.frequency_hours}H` : 'Day'}
+                        </div>
+                        {p.skip_weekends && <div className="text-[10px] font-black bg-[var(--secondary)] text-white px-3 py-1 rounded-full shadow-sm">No Weekends</div>}
+                        {p.time_buckets?.map(b => (
+                          <div key={b} className="text-[10px] font-black border border-[var(--primary)] text-[var(--primary)] px-3 py-0.5 rounded-full capitalize">{b}</div>
+                        ))}
                       </div>
-                      {group.protocol.skip_weekends && <div className="text-[10px] font-black bg-[var(--secondary)] text-white px-3 py-1 rounded-full shadow-sm">No Weekends</div>}
-                      {group.protocol.time_buckets?.map(b => (
-                        <div key={b} className="text-[10px] font-black border border-[var(--primary)] text-[var(--primary)] px-3 py-0.5 rounded-full capitalize">{b}</div>
-                      ))}
+                      <button
+                        onClick={() => rep?.mutate.deleteProtocol(p.id)}
+                        className="p-1 hover:text-[var(--secondary)] transition-colors opacity-0 group-hover:opacity-100"
+                        title="Remove this protocol rule"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
-                  )}
+                  ))}
                 </div>
               ))}
             </div>

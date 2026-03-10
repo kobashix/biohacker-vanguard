@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (name === 'deleteProtocol') {
-      await supabase.from('protocols').delete().eq('id', args).eq('user_id', user.id);
+      const { error } = await supabase.from('protocols').delete().eq('id', args).eq('user_id', user.id);
+      if (error) console.error(`[PUSH ERROR] deleteProtocol failed for ID ${args}:`, error);
     }
 
     if (name === 'logSubjective') {
