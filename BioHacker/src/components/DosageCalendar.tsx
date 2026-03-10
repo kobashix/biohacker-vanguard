@@ -240,7 +240,10 @@ export function DosageCalendar({ userId, onSelectVial, onEditVial }: DosageCalen
                               <Settings className="h-4 w-4" />
                             </button>
                           )}
-                          <button className="btn btn-primary !p-2 !rounded-xl">
+                          <button
+                            className="btn btn-primary !p-2 !rounded-xl"
+                            onClick={(e) => { e.stopPropagation(); onSelectVial(dose.vialId); }}
+                          >
                             <Plus className="h-4 w-4" />
                           </button>
                         </div>

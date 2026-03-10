@@ -283,6 +283,7 @@ function DashboardContent() {
             <MobileSnapDash
               userId={user.id}
               onSelectVial={(id) => {
+                console.log('Mobile onSelectVial triggered for vial:', id);
                 setActiveLoggingVialId(id);
               }}
               onEditVial={(id) => {
