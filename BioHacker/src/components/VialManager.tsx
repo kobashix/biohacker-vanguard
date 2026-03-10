@@ -44,15 +44,19 @@ interface VialManagerProps {
   onLoggingComplete?: () => void;
   initialAction?: string;
   hideLists?: boolean;
+  onlySchedules?: boolean;
+  onlyStockpile?: boolean;
 }
 
 export function VialManager({
   userId,
-  externalLoggingVialId,
-  externalEditingVialId,
+  externalLoggingVialId = null,
+  externalEditingVialId = null,
   onLoggingComplete,
   initialAction,
-  hideLists = false
+  hideLists = false,
+  onlySchedules = false,
+  onlyStockpile = false
 }: VialManagerProps) {
   const [vialName, setVialName] = useState("");
   const [compounds, setCompounds] = useState<Compound[]>([{ name: "", mass_mg: 0, unit: 'mg' }]);
@@ -547,7 +551,7 @@ export function VialManager({
       )}
 
       {/* ACTIVE PROTOCOL SECTION */}
-      {!hideLists && (
+      {!hideLists && !onlyStockpile && (
         <>
           <div className="space-y-6">
             <div className="flex justify-between items-center px-2">
@@ -673,48 +677,50 @@ export function VialManager({
               ))}
             </div>
           </div>
+        </>
+      )}
 
-          {/* STRATEGIC STOCKPILE */}
-          <div className="space-y-6 transition-opacity">
-            <div className="flex justify-between items-center px-2">
-              <div className="flex items-center gap-3">
-                <Archive className="h-5 w-5 text-[var(--muted-foreground)]" />
-                <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Inventory Stash</h3>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {inventory.stockpile.map(group => (
-                <div key={group.vial.id} className="card !p-4 border-dashed flex justify-between items-center group bg-[var(--muted)]/20 shadow-none">
-                  <div>
-                    <div className="font-black text-sm uppercase tracking-tight">{group.vial.name} <span className="text-[var(--primary)] ml-2">Qty {group.count}</span></div>
-                    <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase mt-0.5 opacity-60">
-                      {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                      className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={async () => {
-                        if (confirm(`Permanently delete all ${group.count} ${group.vial.name} items?`)) {
-                          for (const id of group.ids) await rep?.mutate.deleteVial(id);
-                        }
-                      }}
-                      className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+      {/* STRATEGIC STOCKPILE */}
+      {!hideLists && !onlySchedules && (
+        <div className="space-y-6 transition-opacity">
+          <div className="flex justify-between items-center px-2">
+            <div className="flex items-center gap-3">
+              <Archive className="h-5 w-5 text-[var(--muted-foreground)]" />
+              <h3 className="text-xl font-bold tracking-tight text-[var(--muted-foreground)]">Inventory Stash</h3>
             </div>
           </div>
-        </>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {inventory.stockpile.map(group => (
+              <div key={group.vial.id} className="card !p-4 border-dashed flex justify-between items-center group bg-[var(--muted)]/20 shadow-none">
+                <div>
+                  <div className="font-black text-sm uppercase tracking-tight">{group.vial.name} <span className="text-[var(--primary)] ml-2">Qty {group.count}</span></div>
+                  <div className="text-[10px] font-bold text-[var(--muted-foreground)] uppercase mt-0.5 opacity-60">
+                    {(group.vial.compounds || []).map(c => `${c.mass_mg}${c.unit || 'mg'} ${c.name}`).join(' + ')}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setEditingVial(group.vial); setLoggingVial(null); setIsAdding(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--foreground)] hover:text-white transition-all"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm(`Permanently delete all ${group.count} ${group.vial.name} items?`)) {
+                        for (const id of group.ids) await rep?.mutate.deleteVial(id);
+                      }
+                    }}
+                    className="p-2 rounded-lg bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-white transition-all"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* ── PROTOCOL SCHEDULING SHEET ── */}

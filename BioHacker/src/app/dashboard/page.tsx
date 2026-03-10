@@ -187,7 +187,7 @@ function DashboardContent() {
   const isEmpty = coreVials?.length === 0;
 
   return (
-    <div className="flex flex-col gap-12 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-12 max-w-[1440px] mx-auto">
 
       {/* ── DESKTOP LAYOUT ── */}
       <div className="hidden lg:flex flex-col gap-10">
@@ -219,8 +219,8 @@ function DashboardContent() {
           </div>
         ) : (
           <div className="grid grid-cols-12 gap-8 items-start">
-            {/* LEFT COLUMN: Main Activity (7 cols) */}
-            <div className="col-span-12 xl:col-span-7 space-y-8">
+            {/* COLUMN 1: Schedule */}
+            <div className="col-span-12 lg:col-span-7 xl:col-span-4 space-y-8">
               <div className="card space-y-4" id="scheduler">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold tracking-tight">Your Schedule</h3>
@@ -233,8 +233,8 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Inline Active Protocols and Stockpile for Desktop */}
-              <div className="space-y-8">
+              {/* On Large/Mobile it's here; on XL it's in its own column */}
+              <div className="xl:hidden">
                 <VialManager
                   userId={user.id}
                   externalLoggingVialId={null}
@@ -243,14 +243,34 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Management (5 cols) */}
-            <div className="col-span-12 xl:col-span-5 space-y-8">
+            {/* COLUMN 2: Active Schedules (Only on XL+) */}
+            <div className="hidden xl:block xl:col-span-4 space-y-8">
+              <div className="card-no-padding">
+                <VialManager
+                  userId={user.id}
+                  externalLoggingVialId={null}
+                  externalEditingVialId={null}
+                  onlySchedules
+                />
+              </div>
+            </div>
+
+            {/* COLUMN 3: Management */}
+            <div className="col-span-12 lg:col-span-5 xl:col-span-4 space-y-8">
               <div className="card" id="inventory">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold tracking-tight">Supplies stash</h3>
                   <Package className="h-5 w-5 text-[var(--muted-foreground)]" />
                 </div>
                 <SupplyTracker userId={user.id} />
+              </div>
+
+              {/* On XL, Stockpile lives here too */}
+              <div className="hidden xl:block">
+                <VialManager
+                  userId={user.id}
+                  onlyStockpile
+                />
               </div>
 
               <div className="card">
@@ -263,7 +283,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Stacked functional widgets instead of side-by-side grid */}
               <div className="card !p-6 hover:bg-[var(--muted)] transition-colors cursor-pointer">
                 <ReconstitutionEngine />
               </div>
